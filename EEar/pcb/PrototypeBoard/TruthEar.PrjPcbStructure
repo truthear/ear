@@ -1,0 +1,8 @@
+Record=TopLevelDocument|FileName=top.SchDoc
+Record=SheetSymbol|SourceDocument=top.SchDoc|Designator=cpu|SchDesignator=cpu|FileName=cpu.SchDoc|SymbolType=Normal|RawFileName=cpu.SchDoc|DesignItemId= |SourceLibraryName= |ObjectKind=Sheet Symbol|RevisionGUID= |ItemGUID= |VaultGUID= 
+Record=SheetSymbol|SourceDocument=top.SchDoc|Designator=gps|SchDesignator=gps|FileName=gps.SchDoc|SymbolType=Normal|RawFileName=gps.SchDoc|DesignItemId= |SourceLibraryName= |ObjectKind=Sheet Symbol|RevisionGUID= |ItemGUID= |VaultGUID= 
+Record=SheetSymbol|SourceDocument=top.SchDoc|Designator=gsm|SchDesignator=gsm|FileName=gsm.SchDoc|SymbolType=Normal|RawFileName=gsm.SchDoc|DesignItemId= |SourceLibraryName= |ObjectKind=Sheet Symbol|RevisionGUID= |ItemGUID= |VaultGUID= 
+Record=SheetSymbol|SourceDocument=top.SchDoc|Designator=mic|SchDesignator=mic|FileName=mic.SchDoc|SymbolType=Normal|RawFileName=mic.SchDoc|DesignItemId= |SourceLibraryName= |ObjectKind=Sheet Symbol|RevisionGUID= |ItemGUID= |VaultGUID= 
+Record=SheetSymbol|SourceDocument=top.SchDoc|Designator=otg|SchDesignator=otg|FileName=usb_otg.SchDoc|SymbolType=Normal|RawFileName=usb_otg.SchDoc|DesignItemId= |SourceLibraryName= |ObjectKind=Sheet Symbol|RevisionGUID= |ItemGUID= |VaultGUID= 
+Record=SheetSymbol|SourceDocument=top.SchDoc|Designator=pwr|SchDesignator=pwr|FileName=power.SchDoc|SymbolType=Normal|RawFileName=power.SchDoc|DesignItemId= |SourceLibraryName= |ObjectKind=Sheet Symbol|RevisionGUID= |ItemGUID= |VaultGUID= 
+Record=SheetSymbol|SourceDocument=top.SchDoc|Designator=sd|SchDesignator=sd|FileName=sd_card.SchDoc|SymbolType=Normal|RawFileName=sd_card.SchDoc|DesignItemId= |SourceLibraryName= |ObjectKind=Sheet Symbol|RevisionGUID= |ItemGUID= |VaultGUID= 
