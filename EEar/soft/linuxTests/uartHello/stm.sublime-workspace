@@ -1,0 +1,1973 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"fo",
+				"for	Loop"
+			],
+			[
+				"vi",
+				"isValid"
+			],
+			[
+				"va",
+				"value-1"
+			],
+			[
+				"is",
+				"isValid"
+			],
+			[
+				"ha",
+				"hasMenu"
+			],
+			[
+				"menu",
+				"menuStack"
+			],
+			[
+				"q",
+				"qDebug"
+			],
+			[
+				"dis",
+				"displayValueSign"
+			],
+			[
+				"fu",
+				"fun	function{}"
+			],
+			[
+				"fun",
+				"function"
+			],
+			[
+				"pro",
+				"property	QML property"
+			],
+			[
+				"on",
+				"onTriggered"
+			],
+			[
+				"co",
+				"component	Component.onCompleted{}"
+			],
+			[
+				"anch",
+				"anchors.margins	margins"
+			],
+			[
+				"com",
+				"Comfort"
+			],
+			[
+				"re",
+				"return"
+			],
+			[
+				"mi",
+				"minute"
+			],
+			[
+				"pr",
+				"PropertyChanges"
+			],
+			[
+				"ho",
+				"hours"
+			],
+			[
+				"left",
+				"leftMargin"
+			],
+			[
+				"right",
+				"rightMargin"
+			],
+			[
+				"anchors",
+				"anchors.margins	margins"
+			],
+			[
+				"an",
+				"anchors.verticalCenter	vertical"
+			],
+			[
+				"b",
+				"buttonName"
+			],
+			[
+				"ancho",
+				"anchors.fill	fill"
+			],
+			[
+				"O",
+				"ObservableProperty"
+			],
+			[
+				"che",
+				"checkedWhen"
+			],
+			[
+				"nu",
+				"nullptr"
+			],
+			[
+				"OFF",
+				"OFFLINEMODE"
+			],
+			[
+				"cl",
+				"clear"
+			],
+			[
+				"m_",
+				"m_PinType"
+			],
+			[
+				"pinLock",
+				"reqestPinLockStatus"
+			],
+			[
+				"curren",
+				"CurrentPin"
+			],
+			[
+				"cle",
+				"clear"
+			],
+			[
+				"pin",
+				"pinId"
+			],
+			[
+				"retry",
+				"retryCount"
+			],
+			[
+				"m_pi",
+				"m_pinLockStatus"
+			],
+			[
+				"tst_general",
+				"test_generalPinProtection"
+			],
+			[
+				"get",
+				"getPinLockStatus"
+			],
+			[
+				"TO",
+				"TODO"
+			],
+			[
+				"_",
+				"_userProfileListModel"
+			],
+			[
+				"mo",
+				"model"
+			],
+			[
+				"diA",
+				"doAction"
+			],
+			[
+				"butto",
+				"button2Role"
+			],
+			[
+				"s",
+				"selected"
+			],
+			[
+				"S",
+				"State"
+			],
+			[
+				"te",
+				"temp_time"
+			],
+			[
+				"m",
+				"minutes"
+			],
+			[
+				"ig",
+				"ignitionStatus"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "main.c",
+			"settings":
+			{
+				"buffer_size": 4403,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "main.h",
+			"settings":
+			{
+				"buffer_size": 46,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "cmsis_boot/system_stm32f4xx.c",
+			"settings":
+			{
+				"buffer_size": 20987,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"contents": "Searching 83 files for \"HSE_VALUE\"\n\n/home/oserkin/zwork/timetrack/svn/EEarPcb/soft/linuxTests/uartHello/cmsis/src/stm32f4xx_rcc.c:\n  829    *         constant and the selected clock source:\n  830    * @note     If SYSCLK source is HSI, function returns values based on HSI_VALUE(*)\n  831:   * @note     If SYSCLK source is HSE, function returns values based on HSE_VALUE(**)\n  832:   * @note     If SYSCLK source is PLL, function returns values based on HSE_VALUE(**)\n  833    *           or HSI_VALUE(*) multiplied/divided by the PLL factors.\n  834    * @note     (*) HSI_VALUE is a constant defined in stm32f4xx.h file (default value\n  835    *               16 MHz) but the real value may vary depending on the variations\n  836    *               in voltage and temperature.\n  837:   * @note     (**) HSE_VALUE is a constant defined in stm32f4xx.h file (default value\n  838:   *                25 MHz), user has to ensure that HSE_VALUE is same as the real\n  839    *                frequency of the crystal used. Otherwise, this function may\n  840    *                have wrong result.\n  ...\n  867        break;\n  868      case 0x04:  /* HSE used as system clock  source */\n  869:       RCC_Clocks->SYSCLK_Frequency = HSE_VALUE;\n  870        break;\n  871      case 0x08:  /* PLL used as system clock  source */\n  872  \n  873:       /* PLL_VCO = (HSE_VALUE or HSI_VALUE / PLLM) * PLLN\n  874           SYSCLK = PLL_VCO / PLLP\n  875           */\n  ...\n  880        {\n  881          /* HSE used as PLL clock source */\n  882:         pllvco = (HSE_VALUE / pllm) * ((RCC->PLLCFGR & RCC_PLLCFGR_PLLN) >> 6);\n  883        }\n  884        else\n\n/home/oserkin/zwork/timetrack/svn/EEarPcb/soft/linuxTests/uartHello/cmsis/src/stm32f4xx_spi.c:\n  398      \n  399      /* Get the I2S source clock value */\n  400:     i2sclk = (uint32_t)(((HSE_VALUE / pllm) * plln) / pllr);\n  401    #endif /* I2S_EXTERNAL_CLOCK_VAL */\n  402      \n\n/home/oserkin/zwork/timetrack/svn/EEarPcb/soft/linuxTests/uartHello/cmsis_boot/stm32f4xx.h:\n   89    */\n   90  \n   91: #if !defined  (HSE_VALUE)\n   92:   #define HSE_VALUE    ((uint32_t)25000000) /*!< Value of the External oscillator in Hz */\n   93: #endif /* HSE_VALUE */\n   94  \n   95  /**\n\n/home/oserkin/zwork/timetrack/svn/EEarPcb/soft/linuxTests/uartHello/cmsis_boot/stm32f4xx_conf.h:\n   24  #define __STM32F4xx_CONF_H\n   25  \n   26: #if defined  (HSE_VALUE)\n   27  /* Redefine the HSE value; it's equal to 8 MHz on the STM32F4-DISCOVERY Kit */\n   28:  #undef HSE_VALUE\n   29:  #define HSE_VALUE    ((uint32_t)8000000)\n   30: #endif /* HSE_VALUE */\n   31  \n   32  /* Includes ------------------------------------------------------------------*/\n\n/home/oserkin/zwork/timetrack/svn/EEarPcb/soft/linuxTests/uartHello/cmsis_boot/system_stm32f4xx.c:\n   35    *    add some code to deal with this issue inside the SetSysClock() function.\n   36    *\n   37:   * 4. The default value of HSE crystal is set to 25MHz, refer to \"HSE_VALUE\" define\n   38    *    in \"stm32f4xx.h\" file. When HSE is used as system clock source, directly or\n   39    *    through PLL, and you are using different crystal you have to adapt the HSE\n   ..\n  146  \n  147  /************************* PLL Parameters *************************************/\n  148: /* PLL_VCO = (HSE_VALUE or HSI_VALUE / PLL_M) * PLL_N */\n  149  #define PLL_M      25\n  150  #define PLL_N      336\n  ...\n  263    *           - If SYSCLK source is HSI, SystemCoreClock will contain the HSI_VALUE(*)\n  264    *                                              \n  265:   *           - If SYSCLK source is HSE, SystemCoreClock will contain the HSE_VALUE(**)\n  266    *                          \n  267:   *           - If SYSCLK source is PLL, SystemCoreClock will contain the HSE_VALUE(**)\n  268    *             or HSI_VALUE(*) multiplied/divided by the PLL factors.\n  269    *\n  ...\n  272    *             in voltage and temperature.\n  273    *    \n  274:   *         (**) HSE_VALUE is a constant defined in stm32f4xx.h file (default value\n  275:   *              25 MHz), user has to ensure that HSE_VALUE is same as the real\n  276    *              frequency of the crystal used. Otherwise, this function may\n  277    *              have wrong result.\n  ...\n  296        break;\n  297      case 0x04:  /* HSE used as system clock source */\n  298:       SystemCoreClock = HSE_VALUE;\n  299        break;\n  300      case 0x08:  /* PLL used as system clock source */\n  301  \n  302:       /* PLL_VCO = (HSE_VALUE or HSI_VALUE / PLL_M) * PLL_N\n  303           SYSCLK = PLL_VCO / PLL_P\n  304           */    \n  ...\n  309        {\n  310          /* HSE used as PLL clock source */\n  311:         pllvco = (HSE_VALUE / pllm) * ((RCC->PLLCFGR & RCC_PLLCFGR_PLLN) >> 6);\n  312        }\n  313        else\n\n/home/oserkin/zwork/timetrack/svn/EEarPcb/soft/linuxTests/uartHello/src/stm32f4xx_conf.h:\n   24  #define __STM32F4xx_CONF_H\n   25  \n   26: #if defined  (HSE_VALUE)\n   27  /* Redefine the HSE value; it's equal to 8 MHz on the STM32F4-DISCOVERY Kit */\n   28:  #undef HSE_VALUE\n   29:  #define HSE_VALUE    ((uint32_t)8000000) \n   30: #endif /* HSE_VALUE */\n   31  \n   32  /* Includes ------------------------------------------------------------------*/\n\n/home/oserkin/zwork/timetrack/svn/EEarPcb/soft/linuxTests/uartHello/src/system_stm32f4xx.c:\n   35    *    add some code to deal with this issue inside the SetSysClock() function.\n   36    *\n   37:   * 4. The default value of HSE crystal is set to 25MHz, refer to \"HSE_VALUE\" define\n   38    *    in \"stm32f4xx.h\" file. When HSE is used as system clock source, directly or\n   39    *    through PLL, and you are using different crystal you have to adapt the HSE\n   ..\n  146  \n  147  /************************* PLL Parameters *************************************/\n  148: /* PLL_VCO = (HSE_VALUE or HSI_VALUE / PLL_M) * PLL_N */\n  149  #define PLL_M      25\n  150  #define PLL_N      336\n  ...\n  264    *           - If SYSCLK source is HSI, SystemCoreClock will contain the HSI_VALUE(*)\n  265    *                                              \n  266:   *           - If SYSCLK source is HSE, SystemCoreClock will contain the HSE_VALUE(**)\n  267    *                          \n  268:   *           - If SYSCLK source is PLL, SystemCoreClock will contain the HSE_VALUE(**) \n  269    *             or HSI_VALUE(*) multiplied/divided by the PLL factors.\n  270    *         \n  ...\n  273    *             in voltage and temperature.   \n  274    *    \n  275:   *         (**) HSE_VALUE is a constant defined in stm32f4xx.h file (default value\n  276:   *              25 MHz), user has to ensure that HSE_VALUE is same as the real\n  277    *              frequency of the crystal used. Otherwise, this function may\n  278    *              have wrong result.\n  ...\n  297        break;\n  298      case 0x04:  /* HSE used as system clock source */\n  299:       SystemCoreClock = HSE_VALUE;\n  300        break;\n  301      case 0x08:  /* PLL used as system clock source */\n  302  \n  303:       /* PLL_VCO = (HSE_VALUE or HSI_VALUE / PLL_M) * PLL_N\n  304           SYSCLK = PLL_VCO / PLL_P\n  305           */    \n  ...\n  310        {\n  311          /* HSE used as PLL clock source */\n  312:         pllvco = (HSE_VALUE / pllm) * ((RCC->PLLCFGR & RCC_PLLCFGR_PLLN) >> 6);\n  313        }\n  314        else\n\n37 matches across 7 files\n",
+			"settings":
+			{
+				"buffer_size": 7324,
+				"line_ending": "Unix",
+				"name": "Find Results",
+				"scratch": true
+			}
+		},
+		{
+			"file": "cmsis_boot/stm32f4xx.h",
+			"settings":
+			{
+				"buffer_size": 523246,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "build.pl",
+			"settings":
+			{
+				"buffer_size": 2057,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "cmsis/inc/stm32f4xx_gpio.h",
+			"settings":
+			{
+				"buffer_size": 17163,
+				"line_ending": "Windows"
+			}
+		}
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 75.0,
+		"last_filter": "git check	",
+		"selected_items":
+		[
+			[
+				"git check	",
+				"Git: Checkout Current File"
+			],
+			[
+				"git di",
+				"Git: Diff Current File"
+			],
+			[
+				"git chec",
+				"Git: Checkout Current File"
+			],
+			[
+				"git blame",
+				"Git: Blame"
+			],
+			[
+				"git che",
+				"Git: Checkout Current File"
+			],
+			[
+				"git bla",
+				"Git: Blame"
+			],
+			[
+				"git ch",
+				"Git: Checkout Current File"
+			],
+			[
+				"git diff",
+				"Git: Diff Current File"
+			],
+			[
+				"git dif",
+				"Git: Diff Current File"
+			],
+			[
+				"git ",
+				"Git: Blame"
+			],
+			[
+				"git lo",
+				"Git: Log Current File"
+			],
+			[
+				"git b",
+				"Git: Blame"
+			],
+			[
+				"git status ",
+				"Git: Status"
+			],
+			[
+				"git check",
+				"Git: Checkout Current File"
+			],
+			[
+				"git log",
+				"Git: Log Current File"
+			],
+			[
+				"git blame ",
+				"Git: Blame"
+			],
+			[
+				"pa",
+				"Package Control: Install Package"
+			],
+			[
+				"git diff c",
+				"Git: Diff Current File"
+			],
+			[
+				"git log ",
+				"Git: Log Current File"
+			],
+			[
+				"git sta",
+				"Git: Status"
+			],
+			[
+				"git duff",
+				"Git: Diff Current File"
+			],
+			[
+				"git c",
+				"Git: Commit"
+			],
+			[
+				"git",
+				"Git: Commit history"
+			],
+			[
+				"git a",
+				"Git: Add Current File"
+			],
+			[
+				"git br",
+				"Git: New Branch"
+			],
+			[
+				"",
+				"Changelog"
+			],
+			[
+				"git re",
+				"Git: Reset (unstage) Current File"
+			],
+			[
+				"git d",
+				"Git: Diff Current File"
+			],
+			[
+				"git res",
+				"Git: Reset (unstage) Current File"
+			],
+			[
+				"insta",
+				"Package Control: Install Package"
+			]
+		],
+		"width": 521.0
+	},
+	"console":
+	{
+		"height": 139.0,
+		"history":
+		[
+			"import urllib.request,os,hashlib; h = '2915d1851351e5ee549c20394736b442' + '8bc59f460fa1548d1514676163dafc88'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://packagecontrol.io/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by) "
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/home/oserkin/zwork/timetrack/svn/EEarPcb/soft/linuxTests/uartHello",
+		"/home/oserkin/zwork/timetrack/svn/EEarPcb/soft/linuxTests/uartHello/src"
+	],
+	"file_history":
+	[
+		"/home/oserkin/zwork/timetrack/svn/EEarPcb/soft/tests/2016-03-25/25_mic_test1/main.c",
+		"/home/oserkin/zwork/timetrack/svn/EEarPcb/installs/inet_sources.txt",
+		"/home/bbl-pc-06/zwork/svn/EEarPcb/soft/linuxTests/test/main.c",
+		"/home/bbl-pc-06/grive/ububtu/workshop_tmp.txt",
+		"/home/bbl-pc-06/grive/ububtu/workshop.txt",
+		"/home/bbl-pc-06/bin/gg",
+		"/home/bbl-pc-06/zwork/svn/EEarPcb/soft/reference/examples/stm32_discovery_arm_gcc/STM32F4-Discovery_FW_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/inc/stm32f4xx_adc.h",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/common/DualMenuContainer.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1plugins/tests/qml/data/tst_routing/generaldiagnosticsserver.json",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntgbase/components/ui_library/entries/SubMenuListButtonEntry.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/common/DualMenuListContainer.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Camera/CameraBackgroundService.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Settings/ParkingPilotAudioMenu.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Car/SidePadsMenu.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Settings/ntg6/AppViews/Settings/SettingsAppView.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntgbase/components/ui_library/entries/MenuItemEntry.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1plugins/src/plugins/if1/communication/inVehicleCommunication/qmlincarcomclient.cpp",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1plugins/src/plugins/if1/communication/inVehicleCommunication/qmlincarcomclient.h",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Settings/ntg6/imports/SettingsModels.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/styles/ntg6/ToggleButtonStyle.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntgbase/components/ui_library/entries/ToggleButtonEntry.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1mockserver/IF1MockServerLib/mockservices/entertainment.tuner/TuneServer.cs",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1/src/IF1/communication/inVehicleCommunication/inVehicleCommunication.thrift",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1mockserver/IF1MockServerLib/mockservices/communication.inVehicleCommunication/InCarComServer.cs",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1mockserver/mockData/generaldiagnosticsserver.json",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1mockserver/IF1MockServerLib/mockservices/entertainment.player/CurrentPlayListControlServer.cs",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1libs/src/client/if1_autogen/communication/addressbook/AddressbookApplicationStatus.h",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1plugins/src/plugins/if1/input/qmlapplicationloopbackinputfactory.cpp",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1plugins/src/plugins/if1/platform/pinProtection/qmlgeneralpinprotectionclient.cpp",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1plugins/src/plugins/if1/platform/pinProtection/qmlgeneralpinprotectiongroupproperty.h",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1libs/src/client/if1_autogen/communication/inVehicleCommunication/qmlincarcomclient.h.tpl",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1plugins/src/plugins/if1/platform/pinProtection/qmlgeneralpinprotectiongroupproperty.cpp",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1plugins/src/plugins/if1/communication/inVehicleCommunication/qmlinvehiclecommunicationplugin.cpp",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1plugins/src/plugins/if1/communication/inVehicleCommunication/inVehicleCommunication.pro",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Settings/ntg6/src/DisplaySettingsSubMenu.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1/src/IF1/platform/diagnostics/diagnostics.thrift",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Settings/ntg6/src/ManageInternetSettingsSubMenu.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Settings/SettingsMenu.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Comfort/ntg6/imports/SeatModels.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Settings/SoundMenu.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1plugins/tests/qml/tst_diagnostics.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1libs/src/client/if1_autogen/communication/inVehicleCommunication/qmlexperimentalincarcomclient.h",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1/src/IF1/driverAssistance/parkMan/parkMan.thrift",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1mockserver/IF1MockServerLib/mockservices/driverAssistance.parkMan/ParkingAssistanceSettingsServer.cs",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Settings/ntg6/src/ParkingPilotAudioSubMenu.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Settings/ntg6/src/SoundSettingsSubMenu.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Settings/ntg6/qmldir",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Settings/Connectivity/ManageInternetSettingsMenu.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1plugins/src/plugins/if1/driverAssistance/parkMan/qmlparkingassistancesettingsclient.h",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Comfort/ntg6/imports/SeatsAppViewFacade.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Car/ntg6/imports/PlatformDiagnosticsFacade.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Settings/ntg6/src/TimeAndDateSubMenu.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1plugins/src/plugins/if1/platform/diagnostics/qmlgeneraldiagnosticsclient.h",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Media/ntg5_5/Menus/Options/OptionsMenu.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Settings/TimeAndDateMenu.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1plugins/tests/qml/data/tst_favoritescontrol/favoritescontrolserver.json",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Settings/ntg6/src/ConnectivitySubMenu.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Settings/ntg6/src/InputFeedbackSubMenu.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Settings/ntg6/src/OptionsManageInternetSettingsSubMenu.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Settings/ntg6/src/ChangeConfigurationSubMenu.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Car/AssistanceMenu.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Settings/DisplaySettingsMenu.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Settings/InputFeedbackMenu.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Settings/DisplayStyleModeMenu.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Settings/ntg6/src/NavigationAndTrafficAnnoucementSubMenu.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Settings/NavigationAndTrafficAnnouncementMenu.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Settings/TrafficAnnouncementsIncreaseMenu.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Settings/DrivingRecommendationsVolumeMenu.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Settings/Clients/TPConfigurationClient.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Settings/AudioFeedbackMenu.qml",
+		"/home/bbl-pc-06/work/doc/SystemSettingsTree/filesystem-tree.tex",
+		"/home/bbl-pc-06/bin/gm",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/common/VehicleFunctionsFacade.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1plugins/src/plugins/if1/platform/diagnostics/qmldiagnosticsplugin.cpp",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Developer/SettingsMenu.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Settings/UserProfileMenu.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Car/Clients/PreconditionClient.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Settings/ntg6/SettingsAppWindow.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1plugins/tests/qml/tst_illumination.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1/src/IF1/main/main.thrift",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1/src/IF1/vehicle/userData/userData.thrift",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1plugins/src/plugins/if1/vehicle/aircondition/qmlaircondition.h",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Car/AmbientLightPopup.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1libs/src/client/if1_autogen/platform/diagnostics/ALColorProgram2Bit.h",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Car/Clients/IlluminationQmlClient.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1libs/src/client/if1_autogen/vehicle/vehicleFunctions/AmbientLightColorProgram.h",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1plugins/testui/apps/vehicleFunctions/GeneralVehicleFunctionsSettings.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Overlays/Home/DiagIF1HelperFavorites.qml",
+		"/home/bbl-pc-06/work/gerit/build/build.pl",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1plugins/testui/apps/climate/main.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Settings/Clients/DiagnosticsClient.qml",
+		"/home/bbl-pc-06/uisw/ntg6master/if1/src/IF1/platform/diagnostics/diagnostics.thrift",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1mockserver/IF1MockServerLib/mockservices/platform.diagnostics/GeneralDiagnosticsServer.cs",
+		"/home/bbl-pc-06/work/gerit/build/test00.log",
+		"/home/bbl-pc-06/work/gerit/testreport.txt",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Settings/ntg6/src/NavigationAndTrafficAnnouncementSubMenu.qml",
+		"/home/bbl-pc-06/work/gerit/build/trargetE10.ini",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Settings/ntg6/src/DrivingRecommendationsVolumeSlider.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntgbase/components/ui_library/controls/CommonLists/FunctionListStackItem.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Settings/EmotionsMenu.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1plugins/src/plugins/if1/platform/diagnostics/variantcoding.h",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1mockserver/IF1MockServerLib/mockservices/vehicle.specialPurposeVehicles/SPVControlServer.cs",
+		"/home/bbl-pc-06/zwork/svn/EEarPcb/soft/linuxTests/uartHello/main.c",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/i18n/eng_Latn_GBR.ts",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1plugins/src/plugins/if1/platform/diagnostics/variantcoding.cpp",
+		"/home/bbl-pc-06/.config/sublime-text-3/Packages/Default/Preferences.sublime-settings",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Settings/ntg6/imports/AssistanceModels.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Comfort/ntg6/AppViews/Seats/SeatsAppView.qml",
+		"/home/bbl-pc-06/.gitconfig",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Settings/ntg6/AppViews/Assistance/AssistanceAppView.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Settings/DisplayBrightnessMenu.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1plugins/tests/qml/tst_systemsettings.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/styles/ntg6/SubMenuListButtonStyle.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Settings/SettingsApp.qml",
+		"/home/bbl-pc-06/bin/br.sh",
+		"/home/bbl-pc-06/bin/pup.sh",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1plugins/src/plugins/if1/platform/diagnostics/qmlgeneraldiagnosticsclient.cpp",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1plugins/tests/qml/data/tst_diagnostics/generaldiagnosticsserver.json",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1mockserver/autoGeneratedServers/vehicle.specialPurposeVehicles/SPVControlService.cs",
+		"/home/bbl-pc-06/work/gerit/--/fix/diagnostics.thrift",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1libs/src/client/if1_autogen/platform/diagnostics/SpecialPurposeVehiclesConfiguration.h",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Radio/ntg5_5/Sound/SoundMenu.qml",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1mockserver/autoGeneratedServers/vehicle.specialPurposeVehicles/GeneralSPVService.cs",
+		"/home/bbl-pc-06/work/gerit/ntg6master/3rdParty/EGLStreamQtPoC/EGLStreamProducer/producerthread.cpp",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1mockserver/bin/snapshot/generaldiagnosticsserver.json",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1mockserver/IF1MockServerLib/mockservices/driverAssistance.favorites/FavoritesControlServer.cs",
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1libs/src/client/if1_autogen/platform/diagnostics/SeatConfiguration.h",
+		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Comfort/ntg6/ComfortAppWindow.qml"
+	],
+	"find":
+	{
+		"height": 35.0
+	},
+	"find_in_files":
+	{
+		"height": 93.0,
+		"where_history":
+		[
+			"*",
+			"*.json",
+			"*.qml",
+			"*.thrift",
+			"*.cs",
+			"*.thrift",
+			"*.*",
+			"*.json",
+			"*.qml",
+			"*.h",
+			"*.cs",
+			"*.thrift",
+			"qml*.h",
+			"*.qml",
+			"*.h",
+			"*.qml",
+			"*.h",
+			"*",
+			"*.json",
+			"*.qml",
+			"*.*",
+			"*.h",
+			"*.thrift",
+			"*.qml",
+			"*.cs",
+			"*.h",
+			"*.thrift",
+			"*.json",
+			"*.qml",
+			"*.json",
+			"*.thrift",
+			"*.cs",
+			"*.json",
+			"*.qml",
+			"*.thrift",
+			"*.thift",
+			"*.qml",
+			"*.*",
+			"*.thift",
+			"*.trift",
+			"*.qml",
+			"*.h",
+			"*.qml",
+			"*.thrift",
+			"*.qml",
+			"*.h",
+			"*.qml",
+			"qmldir",
+			"",
+			"*.h",
+			"*.qml",
+			"*.cpp",
+			"*.h",
+			"*.qml",
+			"*.cpp",
+			"*.qml",
+			"*.cpp",
+			"*.qml",
+			"*.thrift",
+			"*.qml",
+			"*.*",
+			"*.qml",
+			"*.h",
+			"*.qml",
+			"*.йьд",
+			"*.cs",
+			"*.qml",
+			"*.*",
+			"*.qml",
+			"*.*",
+			"*.qml",
+			"*.*",
+			"*.cs",
+			"*.*",
+			"*.h",
+			"*.*",
+			"*.h",
+			"*.*",
+			"*.qml",
+			"tst*.qml",
+			"*.qml",
+			"tst*.qml",
+			"*",
+			"*tst*.*",
+			"tst*.qml",
+			"*tst*.*",
+			"*.*",
+			"*.cpp",
+			"*.h",
+			"*.qml",
+			"*.cs",
+			"*.json",
+			"*.qml",
+			"*.h",
+			"*.cpp",
+			"*.qml",
+			"*.cpp",
+			"*.cs",
+			"*.qml",
+			"*.json",
+			"*.qml",
+			"*.h",
+			"*.qml",
+			"*.cs",
+			"*.json",
+			"*.qml",
+			"*.cpp",
+			"*.*",
+			"*.cpp",
+			"*.h",
+			"*.qml",
+			"*.*",
+			"*.qml",
+			"qmldir",
+			"*.qml",
+			"*",
+			"*.",
+			"*.qml",
+			"*.cpp",
+			"*.h",
+			"*.qml",
+			"*.*",
+			"*.qml",
+			"*.qlm",
+			"*.h",
+			"*.cpp",
+			"*.*",
+			"*.cpp"
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"SystemCoreClock",
+			"HSE_VALUE",
+			"VECT_TAB_OFFSET",
+			"SystemInit",
+			"GPIO_Pin_11",
+			"RCC_AHB1PeriphClockCmd",
+			"isInCarComEnabled",
+			"60.35.247",
+			"60,35,247",
+			"contains(OnOffControlClient.ignitionStatus)",
+			"contains(OnOffControlClient",
+			"ignitionOff",
+			"Audio attenuation during Park Pilot warning",
+			"Park Pilot",
+			"enabledCameraSystem",
+			"//% \"Park Pilot\"",
+			"IgnitionStatus",
+			"_labelContainerTitle",
+			"55.35.156",
+			"isCarCauseActiveChanged",
+			"Checkbox",
+			"grayout",
+			"comActive",
+			"CauseActive",
+			"CarCauseActive",
+			"debug",
+			"isCarCauseActive",
+			"getIsCarCauseActive",
+			"isInCarComActiveChanged",
+			"isCarCauseActive",
+			"getIsCarCauseActive",
+			"getIsInCarComActive",
+			"isCarCauseActive",
+			"toggle",
+			"InCarCom",
+			"car",
+			"carcom",
+			"car",
+			"CarCom",
+			"CarComEnabled",
+			"isInCarComEnabled",
+			"parkingSupportConfiguration",
+			"toggle",
+			"setIsAddressbookStarting",
+			"Q_PROPERTY(bool",
+			"onIsInCarComActiveCallSucceeded",
+			"isInCarComActiveCallChanged",
+			"setInCarComActive",
+			"getIsInCarComActive",
+			"onIsInCarComActiveCallSucceeded",
+			"setInCarComActive",
+			"IsInCarComActive",
+			"isInCarComActiveCallSucceeded",
+			"Debug",
+			"PinStatus",
+			"isInCarComActive",
+			"isCarCauseActive",
+			"setInCarComActiveCallResult",
+			"CallResult",
+			"isInCarComActiveCallResult",
+			"inCarComCharacteristicsChanged",
+			"IsCarCauseActive",
+			"setInCarComActiveCallResult",
+			"CarComCharacteristicsChanged",
+			"InCarComCharacteristics",
+			"inCarComCharacteristics",
+			"reqestPinStatus",
+			"getPinStatus",
+			"PinLockStatus",
+			"reqestPinLockStatus",
+			"updatePinLockStatus",
+			"pinLockStatus",
+			"m_pinLockStatus",
+			"m_isInCarComActive",
+			"Characteristics",
+			"ComCharacteristics",
+			"INITSTATE",
+			"PRIVATE",
+			"onSubscribeCallSucceeded",
+			"initStateKeyCount",
+			"onIsInCarComActiveCallSucceeded",
+			"CarComActive",
+			"erificationResultChanged",
+			"getVerificationResult",
+			"InCarComActive",
+			"setInCarComActive",
+			"isInCarComActive",
+			"VehicleCommunication",
+			"Vehicle",
+			"isInCarComActive",
+			"DisplayStyleModeMenu.qml",
+			"//% \"Day/Night Mode\"",
+			"isInCarComActive",
+			"isInCarComEnabled",
+			"//% \"Voice amplification\"",
+			"InVehicleCommunicationConfiguration",
+			"isInCarComActiveCallResult",
+			"isInCarComActive",
+			"isInCarCom",
+			"CarCom",
+			"//% \"Voice amplification\"",
+			"PTSVolume",
+			"frontPTSVolume",
+			"entertainmentAudioAttenuation",
+			"PTSSonarFMd",
+			"SonarActive",
+			"isFrontAcousticSonarActivechecked",
+			"//% \"Early Warning\"",
+			"pTSVolume",
+			"ptsFrequency",
+			"ParkingSupportConfiguration",
+			"PTSVolume",
+			"frontPTSVolume",
+			"MBSlider",
+			"PTSVolume",
+			"pTSVolume",
+			"ParkingSupportConfiguration",
+			"TSVolume",
+			"parking",
+			"parkingConfiguration",
+			"parkingSupportConfiguration",
+			"parking",
+			"park",
+			"parkingSupportConfiguration",
+			"pTSVolume",
+			"ptsVolume",
+			"//% \"PTS Volume\"",
+			"PTSVolumeButton"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			" ",
+			"//",
+			" ",
+			"SpecialPurposeVehiclesConfiguration",
+			"SpecialPurposeVehiclesConfigurationQMLProxy",
+			" ",
+			"SpecialPurposeVehiclesConfiguration",
+			"_1VehicleLevelPosition1_4Bit",
+			"tickmarkObjects",
+			"internal.tickmarkObjects",
+			"orizontal",
+			"_timeRollerPopup",
+			"m_onErrorCallback",
+			"QmlGeneralPinProtectionClient",
+			"UserPinGroup",
+			"m_pinType",
+			"m_clientID",
+			"m_pinStatus",
+			"QmlGeneralPinProtectionGroupProperty",
+			"QmlGeneral",
+			"QmlAssistant",
+			"$project_dir",
+			"",
+			"//import hupf.if1.driverAssistance.emergencyAndAssistance 0.7",
+			"//import hupf.if1.platform.speech 0.7",
+			"import hupf.if1.platform.speech 0.7",
+			"//import hupf.if1.navigation.Guiding 0.7",
+			"//import hupf.if1.communication.bluetooth 0.7",
+			"",
+			"//import hupf.if1.driverAssistance.emergencyAndAssistance 0.7",
+			"//import hupf.if1.communication.bluetooth 0.7",
+			"//import hupf.if1.driverAssistance.activeComfort 0.7",
+			"//import hupf.if1.navigation.Guiding 0.7",
+			"navigation7Guiding",
+			"MainIf1.IgnitionStatus",
+			"MainIf1.OnOffControlClient.ignitionStatus",
+			"MainIf1",
+			"MainIf1.VehicleInformationClient.vehicleLine",
+			"MainIf1.OnOffControlClient.ignitionStatus",
+			"Diag",
+			"MainIf1.VehicleInformationClient.vehicleLine",
+			"MainIf1"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "main.c",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 4403,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								268,
+								268
+							]
+						],
+						"settings":
+						{
+							"BracketHighlighterBusy": false,
+							"bh_regions":
+							[
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content"
+							],
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "main.h",
+					"semi_transient": true,
+					"settings":
+					{
+						"buffer_size": 46,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								17,
+								17
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "cmsis_boot/system_stm32f4xx.c",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 20987,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								12805,
+								12805
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 4963.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 7324,
+						"regions":
+						{
+							"match":
+							{
+								"flags": 112,
+								"regions":
+								[
+									[
+										361,
+										370
+									],
+									[
+										454,
+										463
+									],
+									[
+										804,
+										813
+									],
+									[
+										930,
+										939
+									],
+									[
+										1223,
+										1232
+									],
+									[
+										1351,
+										1360
+									],
+									[
+										1544,
+										1553
+									],
+									[
+										1828,
+										1837
+									],
+									[
+										2055,
+										2064
+									],
+									[
+										2083,
+										2092
+									],
+									[
+										2181,
+										2190
+									],
+									[
+										2374,
+										2383
+									],
+									[
+										2486,
+										2495
+									],
+									[
+										2512,
+										2521
+									],
+									[
+										2562,
+										2571
+									],
+									[
+										2943,
+										2952
+									],
+									[
+										3263,
+										3272
+									],
+									[
+										3603,
+										3612
+									],
+									[
+										3735,
+										3744
+									],
+									[
+										3934,
+										3943
+									],
+									[
+										4058,
+										4067
+									],
+									[
+										4333,
+										4342
+									],
+									[
+										4460,
+										4469
+									],
+									[
+										4660,
+										4669
+									],
+									[
+										4909,
+										4918
+									],
+									[
+										5021,
+										5030
+									],
+									[
+										5047,
+										5056
+									],
+									[
+										5098,
+										5107
+									],
+									[
+										5472,
+										5481
+									],
+									[
+										5792,
+										5801
+									],
+									[
+										6132,
+										6141
+									],
+									[
+										6264,
+										6273
+									],
+									[
+										6476,
+										6485
+									],
+									[
+										6600,
+										6609
+									],
+									[
+										6875,
+										6884
+									],
+									[
+										7002,
+										7011
+									],
+									[
+										7202,
+										7211
+									]
+								],
+								"scope": ""
+							}
+						},
+						"selection":
+						[
+							[
+								2089,
+								2089
+							]
+						],
+						"settings":
+						{
+							"default_dir": "/home/oserkin/zwork/timetrack/svn/EEarPcb/soft/linuxTests/uartHello",
+							"detect_indentation": false,
+							"line_numbers": false,
+							"output_tag": 1,
+							"result_base_dir": "",
+							"result_file_regex": "^([A-Za-z\\\\/<].*):$",
+							"result_line_regex": "^ +([0-9]+):",
+							"scroll_past_end": true,
+							"syntax": "Packages/Default/Find Results.hidden-tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 408.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "cmsis_boot/stm32f4xx.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 523246,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3395,
+								3395
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1070.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "build.pl",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2057,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1201,
+								1201
+							]
+						],
+						"settings":
+						{
+							"BracketHighlighterBusy": false,
+							"bh_regions":
+							[
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content"
+							],
+							"syntax": "Packages/Perl/Perl.tmLanguage",
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 153.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 6,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "cmsis/inc/stm32f4xx_gpio.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 17163,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								5933,
+								5933
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 25.0
+	},
+	"input":
+	{
+		"height": 33.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.exec":
+	{
+		"height": 79.0
+	},
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "Packages/User/my_build.sublime-build",
+	"project": "stm.sublime-project",
+	"replace":
+	{
+		"height": 46.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"stm32f4xx_adc.h",
+				"reference/examples/stm32_discovery_arm_gcc/STM32F4-Discovery_FW_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/inc/stm32f4xx_adc.h"
+			],
+			[
+				"submenulistbuttonentry",
+				"ntgbase/components/ui_library/entries/SubMenuListButtonEntry.qml"
+			],
+			[
+				"dualmenucontainer",
+				"ntg6ui/common/DualMenuContainer.qml"
+			],
+			[
+				"dualmenulistcontainer",
+				"ntg6ui/common/DualMenuListContainer.qml"
+			],
+			[
+				"menuitem",
+				"ntgbase/components/ui_library/entries/MenuItemEntry.qml"
+			],
+			[
+				"togglebuttonstyle",
+				"ntg6ui/styles/ntg6/ToggleButtonStyle.qml"
+			],
+			[
+				"togglebuttonentry",
+				"ntgbase/components/ui_library/entries/ToggleButtonEntry.qml"
+			],
+			[
+				"generaldiagnosticsserver.json",
+				"if1mockserver/mockData/generaldiagnosticsserver.json"
+			],
+			[
+				"qmlapplicationloo",
+				"if1plugins/src/plugins/if1/input/qmlapplicationloopbackinputfactory.cpp"
+			],
+			[
+				"qmlincar",
+				"if1libs/src/client/if1_autogen/communication/inVehicleCommunication/qmlincarcomclient.h.tpl"
+			],
+			[
+				"stylemenu.qml",
+				"ntg6ui/apps/Settings/StyleMenu.qml"
+			],
+			[
+				"displaystylemodemenu.qml",
+				"ntg6ui/apps/Settings/DisplayStyleModeMenu.qml"
+			],
+			[
+				"qmlparkingassistancesettingsclient",
+				"if1plugins/src/plugins/if1/driverAssistance/parkMan/qmlparkingassistancesettingsclient.h"
+			],
+			[
+				"qmlgenera",
+				"if1plugins/src/plugins/if1/platform/diagnostics/qmlgeneraldiagnosticsclient.h"
+			],
+			[
+				"settimemenu",
+				"ntg6ui/apps/Settings/SetTimeMenu.qml"
+			],
+			[
+				"timeanddatemenu",
+				"ntg6ui/apps/Settings/TimeAndDateMenu.qml"
+			],
+			[
+				"dunsettings",
+				"ntg6ui/apps/Settings/Connectivity/DUNSettings.qml"
+			],
+			[
+				"settingsoncomandmenu",
+				"ntg6ui/apps/Settings/Connectivity/SettingsOnComandMenu.qml"
+			],
+			[
+				"changeconfigurationmenu",
+				"ntg6ui/apps/Settings/Connectivity/ChangeConfigurationMenu.qml"
+			],
+			[
+				"optionsmanageinternetsettingsmenu",
+				"ntg6ui/apps/Settings/Connectivity/OptionsManageInternetSettingsMenu.qml"
+			],
+			[
+				"manageinternetsettingsmenu",
+				"ntg6ui/apps/Settings/Connectivity/ManageInternetSettingsMenu.qml"
+			],
+			[
+				"manageinternetsettingsmenu.",
+				"ntg6ui/apps/Settings/Connectivity/ManageInternetSettingsMenu.qml"
+			],
+			[
+				"connecti",
+				"ntg6ui/apps/Settings/ConnectivityMenu.qml"
+			],
+			[
+				"connectivitymenu.q",
+				"ntg6ui/apps/Settings/ConnectivityMenu.qml"
+			],
+			[
+				"connectivitymenu",
+				"ntg6ui/apps/Settings/ConnectivityMenu.qml"
+			],
+			[
+				"trafficannouncementsincreasemenu.qml",
+				"ntg6ui/apps/Settings/TrafficAnnouncementsIncreaseMenu.qml"
+			],
+			[
+				"drivingrecommendationsvolumemenu.qml",
+				"ntg6ui/apps/Settings/DrivingRecommendationsVolumeMenu.qml"
+			],
+			[
+				"audiofeedbackmenu",
+				"ntg6ui/apps/Settings/AudioFeedbackMenu.qml"
+			],
+			[
+				"voiceoutputvolumemenu",
+				"ntg6ui/apps/Settings/VoiceOutputVolumeMenu.qml"
+			],
+			[
+				"navigationand",
+				"ntg6ui/apps/Settings/NavigationAndTrafficAnnouncementMenu.qml"
+			],
+			[
+				"parkingpilotaudiomenu",
+				"ntg6ui/apps/Settings/ParkingPilotAudioMenu.qml"
+			],
+			[
+				"inputfeedbackmenu",
+				"ntg6ui/apps/Settings/InputFeedbackMenu.qml"
+			],
+			[
+				"navigationandtrafficannoucementmenu.qml",
+				"ntg6ui/apps/Settings/NavigationAndTrafficAnnouncementMenu.qml"
+			],
+			[
+				"navigationandtrafficannoucementsubmenu.qml",
+				"ntg6ui/apps/Settings/ntg6/src/NavigationAndTrafficAnnoucementSubMenu.qml"
+			],
+			[
+				"soundmenu",
+				"ntg6ui/apps/Settings/SoundMenu.qml"
+			],
+			[
+				"settingsmenu",
+				"ntg6ui/apps/Developer/SettingsMenu.qml"
+			],
+			[
+				"alcolorprogram2bit",
+				"if1libs/src/client/if1_autogen/platform/diagnostics/ALColorProgram2Bit.h"
+			],
+			[
+				"ambientlightcolorprogram.h",
+				"if1libs/src/client/if1_autogen/vehicle/vehicleFunctions/AmbientLightColorProgram.h"
+			],
+			[
+				"illuminationclient.qml",
+				"ntg6ui/apps/Car/Clients/IlluminationQmlClient.qml"
+			],
+			[
+				"qmlair",
+				"if1plugins/src/plugins/if1/vehicle/aircondition/qmlaircondition.h"
+			],
+			[
+				"qmldiagnosticsplugin.cpp",
+				"if1plugins/src/plugins/if1/platform/diagnostics/qmldiagnosticsplugin.cpp"
+			],
+			[
+				"userdata.thrift",
+				"if1/src/IF1/vehicle/userData/userData.thrift"
+			],
+			[
+				"generaldiagnosticsserver.cs",
+				"if1mockserver/IF1MockServerLib/mockservices/platform.diagnostics/GeneralDiagnosticsServer.cs"
+			],
+			[
+				"main.th",
+				"if1/src/IF1/main/main.thrift"
+			],
+			[
+				"dia",
+				"if1/src/IF1/platform/diagnostics/diagnostics.thrift"
+			],
+			[
+				"diag",
+				"if1/src/IF1/platform/diagnostics/diagnostics.thrift"
+			],
+			[
+				"drivingrecommendationsvolumemenu",
+				"ntg6ui/apps/Settings/DrivingRecommendationsVolumeMenu.qml"
+			],
+			[
+				"functionliststackitem",
+				"ntgbase/components/ui_library/controls/CommonLists/FunctionListStackItem.qml"
+			],
+			[
+				"navigationandtrafficannouncementmenu",
+				"ntg6ui/apps/Settings/NavigationAndTrafficAnnouncementMenu.qml"
+			],
+			[
+				"sound",
+				"ntg6ui/apps/Settings/SoundMenu.qml"
+			],
+			[
+				"eng_latn_gbr.ts",
+				"ntg6ui/i18n/eng_Latn_GBR.ts"
+			],
+			[
+				"emotionsmenu.qml",
+				"ntg6ui/apps/Settings/EmotionsMenu.qml"
+			],
+			[
+				"varinat",
+				"if1plugins/src/plugins/if1/platform/diagnostics/variantcoding.cpp"
+			],
+			[
+				"varint",
+				"if1plugins/src/plugins/if1/platform/diagnostics/variantcoding.h"
+			],
+			[
+				"varia",
+				"if1plugins/src/plugins/if1/platform/diagnostics/variantcoding.cpp"
+			],
+			[
+				"display",
+				"ntg6ui/apps/Settings/DisplaySettingsMenu.qml"
+			],
+			[
+				"settingsappw",
+				"ntg6ui/apps/Settings/ntg6/SettingsAppWindow.qml"
+			],
+			[
+				"assistancemodels",
+				"ntg6ui/apps/Settings/ntg6/imports/AssistanceModels.qml"
+			],
+			[
+				"variantcoding.cpp",
+				"if1plugins/src/plugins/if1/platform/diagnostics/variantcoding.cpp"
+			],
+			[
+				"displaybrightnessmenu.qml",
+				"ntg6ui/apps/Settings/DisplayBrightnessMenu.qml"
+			],
+			[
+				"displaysettingsmenu",
+				"ntg6ui/apps/Settings/DisplaySettingsMenu.qml"
+			],
+			[
+				"submenulistbuttonstyle",
+				"ntg6ui/styles/ntg6/SubMenuListButtonStyle.qml"
+			],
+			[
+				"variant",
+				"if1plugins/src/plugins/if1/platform/diagnostics/variantcoding.cpp"
+			],
+			[
+				"spvcontrolservice.cs",
+				"if1mockserver/autoGeneratedServers/vehicle.specialPurposeVehicles/SPVControlService.cs"
+			],
+			[
+				"generalspvservice.cs",
+				"if1mockserver/autoGeneratedServers/vehicle.specialPurposeVehicles/GeneralSPVService.cs"
+			],
+			[
+				"qmlgeneraldia",
+				"if1plugins/src/plugins/if1/platform/diagnostics/qmlgeneraldiagnosticsclient.h"
+			],
+			[
+				"tst_diagnos",
+				"if1plugins/tests/qml/tst_diagnostics.qml"
+			],
+			[
+				"favoritescontrolserver.cs",
+				"if1mockserver/IF1MockServerLib/mockservices/driverAssistance.favorites/FavoritesControlServer.cs"
+			],
+			[
+				"generaldiagnosticsservice",
+				"if1libs/src/client/if1_autogen/platform/diagnostics/GeneralDiagnosticsService.cpp"
+			],
+			[
+				"specialpurpos",
+				"if1libs/src/client/if1_autogen/platform/diagnostics/SpecialPurposeVehiclesConfiguration.h"
+			],
+			[
+				"seatconfigur",
+				"if1libs/src/client/if1_autogen/platform/diagnostics/SeatConfiguration.h"
+			],
+			[
+				"specialpurposevehi",
+				"if1libs/src/client/if1_autogen/platform/diagnostics/SpecialPurposeVehiclesConfiguration.h"
+			],
+			[
+				"qmlgeneraldiagnosticsclient.h",
+				"if1plugins/src/plugins/if1/platform/diagnostics/qmlgeneraldiagnosticsclient.h"
+			],
+			[
+				"specialpurposevehiclesconfiguration.h",
+				"if1libs/src/client/if1_autogen/platform/diagnostics/SpecialPurposeVehiclesConfiguration.h"
+			],
+			[
+				"qmlgener",
+				"if1plugins/src/plugins/if1/platform/diagnostics/qmlgeneraldiagnosticsclient.h"
+			],
+			[
+				"variantcoding",
+				"if1libs/src/client/if1_autogen/variantCodingMenus/variantcoding.cpp"
+			],
+			[
+				"qmlgeneradia",
+				"if1plugins/src/plugins/if1/platform/diagnostics/qmlgeneraldiagnosticsclient.h"
+			],
+			[
+				"mixedcontrolelementsunionentrymodel",
+				"ntg6ui/sheets/ntg6/components/MixedControlElementsUnionEntryModel.qml"
+			],
+			[
+				"basedualmenucontent",
+				"ntg6ui/common/BaseDualMenuContent.qml"
+			],
+			[
+				"submenu",
+				"ntg6ui/common/widgets/SubMenu.qml"
+			],
+			[
+				"tst_ind",
+				"if1plugins/tests/qml/tst_individualDrivingPrograms.qml"
+			],
+			[
+				"sheets_ntg",
+				"ntgbase/src/qmlrt/sheets_ntg6.ini"
+			],
+			[
+				"appviewdualmenu",
+				"ntg6ui/common/AppViewDualMenu.qml"
+			],
+			[
+				"models.qml",
+				"ntg6ui/apps/Comfort/ntg6/imports/SeatModels.qml"
+			],
+			[
+				"eng_latn",
+				"ntg6ui/i18n/eng_Latn_GBR.ts"
+			],
+			[
+				"ssettingsapp",
+				"ntg6ui/apps/Settings/ntg6/SettingsAppWindow.qml"
+			],
+			[
+				"qmlexperimentalgeneralspvclient",
+				"if1libs/src/client/if1_autogen/vehicle/specialPurposeVehicles/qmlexperimentalgeneralspvclient.h"
+			],
+			[
+				"qmlspc",
+				"if1plugins/src/plugins/if1/vehicle/specialPurposeVehicles/qmlspecialpurposevehiclesplugin.cpp"
+			],
+			[
+				"special",
+				"if1/src/IF1/vehicle/specialPurposeVehicles/specialPurposeVehicles.thrift"
+			],
+			[
+				"generalspvserver.cs",
+				"if1mockserver/IF1MockServerLib/mockservices/vehicle.specialPurposeVehicles/GeneralSPVServer.cs"
+			],
+			[
+				"climatecontroll",
+				"ntg6ui/common/ClimateControlClient.qml"
+			],
+			[
+				"airconditionfanicon.qml",
+				"ntg6ui/apps/ClimateLine/AirCondition/Components/AirConditionFanIconEntry.qml"
+			],
+			[
+				"if1con",
+				"if1libs/src/if1common/if1configurator.cpp"
+			],
+			[
+				"climateline",
+				"ntg6ui/apps/ClimateLine/AirCondition/Clients/ClimateLineClient.qml"
+			],
+			[
+				"applicationcontrolclient",
+				"if1plugins/src/plugins/if1/main/qmlapplicationcontrolclient.h"
+			],
+			[
+				"languagesmenu",
+				"ntg6ui/apps/Settings/LanguagesMenu.qml"
+			],
+			[
+				"climate",
+				"ntg6ui/apps/ClimateLine/AirCondition/Clients/ClimateLineClient.qml"
+			],
+			[
+				"climateclient",
+				"ntg6ui/apps/Car/Clients/ClimateControlClient.qml"
+			],
+			[
+				"settingsbackgroundservice",
+				"ntg6ui/apps/Settings/SettingsBackgroundService.qml"
+			],
+			[
+				"e_1vehiclelevelposition1_4bit.h",
+				"if1libs/src/server/if1_autogen/platform/diagnostics/VehicleLevelPosition1_4Bit.h"
+			],
+			[
+				"slider",
+				"ntg6ui/common/widgets/Slider.qml"
+			],
+			[
+				"objecttr",
+				"if1plugins/tests/qmlcppsharedptrtest/objecttransferrer.cpp"
+			],
+			[
+				"dualmenu.qml",
+				"ntg6ui/common/widgets/DualMenu.qml"
+			],
+			[
+				"auxili",
+				"ntg6ui/main_ui/ClimateOverlay/AuxiliaryHeatingMenuContainer.qml"
+			],
+			[
+				"seatsm",
+				"ntg6ui/apps/Car/SeatsMenu.qml"
+			],
+			[
+				"seatsappviewfacade",
+				"ntg6ui/apps/Comfort/ntg6/imports/SeatsAppViewFacade.qml"
+			],
+			[
+				"slider.qml",
+				"ntg6ui/common/widgets/Slider.qml"
+			],
+			[
+				"seatpadclient",
+				"ntg6ui/apps/Car/Clients/SeatsPadsClient.qml"
+			],
+			[
+				"buttonstyle",
+				"ntg6ui/styles/ntg6/ButtonStyle.qml"
+			],
+			[
+				"buttonent",
+				"ntgbase/components/ui_library/entries/ButtonEntry.qml"
+			],
+			[
+				"button",
+				"ntg6ui/styles/ntg6/ButtonStyle.qml"
+			],
+			[
+				"menuitemstyl",
+				"ntg6ui/styles/ntg6/MenuItemStyle.qml"
+			],
+			[
+				"menuitementry",
+				"ntgbase/components/ui_library/entries/MenuItemEntry.qml"
+			],
+			[
+				"seatsvisualization",
+				"ntg6ui/apps/Comfort/ntg6/AppViews/Seats/SeatsVisualization.qml"
+			],
+			[
+				"buttonentry",
+				"ntgbase/components/ui_library/entries/ButtonEntry.qml"
+			],
+			[
+				"headerentry",
+				"ntgbase/components/ui_library/entries/HeaderEntry.qml"
+			],
+			[
+				"dual",
+				"ntg6ui/common/widgets/DualMenu.qml"
+			],
+			[
+				"basestackitem",
+				"ntgbase/components/ui_library/controls/CommonLists/BaseStackItem.qml"
+			],
+			[
+				"basesheet",
+				"ntg6ui/sheets/ntg6/components/BaseSheet.qml"
+			],
+			[
+				"base",
+				"ntg6ui/sheets/ntg6/components/BaseSheet.qml"
+			],
+			[
+				"dualmenuinitialmodel",
+				"ntg6ui/sheets/ntg6/components/DualMenuInitialModel.qml"
+			],
+			[
+				"subsheetentry",
+				"ntg6ui/sheets/ntg6/components/SubSheetEntry.qml"
+			],
+			[
+				"appview02",
+				"ntg6ui/common/AppView02.qml"
+			],
+			[
+				"seatmodels",
+				"ntg6ui/apps/Comfort/ntg6/imports/SeatModels.qml"
+			],
+			[
+				"dualmenusheet.qml",
+				"ntg6ui/sheets/ntg6/components/DualMenuSheet.qml"
+			],
+			[
+				"appview",
+				"ntg6ui/common/AppView02.qml"
+			],
+			[
+				"unionentrymodel",
+				"ntgbase/src/plugins/ui/extensions/entrymodel/qmlunionentrymodel.h"
+			],
+			[
+				"menuitemstyle.",
+				"ntg6ui/styles/ntg6/MenuItemStyle.qml"
+			]
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 165.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

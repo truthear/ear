@@ -1,0 +1,7 @@
+# pack-refs with: peeled fully-peeled 
+593fa0c117727700ac5d9ce7033c4a9e5a366fc0 refs/remotes/origin/master
+763a6ef1a11fb94f9de618d74d560458456a9c58 refs/remotes/origin/texane/pipe
+721684952b35b419131c1fac690627297d7b98be refs/tags/1.0.0
+^c84d8faf38e1d2069e84e0e86fe8ad3f054d36fd
+9017a8edc0c9f59fa82f1db32f49c69b1321c2d8 refs/tags/1.1.0
+^c72205661244e8b7711d2299175097cc02cfd7c1
