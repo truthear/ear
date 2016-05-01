@@ -370,82 +370,90 @@ DocumentPath=Project Outputs for EEar01\EEar01.1
 DItemRevisionGUID=
 
 [GeneratedDocument3]
-DocumentPath=Project Outputs for EEar01\EEar01.DRR
+DocumentPath=Project Outputs for EEar01\EEar01.BOM
 DItemRevisionGUID=
 
 [GeneratedDocument4]
-DocumentPath=Project Outputs for EEar01\EEar01.EXTREP
+DocumentPath=Project Outputs for EEar01\EEar01.CSV
 DItemRevisionGUID=
 
 [GeneratedDocument5]
-DocumentPath=Project Outputs for EEar01\EEar01.GBL
+DocumentPath=Project Outputs for EEar01\EEar01.DRR
 DItemRevisionGUID=
 
 [GeneratedDocument6]
-DocumentPath=Project Outputs for EEar01\EEar01.GBO
+DocumentPath=Project Outputs for EEar01\EEar01.EXTREP
 DItemRevisionGUID=
 
 [GeneratedDocument7]
-DocumentPath=Project Outputs for EEar01\EEar01.GBP
+DocumentPath=Project Outputs for EEar01\EEar01.GBL
 DItemRevisionGUID=
 
 [GeneratedDocument8]
-DocumentPath=Project Outputs for EEar01\EEar01.GBS
+DocumentPath=Project Outputs for EEar01\EEar01.GBO
 DItemRevisionGUID=
 
 [GeneratedDocument9]
-DocumentPath=Project Outputs for EEar01\EEar01.GKO
+DocumentPath=Project Outputs for EEar01\EEar01.GBP
 DItemRevisionGUID=
 
 [GeneratedDocument10]
-DocumentPath=Project Outputs for EEar01\EEar01.GM1
+DocumentPath=Project Outputs for EEar01\EEar01.GBS
 DItemRevisionGUID=
 
 [GeneratedDocument11]
-DocumentPath=Project Outputs for EEar01\EEar01.GM13
+DocumentPath=Project Outputs for EEar01\EEar01.GKO
 DItemRevisionGUID=
 
 [GeneratedDocument12]
-DocumentPath=Project Outputs for EEar01\EEar01.GM15
+DocumentPath=Project Outputs for EEar01\EEar01.GM1
 DItemRevisionGUID=
 
 [GeneratedDocument13]
-DocumentPath=Project Outputs for EEar01\EEar01.GM29
+DocumentPath=Project Outputs for EEar01\EEar01.GM13
 DItemRevisionGUID=
 
 [GeneratedDocument14]
-DocumentPath=Project Outputs for EEar01\EEar01.GML
+DocumentPath=Project Outputs for EEar01\EEar01.GM15
 DItemRevisionGUID=
 
 [GeneratedDocument15]
-DocumentPath=Project Outputs for EEar01\EEar01.GTL
+DocumentPath=Project Outputs for EEar01\EEar01.GM29
 DItemRevisionGUID=
 
 [GeneratedDocument16]
-DocumentPath=Project Outputs for EEar01\EEar01.GTO
+DocumentPath=Project Outputs for EEar01\EEar01.GML
 DItemRevisionGUID=
 
 [GeneratedDocument17]
-DocumentPath=Project Outputs for EEar01\EEar01.GTP
+DocumentPath=Project Outputs for EEar01\EEar01.GTL
 DItemRevisionGUID=
 
 [GeneratedDocument18]
-DocumentPath=Project Outputs for EEar01\EEar01.GTS
+DocumentPath=Project Outputs for EEar01\EEar01.GTO
 DItemRevisionGUID=
 
 [GeneratedDocument19]
-DocumentPath=Project Outputs for EEar01\EEar01.LDP
+DocumentPath=Project Outputs for EEar01\EEar01.GTP
 DItemRevisionGUID=
 
 [GeneratedDocument20]
-DocumentPath=Project Outputs for EEar01\EEar01.REP
+DocumentPath=Project Outputs for EEar01\EEar01.GTS
 DItemRevisionGUID=
 
 [GeneratedDocument21]
-DocumentPath=Project Outputs for EEar01\EEar01.RUL
+DocumentPath=Project Outputs for EEar01\EEar01.LDP
 DItemRevisionGUID=
 
 [GeneratedDocument22]
+DocumentPath=Project Outputs for EEar01\EEar01.REP
+DItemRevisionGUID=
+
+[GeneratedDocument23]
+DocumentPath=Project Outputs for EEar01\EEar01.RUL
+DItemRevisionGUID=
+
+[GeneratedDocument24]
 DocumentPath=Project Outputs for EEar01\EEar01.TXT
 DItemRevisionGUID=
 
@@ -832,7 +840,7 @@ Configuration12_Item1=AddToAllLayerClasses.Set= |AddToAllPlots.Set=SerializeLaye
 [OutputGroup6]
 Name=Report Outputs
 Description=
-TargetPrinter=Microsoft XPS Document Writer
+TargetPrinter=EPSONAB64B1 (XP-235 Series)
 PrinterOptions=Record=PrinterOptions|Copies=1|Duplex=1|TrueTypeOptions=3|Collate=1|PrintJobKind=1|PrintWhat=1
 OutputType1=BOM_PartType
 OutputName1=Bill of Materials
@@ -845,13 +853,13 @@ Configuration1_Item1=CaptionAsName
 Configuration1_Name2=Filter
 Configuration1_Item2=545046300E5446696C74657257726170706572000D46696C7465722E416374697665090F46696C7465722E43726974657269610A04000000000000000000
 Configuration1_Name3=General
-Configuration1_Item3=OpenExported=True|AddToProject=False|ForceFit=False|NotFitted=False|Database=False|DatabasePriority=False|IncludePCBData=False|IncludeVaultData=False|IncludeAlternatives=False|ShowExportOptions=True|TemplateFilename=BOM Simple.XLT|BatchMode=5|FormWidth=1292|FormHeight=650|SupplierProdQty=1|SupplierAutoQty=False|SupplierUseCachedPricing=False|SupplierCurrency=<none>
+Configuration1_Item3=OpenExported=False|AddToProject=False|ForceFit=False|NotFitted=True|Database=False|DatabasePriority=False|IncludePCBData=False|IncludeVaultData=False|IncludeAlternatives=False|ShowExportOptions=True|TemplateFilename=BOM Default Template 95.xlt|BatchMode=5|FormWidth=1292|FormHeight=658|SupplierProdQty=1|SupplierAutoQty=False|SupplierUseCachedPricing=False|SupplierCurrency=<none>
 Configuration1_Name4=GroupOrder
-Configuration1_Item4=Comment=True|Footprint=True
+Configuration1_Item4=Fitted=True|Comment=True|Footprint=True
 Configuration1_Name5=SortOrder
-Configuration1_Item5=Designator=Up|Comment=Up|Footprint=Up
+Configuration1_Item5=Fitted=Up|Designator=Up|Comment=Up|Footprint=Up
 Configuration1_Name6=VisibleOrder
-Configuration1_Item6=Comment=82|Description=103|Designator=67|Footprint=78|LibRef=81|Manufacturer Part Number 1=157|Supplier1=47|Quantity=35
+Configuration1_Item6=Fitted=100|Comment=116|Description=159|Designator=44|Footprint=51|LibRef=53|Quantity=23
 OutputType2=ComponentCrossReference
 OutputName2=Component Cross Reference Report
 OutputDocumentPath2=
@@ -874,6 +882,8 @@ OutputName5=Simple BOM
 OutputDocumentPath5=
 OutputVariantName5=[No Variations]
 OutputDefault5=0
+Configuration5_Name1=OutputConfigurationParameter1
+Configuration5_Item1=Record=SimpleBOMView|SimpleBOMMode=0
 OutputType6=SinglePinNetReporter
 OutputName6=Report Single Pin Nets
 OutputDocumentPath6=
