@@ -348,17 +348,14 @@ DocumentUniqueId=SYBEOQJF
 Description=BASECONFIG
 AllowFabrication=0
 ParameterCount=0
-VariationCount=10
+VariationCount=7
 Variation1=Designator=R3|UniqueId=\KYHGIUFN\QQEPXEWV|Kind=1|AlternatePart= 
 Variation2=Designator=R1|UniqueId=\KYHGIUFN\JOGCFHWF|Kind=1|AlternatePart= 
 Variation3=Designator=X7|UniqueId=\BTCRDFXT\TXVNFKLB|Kind=1|AlternatePart= 
 Variation4=Designator=X5|UniqueId=\BTCRDFXT\PMWQOPFQ|Kind=1|AlternatePart= 
 Variation5=Designator=X20|UniqueId=\SBYQOPVN\VVFLNOKX|Kind=1|AlternatePart= 
 Variation6=Designator=XS2|UniqueId=\SBYQOPVN\OJGNSGIA|Kind=1|AlternatePart= 
-Variation7=Designator=R33|UniqueId=\SBYQOPVN\TYAQXAGJ|Kind=1|AlternatePart= 
-Variation8=Designator=R34|UniqueId=\SBYQOPVN\CMXQKQRG|Kind=1|AlternatePart= 
-Variation9=Designator=R32|UniqueId=\SBYQOPVN\OWCBHRYW|Kind=1|AlternatePart= 
-Variation10=Designator=U8|UniqueId=\FXHLQWHP\UVJYMQOQ|Kind=1|AlternatePart= 
+Variation7=Designator=U8|UniqueId=\FXHLQWHP\UVJYMQOQ|Kind=1|AlternatePart= 
 ParamVariationCount=0
 
 [GeneratedDocument1]
@@ -370,90 +367,82 @@ DocumentPath=Project Outputs for EEar01\EEar01.1
 DItemRevisionGUID=
 
 [GeneratedDocument3]
-DocumentPath=Project Outputs for EEar01\EEar01.BOM
-DItemRevisionGUID=
-
-[GeneratedDocument4]
-DocumentPath=Project Outputs for EEar01\EEar01.CSV
-DItemRevisionGUID=
-
-[GeneratedDocument5]
 DocumentPath=Project Outputs for EEar01\EEar01.DRR
 DItemRevisionGUID=
 
-[GeneratedDocument6]
+[GeneratedDocument4]
 DocumentPath=Project Outputs for EEar01\EEar01.EXTREP
 DItemRevisionGUID=
 
-[GeneratedDocument7]
+[GeneratedDocument5]
 DocumentPath=Project Outputs for EEar01\EEar01.GBL
 DItemRevisionGUID=
 
-[GeneratedDocument8]
+[GeneratedDocument6]
 DocumentPath=Project Outputs for EEar01\EEar01.GBO
 DItemRevisionGUID=
 
-[GeneratedDocument9]
+[GeneratedDocument7]
 DocumentPath=Project Outputs for EEar01\EEar01.GBP
 DItemRevisionGUID=
 
-[GeneratedDocument10]
+[GeneratedDocument8]
 DocumentPath=Project Outputs for EEar01\EEar01.GBS
 DItemRevisionGUID=
 
-[GeneratedDocument11]
+[GeneratedDocument9]
 DocumentPath=Project Outputs for EEar01\EEar01.GKO
 DItemRevisionGUID=
 
-[GeneratedDocument12]
+[GeneratedDocument10]
 DocumentPath=Project Outputs for EEar01\EEar01.GM1
 DItemRevisionGUID=
 
-[GeneratedDocument13]
+[GeneratedDocument11]
 DocumentPath=Project Outputs for EEar01\EEar01.GM13
 DItemRevisionGUID=
 
-[GeneratedDocument14]
+[GeneratedDocument12]
 DocumentPath=Project Outputs for EEar01\EEar01.GM15
 DItemRevisionGUID=
 
-[GeneratedDocument15]
+[GeneratedDocument13]
 DocumentPath=Project Outputs for EEar01\EEar01.GM29
 DItemRevisionGUID=
 
-[GeneratedDocument16]
+[GeneratedDocument14]
 DocumentPath=Project Outputs for EEar01\EEar01.GML
 DItemRevisionGUID=
 
-[GeneratedDocument17]
+[GeneratedDocument15]
 DocumentPath=Project Outputs for EEar01\EEar01.GTL
 DItemRevisionGUID=
 
-[GeneratedDocument18]
+[GeneratedDocument16]
 DocumentPath=Project Outputs for EEar01\EEar01.GTO
 DItemRevisionGUID=
 
-[GeneratedDocument19]
+[GeneratedDocument17]
 DocumentPath=Project Outputs for EEar01\EEar01.GTP
 DItemRevisionGUID=
 
-[GeneratedDocument20]
+[GeneratedDocument18]
 DocumentPath=Project Outputs for EEar01\EEar01.GTS
 DItemRevisionGUID=
 
-[GeneratedDocument21]
+[GeneratedDocument19]
 DocumentPath=Project Outputs for EEar01\EEar01.LDP
 DItemRevisionGUID=
 
-[GeneratedDocument22]
+[GeneratedDocument20]
 DocumentPath=Project Outputs for EEar01\EEar01.REP
 DItemRevisionGUID=
 
-[GeneratedDocument23]
+[GeneratedDocument21]
 DocumentPath=Project Outputs for EEar01\EEar01.RUL
 DItemRevisionGUID=
 
-[GeneratedDocument24]
+[GeneratedDocument22]
 DocumentPath=Project Outputs for EEar01\EEar01.TXT
 DItemRevisionGUID=
 
@@ -708,7 +697,7 @@ PageOptions18=Record=PageOptions|CenterHorizontal=True|CenterVertical=True|Print
 [OutputGroup4]
 Name=Assembly Outputs
 Description=
-TargetPrinter=Win2PDF
+TargetPrinter=CutePDF Writer
 PrinterOptions=Record=PrinterOptions|Copies=1|Duplex=1|TrueTypeOptions=3|Collate=1|PrintJobKind=1|PrintWhat=1
 OutputType1=Assembly
 OutputName1=Assembly Drawings
