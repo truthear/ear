@@ -42,6 +42,7 @@ static const PinMap PinMap_UART_TX[] = {
     {PA_11, UART_6, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF8_USART6)},
     {PB_6,  UART_1, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF7_USART1)},
     {PC_6,  UART_6, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF8_USART6)},
+    {PB_10, UART_3, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF7_USART3)},
     {NC,    NC,     0}
 };
 
@@ -51,10 +52,11 @@ static const PinMap PinMap_UART_RX[] = {
     {PA_12, UART_6, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF8_USART6)},
     {PB_7,  UART_1, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF7_USART1)},
     {PC_7,  UART_6, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF8_USART6)},
+    {PB_11, UART_3, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF7_USART3)},
     {NC,    NC,     0}
 };
 
-#define UART_NUM (3)
+#define UART_NUM (4)
 
 static uint32_t serial_irq_ids[UART_NUM] = {0, 0, 0};
 
@@ -100,6 +102,10 @@ void serial_init(serial_t *obj, PinName tx, PinName rx) {
         __USART6_CLK_ENABLE();
         obj->index = 2;
     }
+    if (obj->uart == UART_3) {
+        __USART3_CLK_ENABLE();
+        obj->index = 3;
+    }
     
     // Configure the UART pins
     pinmap_pinout(tx, PinMap_UART_TX);
@@ -142,6 +148,11 @@ void serial_free(serial_t *obj) {
         __USART6_FORCE_RESET();
         __USART6_RELEASE_RESET();
         __USART6_CLK_DISABLE();
+    }
+    if (obj->uart == UART_3) {
+        __USART3_FORCE_RESET();
+        __USART3_RELEASE_RESET();
+        __USART3_CLK_DISABLE();
     }
 
     // Configure GPIOs
@@ -213,6 +224,9 @@ static void uart2_irq(void) {
 static void uart6_irq(void) {
     uart_irq(UART_6, 2);
 }
+static void uart3_irq(void) {
+    uart_irq(UART_3, 3);
+}
 
 void serial_irq_handler(serial_t *obj, uart_irq_handler handler, uint32_t id) {
     irq_handler = handler;
@@ -238,6 +252,11 @@ void serial_irq_set(serial_t *obj, SerialIrq irq, uint32_t enable) {
     if (obj->uart == UART_6) {
       irq_n = USART6_IRQn;
       vector = (uint32_t)&uart6_irq;
+    }
+
+    if (obj->uart == UART_3) {
+      irq_n = USART3_IRQn;
+      vector = (uint32_t)&uart3_irq;
     }
     
     if (enable) {

@@ -19,13 +19,13 @@ $ENV{'PATH'}     = "$cpath:$stlink_path:$arm_path";
 
 if ($ARGV[0] eq "b")
 {
-	system("$stlink_path/st-flash write bin/outp.hex 0x8000000");
+	system("$stlink_path/st-flash write bin/outp.bin 0x8000000");
 	exit();
 }
 if ($ARGV[0] eq "r")
 {
 	system("make");
-	system("$stlink_path/st-flash write bin/outp.hex 0x8000000");
+	system("$stlink_path/st-flash write bin/outp.bin 0x8000000");
 	exit();
 }
 system("make");
