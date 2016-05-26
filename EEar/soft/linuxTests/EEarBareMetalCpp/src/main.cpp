@@ -28,15 +28,15 @@ int main() {
 
     pc.baud(9600);
 
-    pc.printf("C++ Hello World %d",1234);
+    pc.printf("C++ Hello World  %d",1234);
     gsmReset = 0;
     while(1) {
         myled = 1;
         wait(0.5);
-	       pc.printf("+");
+	       //pc.printf("+");
         myled = 0;
         wait(0.5);
-	       pc.printf("-");
+	      // pc.printf("-");
     }
 }
 
