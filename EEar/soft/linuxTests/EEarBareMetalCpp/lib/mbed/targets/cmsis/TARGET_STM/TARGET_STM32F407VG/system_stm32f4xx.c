@@ -83,7 +83,7 @@
 #include "hal_tick.h"
 
 #if !defined  (HSE_VALUE) 
-  #define HSE_VALUE    ((uint32_t)8000000) /*!< Default value of the External oscillator in Hz */
+  #define HSE_VALUE    ((uint32_t)25000000) /*!< Default value of the External oscillator in Hz */
 #endif /* HSE_VALUE */
 
 #if !defined  (HSI_VALUE)
@@ -228,7 +228,7 @@ void SystemInit(void)
 #endif
 
   /* Configure the Cube driver */
-  SystemCoreClock = 16000000; // At this stage the HSI is used as system clock
+  SystemCoreClock = 25000000; // At this stage the HSI is used as system clock
   HAL_Init();
 
   /* Configure the System clock source, PLL Multiplier and Divider factors,
@@ -611,7 +611,7 @@ uint8_t SetSysClock_PLL_HSE(uint8_t bypass)
 RCC_OscInitStruct.HSIState            = RCC_HSI_OFF;
   RCC_OscInitStruct.PLL.PLLState        = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource       = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLM            = 8;             // VCO input clock = 1 MHz (8 MHz / 8)
+  RCC_OscInitStruct.PLL.PLLM            = 25;             // VCO input clock = 1 MHz (8 MHz / 8)
   RCC_OscInitStruct.PLL.PLLN            = 336;           // VCO output clock = 336 MHz (1 MHz * 336)
   RCC_OscInitStruct.PLL.PLLP            = RCC_PLLP_DIV2; // PLLCLK = 168 MHz (336 MHz / 2)
   RCC_OscInitStruct.PLL.PLLQ            = 7;             // USB clock = 48 MHz (336 MHz / 7) --> OK for USB

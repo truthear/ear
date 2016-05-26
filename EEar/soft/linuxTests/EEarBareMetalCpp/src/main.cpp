@@ -11,11 +11,7 @@
   *
   * Note: Make sure that jumpers JP1 and JP2 are fitted on the Base Board.
   *
-  * This project shows how to retarget STDIO by
-  *  1. patching PeripheralNames.h (see patchfile),
-  *  2. enabling DEVICE_SERIAL (see Makefile),
-  *  3. redefining STDIO_UART_TX, STDIO_UART_RX, STDIO_UART values to
-  *     pins PC_6, PC_7, UART_6, respectively (see Makefile).
+  * This example is based on http://developer.mbed.org/handbook/Serial
   *
   * @param  None
   * @retval None
@@ -25,18 +21,22 @@
 using namespace mbed;
  
 DigitalOut myled(LED1);
+DigitalOut gsmReset(GSM_RESET);
+Serial pc(PB_10, PB_11); // tx, rx
  
 int main() {
 
+    pc.baud(9600);
+
+    pc.printf("C++ Hello World %d",1234);
+    gsmReset = 0;
     while(1) {
         myled = 1;
         wait(0.5);
-	printf("+");
-	fflush(stdout);
+	       pc.printf("+");
         myled = 0;
         wait(0.5);
-	printf("-");
-	fflush(stdout);
+	       pc.printf("-");
     }
 }
 

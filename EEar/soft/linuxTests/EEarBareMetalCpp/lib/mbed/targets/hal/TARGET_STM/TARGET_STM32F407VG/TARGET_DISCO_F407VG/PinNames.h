@@ -245,6 +245,8 @@ typedef enum {
     D15         = PB_8,
 */
     // Generic signals namings
+    GSM_RESET   = PB_0,
+    GSM_PWR_OK  = PB_1,
     LED1        = PD_13,
     LED2        = PD_12,
     LED3        = PD_13,
