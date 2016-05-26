@@ -88,7 +88,7 @@ debug: release
 release: $(BINDIR)/$(BINHEX)
 
 $(BINDIR)/$(BINHEX): $(BINDIR)/$(BINELF)
-	$(CP) -O ihex $< $@
+	$(CP) -O binary $< $@
 	@echo "Objcopy from ELF to IHEX complete!\n"
 
 $(BINDIR)/$(BINELF): $(OBJECTS)
