@@ -17,26 +17,54 @@
   * @retval None
   */
 #include "mbed.h"
-
+#include <vector>
 using namespace mbed;
  
-DigitalOut myled(LED1);
-DigitalOut gsmReset(GSM_RESET);
-Serial pc(PB_10, PB_11); // tx, rx
+DigitalOut myled1(LED1);
+DigitalOut myled2(LED2);
+DigitalOut myled3(LED3);
+DigitalOut myled4(LED4);
+DigitalOut gsmReset(GSM_RESET,0);
+
+DigitalIn  gsmPowerOk(GSM_PWR_OK);
+DigitalIn  btn1(PD_9);
+DigitalIn  btn2(PD_10);
+DigitalIn  btn3(PD_11);
+DigitalIn  pps(PC_13);
+
+Serial debug (PB_10, PB_11); // tx, rx
+Serial gps(PB_6, PB_7); // tx, rx
+Serial gsm(PD_5, PD_6); // tx, rx
  
+
+
 int main() {
 
-    pc.baud(9600);
+    gsm.baud(9600);
+    gps.baud(9600);
+    debug.baud(115200);
 
-    pc.printf("C++ Hello World  %d",1234);
-    gsmReset = 0;
+    debug.printf("\n\rC++ Hello World1  %x",0xdeadbeef);
+
+    gsm.attach([](){
+      debug.putc(gsm.getc());
+    });
+
+    gps.attach([](){
+      debug.putc(gps.getc());
+    });
+
+    debug.attach([](){
+      if (debug.getc() == 'a') gsm.printf("AT\r"); // test for modem OK
+    });
+
     while(1) {
-        myled = 1;
-        wait(0.5);
-	       //pc.printf("+");
-        myled = 0;
-        wait(0.5);
-	      // pc.printf("-");
+        myled1   = !btn1;
+        myled2   = !btn2;
+        myled3   = !btn3;
+        myled4   = pps;
+        gsmReset = !btn1;
+
     }
 }
 

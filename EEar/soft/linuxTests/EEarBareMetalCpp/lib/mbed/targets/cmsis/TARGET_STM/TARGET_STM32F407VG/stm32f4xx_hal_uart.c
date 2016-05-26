@@ -1853,34 +1853,31 @@ static void UART_SetConfig(UART_HandleTypeDef *huart)
   /* Write to USART CR3 */
   huart->Instance->CR3 = (uint32_t)tmpreg;
   
-  // TODO  ALEX : remove hardcode to 9600 bps magic number 
-  // with appropriate correct universal initialization
-  huart->Instance->BRR = 4375;
   /* Check the Over Sampling */
-  //if(huart->Init.OverSampling == UART_OVERSAMPLING_8)
-  //{
-  //  /*-------------------------- USART BRR Configuration ---------------------*/
-  //  if((huart->Instance == USART1) || (huart->Instance == USART6) || (huart->Instance == USART3))
-  //  {
-  //    huart->Instance->BRR = __UART_BRR_SAMPLING8(HAL_RCC_GetPCLK2Freq(), huart->Init.BaudRate);
-  //  }
-  //  else
-  //  {
-  //    huart->Instance->BRR = __UART_BRR_SAMPLING8(HAL_RCC_GetPCLK1Freq(), huart->Init.BaudRate);
-  //  }
-  //}
-  //else
-  //{
-  //  /*-------------------------- USART BRR Configuration ---------------------*/
-  //  if((huart->Instance == USART1) || (huart->Instance == USART6) || (huart->Instance == USART3))
-  //  {
-  //    huart->Instance->BRR = __UART_BRR_SAMPLING16(HAL_RCC_GetPCLK2Freq(), huart->Init.BaudRate);
-  //  }
-  //  else
-  //  {
-  //    huart->Instance->BRR = __UART_BRR_SAMPLING16(HAL_RCC_GetPCLK1Freq(), huart->Init.BaudRate);
-  //  }
-  //}
+  if(huart->Init.OverSampling == UART_OVERSAMPLING_8)
+  {
+    /*-------------------------- USART BRR Configuration ---------------------*/
+    if((huart->Instance == USART1) || (huart->Instance == USART6))
+    {
+      huart->Instance->BRR = __UART_BRR_SAMPLING8(HAL_RCC_GetPCLK2Freq(), huart->Init.BaudRate);
+    }
+    else
+    {
+      huart->Instance->BRR = __UART_BRR_SAMPLING8(HAL_RCC_GetPCLK1Freq(), huart->Init.BaudRate);
+    }
+  }
+  else
+  {
+    /*-------------------------- USART BRR Configuration ---------------------*/
+    if((huart->Instance == USART1) || (huart->Instance == USART6))
+    {
+      huart->Instance->BRR = __UART_BRR_SAMPLING16(HAL_RCC_GetPCLK2Freq(), huart->Init.BaudRate);
+    }
+    else
+    {
+      huart->Instance->BRR = __UART_BRR_SAMPLING16(HAL_RCC_GetPCLK1Freq(), huart->Init.BaudRate);
+    }
+  }
 }
 
 /**
