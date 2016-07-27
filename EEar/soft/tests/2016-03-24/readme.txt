@@ -1,1 +1,0 @@
-transport GSM<-->DEBUG

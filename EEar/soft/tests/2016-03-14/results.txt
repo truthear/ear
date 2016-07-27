@@ -1,4 +1,0 @@
-25MHz_HSE.bin - Led D4 indicate 1 HZ
-25MHz_LSE.bin - Led D2 indicate 1 HZ 
-25MHz_LSI.bin - no led indications - not work
-25MHz_ticks.bin - Led D3 indicate 1 HZ 
