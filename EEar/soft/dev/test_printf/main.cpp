@@ -2,7 +2,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx.h"
 #include <stdio.h>
-#include <stdarg.h>
+//#include <stdarg.h>
 //#include <stdlib.h>
 //#include <vector>
 #include "dbg_uart.h"
@@ -19,17 +19,17 @@ void delay_ms_not_strict(uint32_t ms)
 }
 
 
+
 int main(void)
 {
   InitUART3();
 
-  
+  RCC_ClocksTypeDef clk;
+  RCC_GetClocksFreq(&clk);
   
   while (1)
   {
-    double f = 0;
-    sscanf("111.222","%lf",&f);
-    printf("%08X %08X %lf\n",*(reinterpret_cast<unsigned*>(&f)+0),*(reinterpret_cast<unsigned*>(&f)+1),f);
+    printf("%u %u %u %u\n",(unsigned)clk.SYSCLK_Frequency,(unsigned)clk.HCLK_Frequency,(unsigned)clk.PCLK1_Frequency,(unsigned)clk.PCLK2_Frequency);
 
     delay_ms_not_strict(1000);
   }

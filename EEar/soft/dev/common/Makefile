@@ -45,9 +45,9 @@ LIBS=
 
 LDSCRIPT=$(OUR_COMMON)/stm32_flash.ld
 
-INCLUDE_DIRS=-I. -I$(OUR_COMMON) -I$(CMSIS_COMMON)/Include -I$(CMSIS_COMMON)/Device/ST/STM32F4xx/Include -I$(DRV_COMMON)/inc
+INCLUDE_DIRS=-I$(OUR_COMMON) -I$(CMSIS_COMMON)/Include -I$(CMSIS_COMMON)/Device/ST/STM32F4xx/Include -I$(DRV_COMMON)/inc
 HSE_VALUE=25000000
-DEFS=-DSTM32F40_41xxx -DUSE_STDPERIPH_DRIVER -DHSE_VALUE=$(HSE_VALUE)
+DEFS=-DSTM32F40_41xxx -DUSE_STDPERIPH_DRIVER -DHSE_VALUE=$(HSE_VALUE) -DNDEBUG
 MCFLAGS=-mcpu=cortex-m4 -mlittle-endian -mthumb -mthumb-interwork -mfloat-abi=softfp -mfpu=fpv4-sp-d16
 WARNINGS=-Wall
 CODEGENFLAGS=-Os -fno-strict-aliasing -fno-exceptions -fstack-check=no
