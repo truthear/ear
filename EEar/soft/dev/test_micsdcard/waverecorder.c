@@ -1,7 +1,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "waverecorder.h" 
-#include "./pdm/pdm_filter.h"
+#include "pdm/pdm_filter.h"
 #include <stddef.h>
 #include <string.h>
 
