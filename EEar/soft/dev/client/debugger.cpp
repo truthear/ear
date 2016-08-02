@@ -27,17 +27,17 @@ void CDebugger::PutChar(unsigned char c)
 }
 
 
-///////////////////////////////
+///////////////////////////
 
 
 #define MAX_PRINTF_STR_SIZE 1024   // uses stack memory!
 
 
 extern "C"
-int _EXFUN(printf,(const char * __restrict pFormat, ...))
+int _EXFUN(printf, (const char* __restrict pFormat, ...))
 {
   int result = 0;
-
+  
   char pStr[MAX_PRINTF_STR_SIZE];
 
   pStr[0] = 0;
@@ -66,6 +66,9 @@ int _EXFUN(printf,(const char * __restrict pFormat, ...))
 
   return result;
 }
+
+
+
 
 
 

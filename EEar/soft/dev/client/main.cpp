@@ -104,27 +104,60 @@ void OnButton(void *p)
 
 int main()
 {
-  InitTBuff(&debug2device);
-  InitTBuff(&device2debug);
+//  InitTBuff(&debug2device);
+//  InitTBuff(&device2debug);
   
   CSysTicks::Init();
   CCPUTicks::Init();
 
-  CBoardLED led(BOARD_LED4);
 
-  const int rate = 9600;
+//  const int rate = 9600;
   
-  CUART *dev = new CBoardUART(BOARD_UART_GSM,rate,true,true,OnUARTRecvByte,(void*)&device2debug);
-  CUART *dbg = new CBoardUART(BOARD_UART_DEBUG,rate,true,true,OnUARTRecvByte,(void*)&debug2device);
-  //CDebugger::Init();
+//  CUART *dev = new CBoardUART(BOARD_UART_GSM,rate,true,true,OnUARTRecvByte,(void*)&device2debug);
+//  CUART *dbg = new CBoardUART(BOARD_UART_DEBUG,rate,true,true,OnUARTRecvByte,(void*)&debug2device);
+  CDebugger::Init();
 
-  //new CBoardButton(BOARD_BUTTON1,OnButton,dev);
+  CBoardButton btn(BOARD_BUTTON1);
   //new CBoardButton(BOARD_BUTTON2,OnButton,new CBoardLED(BOARD_LED2));
   //new CBoardButton(BOARD_BUTTON3,OnButton,new CBoardLED(BOARD_LED3));
 
+
+  if ( !CBoardRTC::Init() )
+     {
+       CBoardLED(BOARD_LED1).On();
+       CBoardLED(BOARD_LED2).On();
+       CBoardLED(BOARD_LED3).On();
+       CBoardLED(BOARD_LED4).On();
+       CSysTicks::DelayInfinite();
+     }
+
+  CBoardRTC::SetTime(16,12,31,RTC_Weekday_Saturday,23,59,05);
+
+  CBoardLED led1(BOARD_LED4);
+  CBoardLED led2(BOARD_LED3);
+
   while (1)
   {
-    SendByte(dev,&debug2device);
-    SendByte(dbg,&device2debug);
+    if ( !btn.IsDown() )
+       {
+         char yy,mm,dd,wd,hh,nn,ss;
+         int subs;
+
+         if ( CBoardRTC::GetTS(yy,mm,dd,wd,hh,nn,ss,subs) )
+            {
+              printf("TS Event(!): 20%02d-%02d-%02d(%d) %02d:%02d:%02d.%03d\n",yy,mm,dd,wd,hh,nn,ss,CBoardRTC::SS2MS(subs));
+              led2.On();
+            }
+
+         CBoardRTC::GetTime(yy,mm,dd,wd,hh,nn,ss,subs);
+
+         OURTIME ot = ConvertOurTime(yy+2000,mm,dd,hh,nn,ss,CBoardRTC::SS2MS(subs));
+         char s[100];
+         OurTimeToString(ot,s);
+         printf("             %s [%4d]\n",s,subs);
+       }
+
+    CSysTicks::Delay(100);
+    led1.Toggle();
   }
 }
