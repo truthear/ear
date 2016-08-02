@@ -1,0 +1,28 @@
+Output: Gerber Files
+Type  : Gerber
+From  : Variant [[No Variations]] of Project [EEar02.PrjPcb]
+   Generated File[EEar02.GTL]
+   Generated File[EEar02.GBL]
+   Generated File[EEar02.GTP]
+   Generated File[EEar02.GTO]
+   Generated File[EEar02.GTS]
+   Generated File[EEar02.GBS]
+   Generated File[EEar02.GBO]
+   Generated File[EEar02.GBP]
+   Generated File[EEar02.GKO]
+   Generated File[EEar02.GM1]
+   Generated File[EEar02.GM13]
+   Generated File[EEar02.GM15]
+   Generated File[EEar02.GM29]
+   Generated File[EEar02.GM30]
+   Generated File[EEar02.GML]
+   Generated File[EEar02.1]
+   Generated File[EEar02.RUL]
+   Generated File[EEar02.EXTREP]
+   Generated File[EEar02.REP]
+
+
+Files Generated   : 19
+Documents Printed : 0
+
+Finished Output Generation At 19:43:07 On 02.08.2016

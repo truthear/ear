@@ -1,0 +1,21 @@
+----------------------------------------------------------------------------------------------------------------------------------
+NCDrill File Report For: EEar02.PcbDoc   02.08.2016  19:42:46
+----------------------------------------------------------------------------------------------------------------------------------
+
+Layer Pair : Top Layer to Bottom Layer
+ASCII RoundHoles File : EEar02.TXT
+
+Tool       Hole Size               Hole Tolerance               Hole Type       Hole Count   Plated         Tool Travel
+----------------------------------------------------------------------------------------------------------------------------------
+T1      0.5mm (20mil)                                             Round             1041      PTH        3953.04mm (155.63inch)
+T2      0.9mm (35mil)                                             Round             10        PTH        106.27mm (4.18inch)
+T3      1mm (39mil)                                               Round             25        PTH        343.34mm (13.52inch)
+T4      1.1mm (43mil)                                             Round             20        PTH        161.86mm (6.37inch)
+T5      1.3mm (51mil)                                             Round             4         PTH        157.46mm (6.20inch)
+T6      1.5mm (59mil)                                             Round             1         PTH        0.00mm (0.00inch)
+T7      1.8mm (71mil)                                             Round             4         PTH        15.24mm (0.60inch)
+T8      3.2mm (126mil)                                            Round             6         PTH        365.10mm (14.37inch)
+----------------------------------------------------------------------------------------------------------------------------------
+Totals                                                                              1111
+
+Total Processing Time (hh:mm:ss) : 00:00:01
