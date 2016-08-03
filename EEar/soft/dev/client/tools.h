@@ -3,6 +3,12 @@
 #define __TOOLS_H__
 
 
+#define MAX(a,b)   ((a)>(b)?(a):(b))
+#define MIN(a,b)   ((a)<(b)?(a):(b))
+
+#define CLEAROBJ(o)   memset(&(o),0,sizeof(o))
+
+
 typedef long long OURTIME;   // time_t*1000+msec
 
 

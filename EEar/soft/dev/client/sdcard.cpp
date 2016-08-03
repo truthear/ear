@@ -33,7 +33,7 @@ bool CSDCard::InitCard()
 }
 
 
-uint64_t CSDCard::GetCardCapacity()
+unsigned long long CSDCard::GetCardCapacity()
 {
   SD_CardInfo i;
   return (b_init_ok && SD_GetCardInfo(&i) == SD_OK ? i.CardCapacity : 0);

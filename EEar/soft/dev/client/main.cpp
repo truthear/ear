@@ -213,22 +213,57 @@ int main()
     }
 
     printf("--- test begin ---\n");
-    TestSectorRW(29296870);
-    TestSectorRW(29296875*2);
-    TestSectorRW(29296825);
+    //TestSectorRW(29296870);
+    //TestSectorRW(29296875*2);
+    //TestSectorRW(29296825);
+    //TestSectorR(1234);
+    //TestSectorR(1239);
+    //TestSectorR(1239);
+    //TestSectorRW(29296870);
+    //TestSectorR(29296870);
+    //TestSectorR(29296870);
+    //TestSectorR(29296870*2);
+    //TestSectorR(1249);
+    //TestSectorRW(2249);
+
+    FATFS ffs;
+    CLEAROBJ(ffs);
+    f_mount(&ffs,"0:",1);  // should always succeed in our case
     
-    TestSectorR(1234);
-    TestSectorR(1239);
-    TestSectorR(1239);
-    TestSectorRW(29296870);
-    TestSectorR(29296870);
-    TestSectorR(29296870);
-    TestSectorR(29296870*2);
-    TestSectorR(1249);
-    TestSectorRW(2249);
+    {
+      FIL f;
+      if ( f_open(&f,"data.raw",FA_WRITE|FA_CREATE_ALWAYS) == FR_OK )
+         {
+           printf("Writting data... Push button to stop.\n");
+           
+           static char buff[60000];
+           memset(buff,1,sizeof(buff));
+
+           while (!btn.IsDown()) 
+           {
+             UINT bw = 0;
+             if ( f_write(&f,buff,sizeof(buff),&bw) == FR_OK && bw == sizeof(buff) )
+              {}
+             else
+              {
+                printf("f_write failed\n");
+                break;
+              }
+           }
+
+           printf("Stopped\n");
+
+          f_close(&f);
+         }
+      else
+        printf("f_open() failed\n");
+
+    }
+
+    
     printf("--- test end ---\n");
     
-    while (!btn.IsDown()) {}
+    while (1){}
   }
 
 
