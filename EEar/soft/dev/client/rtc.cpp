@@ -3,8 +3,14 @@
 
 
 
-bool CRTC::InitRTC(ERtcClk clk,int subseconds_bits)
+volatile OURTIME CRTC::m_shift = 0;
+
+
+
+bool CRTC::Init(char yy,char mm,char dd,char wd,char hh,char nn,char ss)
 {
+  bool rc = false;
+
   // Enable the PWR clock
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
 
@@ -15,18 +21,10 @@ bool CRTC::InitRTC(ERtcClk clk,int subseconds_bits)
   RCC_BackupResetCmd(ENABLE);
   RCC_BackupResetCmd(DISABLE);
   
-  if ( clk == RTC_CLKSEL_INTERNAL )
-     {
-       RCC_LSICmd(ENABLE);
-       while(RCC_GetFlagStatus(RCC_FLAG_LSIRDY) == RESET) {}
-       RCC_RTCCLKConfig(RCC_RTCCLKSource_LSI);
-     }
-  else
-     {
-       RCC_LSEConfig(RCC_LSE_ON);
-       while(RCC_GetFlagStatus(RCC_FLAG_LSERDY) == RESET) {}
-       RCC_RTCCLKConfig(RCC_RTCCLKSource_LSE);
-     }
+  // Init LSE
+  RCC_LSEConfig(RCC_LSE_ON);
+  while(RCC_GetFlagStatus(RCC_FLAG_LSERDY) == RESET) {}
+  RCC_RTCCLKConfig(RCC_RTCCLKSource_LSE);
 
   // Enable the RTC Clock
   RCC_RTCCLKCmd(ENABLE);
@@ -35,50 +33,76 @@ bool CRTC::InitRTC(ERtcClk clk,int subseconds_bits)
   RTC_WaitForSynchro();
 
   RTC_InitTypeDef RTC_InitStruct;
-  RTC_InitStruct.RTC_AsynchPrediv = (1UL << (15-subseconds_bits)) - 1;
-  RTC_InitStruct.RTC_SynchPrediv  = (1UL << subseconds_bits) - 1;
+  RTC_InitStruct.RTC_AsynchPrediv = (1UL << (15-SUBSECONDS_BITS)) - 1;
+  RTC_InitStruct.RTC_SynchPrediv  = (1UL << SUBSECONDS_BITS) - 1;
   RTC_InitStruct.RTC_HourFormat = RTC_HourFormat_24;
-  return (RTC_Init(&RTC_InitStruct) == SUCCESS);
-}
 
-
-void CRTC::InitTimeStamp(uint32_t ts_pin,uint32_t ts_edge)
-{
-  RTC_TimeStampPinSelection(ts_pin);
-  RTC_ClearFlag(RTC_FLAG_TSF|RTC_FLAG_TSOVF);  // clear TS and TS_Overflow flags
-  RTC_TimeStampCmd(ts_edge,ENABLE);
-}
-
-
-bool CRTC::Init()
-{
-  if ( !InitRTC(RTC_CLKSEL_EXTERNAL/*we use LSE*/,SUBSECONDS_BITS) )
+  if ( RTC_Init(&RTC_InitStruct) == SUCCESS )
      {
-       return false;
+       // set date
+       RTC_DateTypeDef RTC_DateStruct;
+       RTC_DateStruct.RTC_Year = yy;
+       RTC_DateStruct.RTC_Month = mm;
+       RTC_DateStruct.RTC_Date = dd;
+       RTC_DateStruct.RTC_WeekDay = wd;
+       RTC_SetDate(RTC_Format_BIN, &RTC_DateStruct);
+
+       // set time
+       RTC_TimeTypeDef RTC_TimeStruct;
+       RTC_TimeStruct.RTC_Hours = hh;
+       RTC_TimeStruct.RTC_Minutes = nn;
+       RTC_TimeStruct.RTC_Seconds = ss;
+       RTC_TimeStruct.RTC_H12 = 0;
+       RTC_SetTime(RTC_Format_BIN, &RTC_TimeStruct);
+       
+       // init timestamp
+       RTC_TimeStampPinSelection(RTC_TimeStampPin_PC13);
+       RTC_ClearFlag(RTC_FLAG_TSF|RTC_FLAG_TSOVF);  // clear TS and TS_Overflow flags
+       RTC_TimeStampCmd(RTC_TimeStampEdge_Rising,ENABLE);
+
+       rc = true;
+     }
+
+  return rc;
+}
+
+
+void CRTC::SetShift(OURTIME shift)
+{
+  m_shift = shift;
+}
+
+
+OURTIME CRTC::GetTime(bool use_shift)
+{
+  char yy,mm,dd,wd,hh,nn,ss;
+  int subsec;
+
+  GetTime(yy,mm,dd,wd,hh,nn,ss,subsec);
+
+  OURTIME t = ConvertOurTime(2000+yy,mm,dd,hh,nn,ss,SS2MS(subsec));
+
+  return use_shift ? t+m_shift : t;
+}
+
+
+bool CRTC::GetTS(OURTIME& _time,bool use_shift)
+{
+  char yy,mm,dd,wd,hh,nn,ss;
+  int subsec;
+
+  if ( GetTS(yy,mm,dd,wd,hh,nn,ss,subsec) )
+     {
+       OURTIME t = ConvertOurTime(2000+yy,mm,dd,hh,nn,ss,SS2MS(subsec));
+
+       _time = use_shift ? t+m_shift : t;
+
+       return true;
      }
   else
      {
-       InitTimeStamp(RTC_TimeStampPin_PC13,RTC_TimeStampEdge_Rising);
-       return true;
+       return false;
      }
-}
-
-
-void CRTC::SetTime(char yy,char mm,char dd,char wd,char hh,char nn,char ss)
-{
-  RTC_DateTypeDef RTC_DateStruct;
-  RTC_DateStruct.RTC_Year = yy;
-  RTC_DateStruct.RTC_Month = mm;
-  RTC_DateStruct.RTC_Date = dd;
-  RTC_DateStruct.RTC_WeekDay = wd;
-  RTC_SetDate(RTC_Format_BIN, &RTC_DateStruct);
-
-  RTC_TimeTypeDef RTC_TimeStruct;
-  RTC_TimeStruct.RTC_Hours = hh;
-  RTC_TimeStruct.RTC_Minutes = nn;
-  RTC_TimeStruct.RTC_Seconds = ss;
-  RTC_TimeStruct.RTC_H12 = 0;
-  RTC_SetTime(RTC_Format_BIN, &RTC_TimeStruct);
 }
 
 
@@ -137,7 +161,7 @@ int CRTC::SS2MS(int subs)
 {
   int mx = (1L << SUBSECONDS_BITS) - 1;
 
-  return ((mx-subs) * 1000) >> SUBSECONDS_BITS;
+  return mx < subs ? 0 : (((mx-subs) * 1000) >> SUBSECONDS_BITS);
 }
 
 
