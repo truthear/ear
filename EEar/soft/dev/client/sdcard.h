@@ -12,7 +12,7 @@ class CSDCard
           
           static bool InitCard(); // can be called many times (for hot-plug support)
 
-          static uint64_t GetCardCapacity();  // in bytes
+          static unsigned long long GetCardCapacity();  // in bytes
           static bool Read(void *buff,unsigned start_sector,unsigned num_sectors);
           static bool Write(const void *buff,unsigned start_sector,unsigned num_sectors);
 };

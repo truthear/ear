@@ -19,6 +19,7 @@
 #include "rtc.h"
 #include "tools.h"
 #include "sdcard.h"
+#include "ff.h"
 
 
 #endif
