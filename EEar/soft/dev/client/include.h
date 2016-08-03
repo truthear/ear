@@ -18,6 +18,7 @@
 #include "debugger.h"
 #include "rtc.h"
 #include "tools.h"
+#include "sdcard.h"
 
 
 #endif

@@ -16,6 +16,7 @@ class CLED
           void On();
           void Off();
           void Toggle();
+          void SetState(bool state);
 };
 
 

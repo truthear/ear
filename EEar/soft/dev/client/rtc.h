@@ -3,7 +3,7 @@
 #define __RTC_H__
 
 
-class CBoardRTC
+class CRTC
 {
           static const int SUBSECONDS_BITS = 10;  // to get 1/1024 sec resolution (min is 8 bits, max is 15)
 

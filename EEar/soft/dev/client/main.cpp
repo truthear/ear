@@ -102,6 +102,62 @@ void OnButton(void *p)
 }
 
 
+void TestSectorRW(unsigned start_sector)
+{
+  const unsigned num_sectors = 4;
+  
+  char data[CSDCard::SECTOR_SIZE*num_sectors];
+  char data2[CSDCard::SECTOR_SIZE*num_sectors];
+  for ( unsigned n = 0; n < sizeof(data); n++ )
+  {
+    data[n] = (char)n;
+  }
+
+  if ( !CSDCard::Write(data,start_sector,num_sectors) )
+     {
+       printf("Write failed\n");
+     }
+  else
+     {
+       if ( !CSDCard::Read(data2,start_sector,num_sectors) )
+          {
+            printf("Read failed\n");
+          }
+       else
+          {
+            if ( memcmp(data,data2,sizeof(data)) == 0 )
+               {
+                 printf("OK!\n");
+               }
+            else
+               {
+                 printf("cmp failed\n");
+               }
+          }
+     }
+}
+
+
+void TestSectorR(unsigned start_sector)
+{
+  const unsigned num_sectors = 4;
+  
+  char data[CSDCard::SECTOR_SIZE*num_sectors];
+
+     {
+       if ( !CSDCard::Read(data,start_sector,num_sectors) )
+          {
+            printf("Read failed\n");
+          }
+       else
+          {
+            printf("OK!\n");
+          }
+     }
+}
+
+
+
 int main()
 {
 //  InitTBuff(&debug2device);
@@ -122,36 +178,76 @@ int main()
   //new CBoardButton(BOARD_BUTTON3,OnButton,new CBoardLED(BOARD_LED3));
 
 
-  if ( !CBoardRTC::Init() )
-     {
-       CBoardLED(BOARD_LED1).On();
-       CBoardLED(BOARD_LED2).On();
-       CBoardLED(BOARD_LED3).On();
-       CBoardLED(BOARD_LED4).On();
-       CSysTicks::DelayInfinite();
-     }
+//  if ( !CRTC::Init() )
+//     {
+//       CBoardLED(BOARD_LED1).On();
+//       CBoardLED(BOARD_LED2).On();
+//       CBoardLED(BOARD_LED3).On();
+//       CBoardLED(BOARD_LED4).On();
+//       CSysTicks::DelayInfinite();
+//     }
 
-  CBoardRTC::SetTime(16,12,31,RTC_Weekday_Saturday,23,59,05);
+//  CRTC::SetTime(16,12,31,RTC_Weekday_Saturday,23,59,05);
 
-  CBoardLED led1(BOARD_LED4);
-  CBoardLED led2(BOARD_LED3);
+  CBoardLED led1(BOARD_LED1);
+  CBoardLED led2(BOARD_LED2);
+  CBoardLED led3(BOARD_LED3);
+  CBoardLED led4(BOARD_LED4);
 
-  while (1)
+  while(1)
+  {
+    while (1)
+    {
+      bool init_ok = CSDCard::InitCard();
+
+      led4.SetState(!init_ok);
+      led1.SetState(init_ok);
+
+      if ( init_ok )
+         {
+           printf("%lld\n",CSDCard::GetCardCapacity());
+           break;
+         }
+
+      CSysTicks::Delay(2000);
+    }
+
+    printf("--- test begin ---\n");
+    TestSectorRW(29296870);
+    TestSectorRW(29296875*2);
+    TestSectorRW(29296825);
+    
+    TestSectorR(1234);
+    TestSectorR(1239);
+    TestSectorR(1239);
+    TestSectorRW(29296870);
+    TestSectorR(29296870);
+    TestSectorR(29296870);
+    TestSectorR(29296870*2);
+    TestSectorR(1249);
+    TestSectorRW(2249);
+    printf("--- test end ---\n");
+    
+    while (!btn.IsDown()) {}
+  }
+
+
+/*  while (1)
   {
     if ( !btn.IsDown() )
        {
          char yy,mm,dd,wd,hh,nn,ss;
          int subs;
 
-         if ( CBoardRTC::GetTS(yy,mm,dd,wd,hh,nn,ss,subs) )
+         if ( CRTC::GetTS(yy,mm,dd,wd,hh,nn,ss,subs) )
             {
-              printf("TS Event(!): 20%02d-%02d-%02d(%d) %02d:%02d:%02d.%03d\n",yy,mm,dd,wd,hh,nn,ss,CBoardRTC::SS2MS(subs));
+              printf("TS Event(!): 20%02d-%02d-%02d(%d) %02d:%02d:%02d.%03d\n",yy,mm,dd,wd,hh,nn,ss,CRTC::SS2MS(subs));
               led2.On();
             }
 
-         CBoardRTC::GetTime(yy,mm,dd,wd,hh,nn,ss,subs);
+         CRTC::GetTime(yy,mm,dd,wd,hh,nn,ss,subs);
 
-         OURTIME ot = ConvertOurTime(yy+2000,mm,dd,hh,nn,ss,CBoardRTC::SS2MS(subs));
+         OURTIME ot = ConvertOurTime(yy+2000,mm,dd,hh,nn,ss,CRTC::SS2MS(subs));
          char s[100];
          OurTimeToString(ot,s);
          printf("             %s [%4d]\n",s,subs);
@@ -159,5 +255,5 @@ int main()
 
     CSysTicks::Delay(100);
     led1.Toggle();
-  }
+  }*/
 }
