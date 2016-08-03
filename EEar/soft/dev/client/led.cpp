@@ -43,6 +43,20 @@ void CLED::Toggle()
 }
 
 
+void CLED::SetState(bool state)
+{ 
+  if ( state ) 
+     {
+       On(); 
+     }
+  else 
+     {
+       Off(); 
+     }
+}
+
+
+
 uint16_t CBoardLED::leds[4] = {GPIO_Pin_12,GPIO_Pin_13,GPIO_Pin_14,GPIO_Pin_15};
 
 CBoardLED::CBoardLED(EBoardLeds led,bool init_on) : CLED(GPIOD,leds[led],RCC_AHB1Periph_GPIOD)

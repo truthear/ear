@@ -3,7 +3,7 @@
 
 
 
-bool CBoardRTC::InitRTC(ERtcClk clk,int subseconds_bits)
+bool CRTC::InitRTC(ERtcClk clk,int subseconds_bits)
 {
   // Enable the PWR clock
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
@@ -42,7 +42,7 @@ bool CBoardRTC::InitRTC(ERtcClk clk,int subseconds_bits)
 }
 
 
-void CBoardRTC::InitTimeStamp(uint32_t ts_pin,uint32_t ts_edge)
+void CRTC::InitTimeStamp(uint32_t ts_pin,uint32_t ts_edge)
 {
   RTC_TimeStampPinSelection(ts_pin);
   RTC_ClearFlag(RTC_FLAG_TSF|RTC_FLAG_TSOVF);  // clear TS and TS_Overflow flags
@@ -50,7 +50,7 @@ void CBoardRTC::InitTimeStamp(uint32_t ts_pin,uint32_t ts_edge)
 }
 
 
-bool CBoardRTC::Init()
+bool CRTC::Init()
 {
   if ( !InitRTC(RTC_CLKSEL_EXTERNAL/*we use LSE*/,SUBSECONDS_BITS) )
      {
@@ -64,7 +64,7 @@ bool CBoardRTC::Init()
 }
 
 
-void CBoardRTC::SetTime(char yy,char mm,char dd,char wd,char hh,char nn,char ss)
+void CRTC::SetTime(char yy,char mm,char dd,char wd,char hh,char nn,char ss)
 {
   RTC_DateTypeDef RTC_DateStruct;
   RTC_DateStruct.RTC_Year = yy;
@@ -82,7 +82,7 @@ void CBoardRTC::SetTime(char yy,char mm,char dd,char wd,char hh,char nn,char ss)
 }
 
 
-void CBoardRTC::GetTime(char& yy,char& mm,char& dd,char& wd,char& hh,char& nn,char& ss,int& subsec)
+void CRTC::GetTime(char& yy,char& mm,char& dd,char& wd,char& hh,char& nn,char& ss,int& subsec)
 {
   subsec = ((uint32_t)(RTC->SSR)) & 0xFFFF;  // after read SSR time/date regs became frozen
 
@@ -101,7 +101,7 @@ void CBoardRTC::GetTime(char& yy,char& mm,char& dd,char& wd,char& hh,char& nn,ch
 }
 
 
-bool CBoardRTC::GetTS(char& yy,char& mm,char& dd,char& wd,char& hh,char& nn,char& ss,int& subsec)
+bool CRTC::GetTS(char& yy,char& mm,char& dd,char& wd,char& hh,char& nn,char& ss,int& subsec)
 {
   if ( RTC_GetFlagStatus(RTC_FLAG_TSF) != RESET )
      {
@@ -133,7 +133,7 @@ bool CBoardRTC::GetTS(char& yy,char& mm,char& dd,char& wd,char& hh,char& nn,char
 }
 
 
-int CBoardRTC::SS2MS(int subs)
+int CRTC::SS2MS(int subs)
 {
   int mx = (1L << SUBSECONDS_BITS) - 1;
 
