@@ -178,16 +178,15 @@ int main()
   //new CBoardButton(BOARD_BUTTON3,OnButton,new CBoardLED(BOARD_LED3));
 
 
-//  if ( !CRTC::Init() )
-//     {
-//       CBoardLED(BOARD_LED1).On();
-//       CBoardLED(BOARD_LED2).On();
-//       CBoardLED(BOARD_LED3).On();
-//       CBoardLED(BOARD_LED4).On();
-//       CSysTicks::DelayInfinite();
-//     }
+  if ( !CRTC::Init(16,12,31,RTC_Weekday_Saturday,23,59,05) )
+     {
+       CBoardLED(BOARD_LED1).On();
+       CBoardLED(BOARD_LED2).On();
+       CBoardLED(BOARD_LED3).On();
+       CBoardLED(BOARD_LED4).On();
+       CSysTicks::DelayInfinite();
+     }
 
-//  CRTC::SetTime(16,12,31,RTC_Weekday_Saturday,23,59,05);
 
   CBoardLED led1(BOARD_LED1);
   CBoardLED led2(BOARD_LED2);
@@ -231,33 +230,11 @@ int main()
     f_mount(&ffs,"0:",1);  // should always succeed in our case
     
     {
-      FIL f;
-      if ( f_open(&f,"data.raw",FA_WRITE|FA_CREATE_ALWAYS) == FR_OK )
-         {
-           printf("Writting data... Push button to stop.\n");
-           
-           static char buff[60000];
-           memset(buff,1,sizeof(buff));
+      CLog log("new_log.txt",true);
 
-           while (!btn.IsDown()) 
-           {
-             UINT bw = 0;
-             if ( f_write(&f,buff,sizeof(buff),&bw) == FR_OK && bw == sizeof(buff) )
-              {}
-             else
-              {
-                printf("f_write failed\n");
-                break;
-              }
-           }
-
-           printf("Stopped\n");
-
-          f_close(&f);
-         }
-      else
-        printf("f_open() failed\n");
-
+      log.Add("Hello %f",123.456);
+      CSysTicks::Delay(1000);
+      log.Add("Hello %f",321.111);
     }
 
     

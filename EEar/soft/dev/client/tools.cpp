@@ -20,7 +20,7 @@ OURTIME ConvertOurTime(int yyyy,int mm,int dd,int hh,int nn,int ss,int msec)
 
   time_t tt = mktime(&t);
 
-  return (OURTIME)tt*1000+msec;
+  return ((OURTIME)(uint32_t)tt)*1000+msec;
 }
 
 
