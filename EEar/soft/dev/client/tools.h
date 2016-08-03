@@ -9,7 +9,7 @@
 #define CLEAROBJ(o)   memset(&(o),0,sizeof(o))
 
 
-typedef long long OURTIME;   // time_t*1000+msec
+typedef signed long long OURTIME;   // time_t*1000+msec, must be signed (because of arithmetic operations)!
 
 
 OURTIME ConvertOurTime(int yyyy,int mm,int dd,int hh,int nn,int ss,int msec);
