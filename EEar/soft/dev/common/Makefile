@@ -50,7 +50,7 @@ HSE_VALUE=25000000
 DEFS=-DSTM32F40_41xxx -DUSE_STDPERIPH_DRIVER -DHSE_VALUE=$(HSE_VALUE) -DNDEBUG
 MCFLAGS=-mcpu=cortex-m4 -mlittle-endian -mthumb -mthumb-interwork -mfloat-abi=softfp -mfpu=fpv4-sp-d16
 WARNINGS=-Wall
-CODEGENFLAGS=-Os -fno-strict-aliasing -fno-exceptions -fstack-check=no -fno-builtin
+CODEGENFLAGS=-Ofast -fno-strict-aliasing -fno-exceptions -fstack-check=no -fno-builtin
 SPECS=--specs=nosys.specs
 
 CFLAGS=-std=c99 $(INCLUDE_DIRS) $(DEFS) $(MCFLAGS) $(WARNINGS) $(CODEGENFLAGS) $(SPECS)
