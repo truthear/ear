@@ -37,7 +37,7 @@ class CCPUTicks : public CTicksCommon
 {
   public:
           static void Init();
-          static unsigned GetCounter();    // in CPU ticks
+          static unsigned GetCounter() { return DWT->CYCCNT; }    // in CPU ticks
           static void Delay(unsigned ms);  // max about ~25000 msec
           static unsigned GetTicksPerSecond();
           static unsigned GetTicksPerMS();

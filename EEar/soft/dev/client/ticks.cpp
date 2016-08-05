@@ -73,13 +73,6 @@ void CCPUTicks::Init()
 }
 
 
-unsigned CCPUTicks::GetCounter()
-{
-  volatile uint32_t *pcnt = &(DWT->CYCCNT);
-  return *pcnt;
-}
-
-
 void CCPUTicks::Delay(unsigned ms)
 {
   if ( ms )
