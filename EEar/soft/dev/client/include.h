@@ -10,7 +10,6 @@
 #include <time.h>
 #include <string>
 #include "stm32f4xx.h"
-#include "gtypes.h"
 #include "tools.h"
 #include "led.h"
 #include "button.h"
@@ -20,6 +19,7 @@
 #include "rtc.h"
 #include "sdcard.h"
 #include "ff.h"
+#include "mic.h"
 #include "log.h"
 
 

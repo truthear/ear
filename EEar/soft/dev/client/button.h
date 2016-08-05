@@ -28,6 +28,10 @@ BOARD_BUTTON3 = 2,
 
 class CBoardButton : public CButton
 {
+  public:
+          typedef void (*TCALLBACK)(void*);
+
+  private:        
           typedef struct {
           TCALLBACK func;
           void *parm;

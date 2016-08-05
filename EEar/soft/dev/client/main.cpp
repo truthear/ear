@@ -1,7 +1,6 @@
 
 #include "include.h"
 
-
 #define MAX_BUFF 4096
 
 typedef struct {
@@ -157,14 +156,50 @@ void TestSectorR(unsigned start_sector)
 }
 
 
+static const int MAX_SAMPLES = CMic::SAMPLE_RATE*2;  // 2 sec
+
+short voice[MAX_SAMPLES];
+volatile int voice_pos = 0;
+
+
+void MicCB(void *led,const int16_t* buff,int num_samples)
+{
+  int sum = 0;
+
+  int dest_pos = voice_pos;
+  
+  for ( int n = 0; n < num_samples; n++ )
+      {
+        short s = buff[n];
+
+        voice[dest_pos+n] = s;
+        
+        if ( s < 0 )
+         s = -s;
+
+        sum += s;
+      }
+
+  dest_pos += num_samples;
+  if ( dest_pos == MAX_SAMPLES )
+   dest_pos = 0;
+  voice_pos = dest_pos;
+      
+  sum /= num_samples;
+  
+  reinterpret_cast<CLED*>(led)->SetState(sum>1000);
+}
+
+
 
 int main()
 {
 //  InitTBuff(&debug2device);
 //  InitTBuff(&device2debug);
   
-  CSysTicks::Init();
   CCPUTicks::Init();
+  CSysTicks::Init();
+
 
 
 //  const int rate = 9600;
@@ -173,19 +208,20 @@ int main()
 //  CUART *dbg = new CBoardUART(BOARD_UART_DEBUG,rate,true,true,OnUARTRecvByte,(void*)&debug2device);
   CDebugger::Init();
 
+
   CBoardButton btn(BOARD_BUTTON1);
   //new CBoardButton(BOARD_BUTTON2,OnButton,new CBoardLED(BOARD_LED2));
   //new CBoardButton(BOARD_BUTTON3,OnButton,new CBoardLED(BOARD_LED3));
 
 
-  if ( !CRTC::Init(16,12,31,RTC_Weekday_Saturday,23,59,05) )
-     {
-       CBoardLED(BOARD_LED1).On();
-       CBoardLED(BOARD_LED2).On();
-       CBoardLED(BOARD_LED3).On();
-       CBoardLED(BOARD_LED4).On();
-       CSysTicks::DelayInfinite();
-     }
+//  if ( !CRTC::Init(16,12,31,RTC_Weekday_Saturday,23,59,05) )
+//     {
+//       CBoardLED(BOARD_LED1).On();
+//       CBoardLED(BOARD_LED2).On();
+//       CBoardLED(BOARD_LED3).On();
+//       CBoardLED(BOARD_LED4).On();
+//       CSysTicks::DelayInfinite();
+//     }
 
 
   CBoardLED led1(BOARD_LED1);
@@ -193,25 +229,53 @@ int main()
   CBoardLED led3(BOARD_LED3);
   CBoardLED led4(BOARD_LED4);
 
+  while (1)
+  {
+    bool init_ok = CSDCard::InitCard();
+
+    led4.SetState(!init_ok);
+    led1.SetState(init_ok);
+
+    if ( init_ok )
+      break;
+
+    CSysTicks::Delay(2000);
+  }
+
+  printf("--- test begin ---\n");
+
+  FATFS ffs;
+  CLEAROBJ(ffs);
+  f_mount(&ffs,"0:",1);  // should always succeed in our case
+
+  FIL f;
+  f_open(&f,"voice.raw",FA_CREATE_ALWAYS|FA_WRITE);
+
+  CMic::Init(MicCB,&led3);
+
+  int last_part = 1;
+
+  while(!btn.IsDown()) 
+  {
+    int safe_part = voice_pos < MAX_SAMPLES/2 ? 1 : 0;
+    if ( safe_part != last_part )
+       {
+         UINT wb = 0;
+         f_write(&f,voice+safe_part*(MAX_SAMPLES/2),(MAX_SAMPLES/2)*sizeof(short),&wb);
+
+         last_part = safe_part;
+       }
+  }
+
+  f_close(&f);
+
+  printf("--- test end ---\n");
+
+  while(1) {}
+
+
   while(1)
   {
-    while (1)
-    {
-      bool init_ok = CSDCard::InitCard();
-
-      led4.SetState(!init_ok);
-      led1.SetState(init_ok);
-
-      if ( init_ok )
-         {
-           printf("%lld\n",CSDCard::GetCardCapacity());
-           break;
-         }
-
-      CSysTicks::Delay(2000);
-    }
-
-    printf("--- test begin ---\n");
     //TestSectorRW(29296870);
     //TestSectorRW(29296875*2);
     //TestSectorRW(29296825);
@@ -224,23 +288,6 @@ int main()
     //TestSectorR(29296870*2);
     //TestSectorR(1249);
     //TestSectorRW(2249);
-
-    FATFS ffs;
-    CLEAROBJ(ffs);
-    f_mount(&ffs,"0:",1);  // should always succeed in our case
-    
-    {
-      CLog log("new_log.txt",true);
-
-      log.Add("Hello %f",123.456);
-      CSysTicks::Delay(1000);
-      log.Add("Hello %f",321.111);
-    }
-
-    
-    printf("--- test end ---\n");
-    
-    while (1){}
   }
 
 
