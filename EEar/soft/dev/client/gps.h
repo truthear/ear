@@ -43,7 +43,9 @@ class CTelitGPS : public CGPS
             : CGPS(uart,rate,cb,cbparm,irq_priority) {}
 
           void EnableOnlyRMC();
-          bool ParseNMEA(const char *nmea,unsigned str_len,char *_yymmddhhnnsssss=NULL,double *_lat=NULL,double *_lon=NULL);
+          void SetSearchMode(bool use_gps,bool use_glonass,bool use_galileo,bool use_beidou);
+
+          bool ParseNMEA(const char *nmea,unsigned str_len,char *_yymmddhhnnsssss=NULL,double *_lat=NULL,double *_lon=NULL,short *_gnss=NULL);
 
   private:
           static bool IsLenOk(const char *s,int v_min,int v_max);
@@ -54,7 +56,7 @@ class CTelitGPS : public CGPS
 class CBoardGPS : public CTelitGPS
 {
   public:
-          typedef void (*TCALLBACK)(void*,OURTIME _time,double _lat,double _lon);
+          typedef void (*TCALLBACK)(void*,OURTIME _time,double _lat,double _lon,short _gnss);
 
   private:
           static TCALLBACK p_cb;  // we use static because initially cb must be NULL (callback from upper class can be initiated before constructor of this class - in theory :)

@@ -45,12 +45,12 @@ static char nmeas[NMEA_AR_MAX][128];
 static volatile unsigned curr_nmea = 0;
 
 
-void OnGPS(void *parm,OURTIME _time,double _lat,double _lon)
+void OnGPS(void *parm,OURTIME _time,double _lat,double _lon,short _gnss)
 {
   unsigned idx = curr_nmea;
 
   char s[100];
-  sprintf(nmeas[idx],"[%s], %.6f %.6f",OurTimeToString(_time+3*3600*1000,s),_lat,_lon);
+  sprintf(nmeas[idx],"%c%c: [%s], %.6f %.6f",(_gnss>>8)&0xFF,_gnss&0xFF,OurTimeToString(_time+3*3600*1000,s),_lat,_lon);
 
   idx++;
   if ( idx == NMEA_AR_MAX )
@@ -70,7 +70,7 @@ int main()
 
   CSysTicks::Delay(100);
   gps->EnableOnlyRMC();
-  //gps->SendNMEA("PMTK401");
+  gps->SetSearchMode(true/*GPS*/,false/*!!!GLONASS*/,false,false);
 
   unsigned read_pos = 0;
 
