@@ -121,7 +121,15 @@ void CTelitGPS::EnableOnlyRMC()
 }
 
 
-bool CTelitGPS::ParseNMEA(const char *nmea,unsigned str_len,char *_yymmddhhnnsssss,double *_lat,double *_lon)
+void CTelitGPS::SetSearchMode(bool use_gps,bool use_glonass,bool use_galileo,bool use_beidou)
+{
+  char s[64];
+  sprintf(s,"PMTK353,%d,%d,%d,%d,%d",use_gps?1:0,use_glonass?1:0,use_galileo?1:0,use_galileo?1:0,use_beidou?1:0);
+  SendNMEA(s);
+}
+
+
+bool CTelitGPS::ParseNMEA(const char *nmea,unsigned str_len,char *_yymmddhhnnsssss,double *_lat,double *_lon,short *_gnss)
 {
   bool rc = false;
 
@@ -210,6 +218,11 @@ bool CTelitGPS::ParseNMEA(const char *nmea,unsigned str_len,char *_yymmddhhnnsss
                                    {
                                      *_lon = ConvertLatLon(p_lon,3,p_loni[0]=='W');
                                    }
+
+                                if ( _gnss )
+                                   {
+                                     *_gnss = ((short)(nmea[0]) << 8) | nmea[1];
+                                   }
                               }
                          }
                     }
@@ -285,8 +298,9 @@ void CBoardGPS::OnNMEA(const char *nmea,unsigned str_len)
      {
        char yymmddhhnnsssss[16];
        double lat,lon; 
+       short gnss;
         
-       if ( ParseNMEA(nmea,str_len,yymmddhhnnsssss,&lat,&lon) )
+       if ( ParseNMEA(nmea,str_len,yymmddhhnnsssss,&lat,&lon,&gnss) )
           {
             int yy = ParseInt(yymmddhhnnsssss,0,1);
             int mm = ParseInt(yymmddhhnnsssss,2,3);
@@ -298,7 +312,7 @@ void CBoardGPS::OnNMEA(const char *nmea,unsigned str_len)
 
             OURTIME ourtime = ConvertOurTime(2000+yy,mm,dd,hh,nn,ss,ms);
             
-            p_cb(p_cbparm,ourtime,lat,lon);
+            p_cb(p_cbparm,ourtime,lat,lon,gnss);
           }
      }
 }
