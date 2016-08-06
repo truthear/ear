@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
+#include <stdlib.h>
 #include <assert.h>
 #include <time.h>
 #include <string>
@@ -21,6 +22,7 @@
 #include "ff.h"
 #include "mic.h"
 #include "log.h"
+#include "gps.h"
 
 
 #endif
