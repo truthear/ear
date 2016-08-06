@@ -29,11 +29,13 @@ BOARD_UART_GSM   = BOARD_UART2,
 BOARD_UART_DEBUG = BOARD_UART3,
 };
 
-typedef void (*TUARTRXCALLBACK)(void*,unsigned char data);
-
 
 class CBoardUART : public CUART
 {
+  public:
+          typedef void (*TUARTRXCALLBACK)(void*,unsigned char data);
+
+  private:        
           typedef struct {
           TUARTRXCALLBACK func;
           void *parm;
