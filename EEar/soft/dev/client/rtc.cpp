@@ -3,11 +3,19 @@
 
 
 
+#define TIMESTAMP_EXTI_LINE   EXTI_Line21
+
+
+
 volatile OURTIME CRTC::m_shift = 0;
 
+CRTC::TCALLBACK CRTC::p_cb = NULL;
+void* CRTC::p_cbparm = NULL;
 
 
-bool CRTC::Init(char yy,char mm,char dd,char wd,char hh,char nn,char ss)
+
+bool CRTC::Init(char yy,char mm,char dd,char wd,char hh,char nn,char ss,
+                TCALLBACK cbts,void *cbparm,int irq_priority)
 {
   bool rc = false;
 
@@ -56,6 +64,28 @@ bool CRTC::Init(char yy,char mm,char dd,char wd,char hh,char nn,char ss)
        RTC_SetTime(RTC_Format_BIN, &RTC_TimeStruct);
        
        // init timestamp
+       if ( cbts )
+          {
+            p_cbparm = cbparm;
+            p_cb = cbts;
+
+            EXTI_InitTypeDef EXTI_InitStructure;
+            EXTI_InitStructure.EXTI_Line = TIMESTAMP_EXTI_LINE;
+            EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+            EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;  // should be always Rising!
+            EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+            EXTI_Init(&EXTI_InitStructure);
+
+            NVIC_InitTypeDef NVIC_InitStructure;
+            NVIC_InitStructure.NVIC_IRQChannel = TAMP_STAMP_IRQn;
+            NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = irq_priority;
+            NVIC_InitStructure.NVIC_IRQChannelSubPriority = irq_priority;
+            NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+            NVIC_Init(&NVIC_InitStructure); 
+
+            RTC_ITConfig(RTC_IT_TS, ENABLE);
+          }
+       
        RTC_TimeStampPinSelection(RTC_TimeStampPin_PC13);
        RTC_ClearFlag(RTC_FLAG_TSF|RTC_FLAG_TSOVF);  // clear TS and TS_Overflow flags
        RTC_TimeStampCmd(RTC_TimeStampEdge_Rising,ENABLE);
@@ -73,41 +103,44 @@ void CRTC::SetShift(OURTIME shift)
 }
 
 
-OURTIME CRTC::GetTime(bool use_shift)
+OURTIME CRTC::GetShift()
+{
+  return m_shift;
+}
+
+
+OURTIME CRTC::GetTime()
 {
   char yy,mm,dd,wd,hh,nn,ss;
   int subsec;
 
   GetTime(yy,mm,dd,wd,hh,nn,ss,subsec);
 
-  OURTIME t = ConvertOurTime(2000+yy,mm,dd,hh,nn,ss,SS2MS(subsec));
-
-  return use_shift ? t+m_shift : t;
+  return ConvertOurTime(2000+yy,mm,dd,hh,nn,ss,SS2MS(subsec)) + m_shift;
 }
 
 
 bool CRTC::GetTS(OURTIME& _time,bool use_shift)
 {
+  bool rc = false;
+  
   char yy,mm,dd,wd,hh,nn,ss;
   int subsec;
 
   if ( GetTS(yy,mm,dd,wd,hh,nn,ss,subsec) )
      {
-       OURTIME t = ConvertOurTime(2000+yy,mm,dd,hh,nn,ss,SS2MS(subsec));
-
-       _time = use_shift ? t+m_shift : t;
-
-       return true;
+       _time = ConvertOurTime(2000+yy,mm,dd,hh,nn,ss,SS2MS(subsec)) + (use_shift ? m_shift : 0);
+       rc = true;
      }
-  else
-     {
-       return false;
-     }
+
+  return rc;
 }
 
 
 void CRTC::GetTime(char& yy,char& mm,char& dd,char& wd,char& hh,char& nn,char& ss,int& subsec)
 {
+  RTC_WaitForSynchro();  // RTC->TR shadow can hold old value while RTC->SSR - new, so we need wait (1/32768 sec)
+  
   subsec = ((uint32_t)(RTC->SSR)) & 0xFFFF;  // after read SSR time/date regs became frozen
 
   RTC_TimeTypeDef t_s;
@@ -165,6 +198,29 @@ int CRTC::SS2MS(int subs)
 }
 
 
+void CRTC::OnIRQ_Internal()
+{
+  if ( EXTI_GetITStatus(TIMESTAMP_EXTI_LINE) != RESET ) 
+     {
+       EXTI_ClearITPendingBit(TIMESTAMP_EXTI_LINE);
+
+       OURTIME ts;
+       if ( GetTS(ts,false) )  // here pending flags are cleared
+          {
+            if ( p_cb )
+               {
+                 p_cb(p_cbparm,ts,ts+m_shift);
+               }
+          }
+     }
+}
+
+
+extern "C"
+void TAMP_STAMP_IRQHandler()
+{
+  CRTC::OnIRQ_Internal();
+}
 
 
 
