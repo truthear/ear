@@ -5,7 +5,7 @@
 
 
 // WARNING!!! Not thread/IRQ safe!
-// WARNING!!! SDCard and fatfs must be initialized first!
+// WARNING!!! SDCard and fatfs must be initialized first if you need file output!
 // WARNING!!! If you need correct time in log CRTC::Init() must be called first
 // WARNING!!! If you need stdut echo CDebugger::Init() must be called first
 class CLog
@@ -16,7 +16,7 @@ class CLog
           bool b_stdout_echo;
 
   public:
-          CLog(const char *filename,bool stdout_echo=false);
+          CLog(const char *filename=NULL,bool stdout_echo=false);
           ~CLog();
 
           void Add(const char *format,...);
