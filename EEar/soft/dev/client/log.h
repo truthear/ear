@@ -6,8 +6,8 @@
 
 // WARNING!!! Not thread/IRQ safe!
 // WARNING!!! SDCard and fatfs must be initialized first if you need file output!
-// WARNING!!! If you need correct time in log CRTC::Init() must be called first
-// WARNING!!! If you need stdut echo CDebugger::Init() must be called first
+// WARNING!!! CRTC::Init() must be called first
+// WARNING!!! If you need stdout echo - CDebugger::Init() must be called first
 class CLog
 {
           static const unsigned MAX_LOG_STR_SIZE = 1024;   // uses stack memory!

@@ -310,7 +310,7 @@ void CBoardGPS::OnNMEA(const char *nmea,unsigned str_len)
             int ss = ParseInt(yymmddhhnnsssss,10,11);
             int ms = ParseInt(yymmddhhnnsssss,12,14);
 
-            OURTIME ourtime = ConvertOurTime(2000+yy,mm,dd,hh,nn,ss,ms);
+            OURTIME ourtime = COurTime(yy,mm,dd,hh,nn,ss,ms);
             
             p_cb(p_cbparm,ourtime,lat,lon,gnss);
           }

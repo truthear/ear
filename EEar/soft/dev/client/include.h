@@ -8,8 +8,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
-#include <time.h>
-#include <string>
 #include "stm32f4xx.h"
 #include "tools.h"
 #include "led.h"

@@ -1,7 +1,6 @@
 
 #include "include.h"
-#include <vector>
-#include <math.h>
+
 
 
 /*
@@ -39,11 +38,6 @@ void MicCB(void *led,const int16_t* buff,int num_samples)
   reinterpret_cast<CLED*>(led)->SetState(sum>1000);
 }
 */
-
-
-//static const unsigned NMEA_AR_MAX = 16;
-//static char nmeas[NMEA_AR_MAX][128];
-//static volatile unsigned curr_nmea = 0;
 
 
 
@@ -106,8 +100,7 @@ int main()
   CSysTicks::Init();
   CDebugger::Init();
 
-
-  if ( !CRTC::Init(19,1,1,RTC_Weekday_Tuesday,0,0,0,OnTS,led) )
+  if ( !CRTC::Init(20,2,29,RTC_Weekday_Tuesday,23,59,50,OnTS,led) )
      {
        CBoardLED(BOARD_LED1).On();
        CBoardLED(BOARD_LED2).On();
@@ -115,8 +108,6 @@ int main()
        CBoardLED(BOARD_LED4).On();
        CSysTicks::DelayInfinite();
      }
-
-
 
   gps_data.lat = 0;
   gps_data.lon = 0;

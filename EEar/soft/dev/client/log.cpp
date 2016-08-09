@@ -20,7 +20,7 @@ void CLog::Add(const char *format,...)
   char s[MAX_LOG_STR_SIZE];
 
   strcpy(s,"[");
-  OurTimeToString(CRTC::GetTime(),s+strlen(s));
+  COurTime(CRTC::GetTime()).ToString(s+strlen(s));
   strcat(s,"] ");
 
   va_list ap;

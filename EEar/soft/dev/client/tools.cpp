@@ -4,41 +4,114 @@
 
 
 
-OURTIME ConvertOurTime(int yyyy,int mm,int dd,int hh,int nn,int ss,int msec)
+COurTime::COurTime(int yy,int mm,int dd,int hh,int nn,int ss,int msec)
 {
-  struct tm t;
+  if ( yy < 0 || yy > 99 || mm < 1 || mm > 12 || dd < 1 || dd > 31 )
+     {
+       m_time = -1;
+     }
+  else
+     {
+       int num_leaps = (yy+3)/4; // for 21'th cent is true
+       int days = (yy*365+num_leaps) + GetMonthTable(yy)[mm-1] + (dd-1);
+       int msec_day_part = hh*3600000+nn*60000+ss*1000+msec;
 
-  t.tm_sec = ss;
-  t.tm_min = nn;
-  t.tm_hour = hh;
-  t.tm_mday = dd;
-  t.tm_mon = mm-1;
-  t.tm_year = yyyy-1900;
-  t.tm_wday = 0;
-  t.tm_yday = 0;
-  t.tm_isdst = 0;
-
-  time_t tt = mktime(&t);
-
-  return ((OURTIME)(uint32_t)tt)*1000+msec;
+       m_time = ((OURTIME)((unsigned)days*(unsigned)84375) << 10) + (OURTIME)msec_day_part;
+     }
 }
 
 
-// not IRQ handler safe! (because of localtime())
-char* OurTimeToString(OURTIME t,char *s)
+bool COurTime::Unpack(int& yy,int& mm,int& dd,int& hh,int& nn,int& ss,int& msec) const
+{
+  bool rc = false;
+       
+  if ( m_time >= 0 && m_time <= MAX_TIME_VALUE )
+     {
+       OURTIME t = m_time;
+       
+       msec = t % 1000;
+       t /= 1000;  // now t in seconds
+
+       ss = t % 60;
+       t /= 60;    // now t in minutes
+
+       nn = t % 60;
+       t /= 60;    // now t in hours
+
+       hh = t % 24;
+       t /= 24;    // now t in days
+
+       yy = 0;
+
+       for ( int n = 0; n <= 99; n++ )
+           {
+             int days_in_year = (IsLeapYear(n) ? 366 : 365);
+             
+             t -= days_in_year;
+
+             if ( t < 0 )
+                {
+                  t += days_in_year;
+                  break;
+                }
+
+             yy++;
+           }
+
+       // t now is rest in days within year
+       mm = 1; // to disable warning
+       const int *mtable = GetMonthTable(yy);
+       for ( int n = 11; n >= 0; n-- )
+           {
+             if ( t >= mtable[n] )
+                {
+                  mm = n+1;
+                  t -= mtable[n];
+                  break;
+                }
+           }
+
+       // t now is days rest
+       dd = t+1;
+
+       rc = true;
+     }
+
+  return rc;
+}
+
+
+char* COurTime::ToString(char *s) const
 {
   if ( s )
      {
-       int msec = t % 1000;
+       int yy,mm,dd,hh,nn,ss,msec;
        
-       time_t tim = (time_t)(t / 1000);
-
-       const struct tm* t2 = localtime(&tim);
-
-       sprintf(s,"%04d-%02d-%02d %02d:%02d:%02d.%03d",t2->tm_year+1900,t2->tm_mon+1,t2->tm_mday,t2->tm_hour,t2->tm_min,t2->tm_sec,msec);
+       if ( Unpack(yy,mm,dd,hh,nn,ss,msec) )
+          {
+            sprintf(s,"%04d-%02d-%02d %02d:%02d:%02d.%03d",2000+yy,mm,dd,hh,nn,ss,msec);
+          }
+       else
+          {
+            sprintf(s,"%s","Invalid date/time");
+          }
      }
 
   return s;
 }
 
+
+bool COurTime::IsLeapYear(int yy)
+{
+  return (yy % 4) == 0;  // true for 21'th century
+}
+
+
+const int* COurTime::GetMonthTable(int yy)
+{
+  static const int normal_year[12] = {0,31,59,90,120,151,181,212,243,273,304,334};
+  static const int leap_year[12]   = {0,31,60,91,121,152,182,213,244,274,305,335};
+  
+  return IsLeapYear(yy) ? leap_year : normal_year;
+}
 
