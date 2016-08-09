@@ -9,7 +9,31 @@
 #define CLEAROBJ(o)   memset(&(o),0,sizeof(o))
 
 
-typedef signed long long OURTIME;   // time_t*1000+msec, must be signed (because of arithmetic operations)!
+typedef signed long long OURTIME;   // number of msec since 2000-01-01, must be signed (because of arithmetic operations)!
+
+
+class COurTime
+{
+          static const OURTIME MAX_TIME_VALUE = 3155759999999;
+          
+          OURTIME m_time;
+
+  public:
+          COurTime() : m_time(-1) {}
+          COurTime(OURTIME t) : m_time(t) {}
+          COurTime(int yy,int mm,int dd,int hh,int nn,int ss,int msec);
+
+          operator OURTIME () const { return m_time; }
+          OURTIME GetValue() const { return m_time; }
+
+          bool Unpack(int& yy,int& mm,int& dd,int& hh,int& nn,int& ss,int& msec) const;
+          char* ToString(char *s) const;
+
+  private:
+          static bool IsLeapYear(int yy);
+          static const int* GetMonthTable(int yy);
+
+};
 
 
 // WARNING!!! works only on single-core CPU!
@@ -43,10 +67,6 @@ class CCSGuard
           ~CCSGuard() { o_cs.Unlock(); }
 };
 
-
-
-OURTIME ConvertOurTime(int yyyy,int mm,int dd,int hh,int nn,int ss,int msec);
-char* OurTimeToString(OURTIME t,char *s); // WARNING!!! not IRQhandler/thread safe! problem when simulatenous call in main and IRQ
 
 
 

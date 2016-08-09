@@ -116,7 +116,7 @@ OURTIME CRTC::GetTime()
 
   GetTime(yy,mm,dd,wd,hh,nn,ss,subsec);
 
-  return ConvertOurTime(2000+yy,mm,dd,hh,nn,ss,SS2MS(subsec)) + m_shift;
+  return (OURTIME)COurTime(yy,mm,dd,hh,nn,ss,SS2MS(subsec)) + m_shift;
 }
 
 
@@ -129,7 +129,7 @@ bool CRTC::GetTS(OURTIME& _time,bool use_shift)
 
   if ( GetTS(yy,mm,dd,wd,hh,nn,ss,subsec) )
      {
-       _time = ConvertOurTime(2000+yy,mm,dd,hh,nn,ss,SS2MS(subsec)) + (use_shift ? m_shift : 0);
+       _time = (OURTIME)COurTime(yy,mm,dd,hh,nn,ss,SS2MS(subsec)) + (use_shift ? m_shift : 0);
        rc = true;
      }
 
