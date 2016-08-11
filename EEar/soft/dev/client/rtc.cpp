@@ -109,14 +109,14 @@ OURTIME CRTC::GetShift()
 }
 
 
-OURTIME CRTC::GetTime()
+OURTIME CRTC::GetTime(bool use_shift)
 {
   char yy,mm,dd,wd,hh,nn,ss;
   int subsec;
 
   GetTime(yy,mm,dd,wd,hh,nn,ss,subsec);
 
-  return (OURTIME)COurTime(yy,mm,dd,hh,nn,ss,SS2MS(subsec)) + m_shift;
+  return (OURTIME)COurTime(yy,mm,dd,hh,nn,ss,SS2MS(subsec)) + (use_shift ? m_shift : 0);
 }
 
 
