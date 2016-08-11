@@ -8,6 +8,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <string>
+#include <vector>
 #include "stm32f4xx.h"
 #include "tools.h"
 #include "led.h"
@@ -21,6 +23,7 @@
 #include "mic.h"
 #include "log.h"
 #include "gps.h"
+#include "modem.h"
 
 
 #endif

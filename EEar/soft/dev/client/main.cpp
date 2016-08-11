@@ -1,43 +1,8 @@
 
 #include "include.h"
+#include <string>
+#include <vector>
 
-
-
-/*
-static const int MAX_SAMPLES = CMic::SAMPLE_RATE*2;  // 2 sec
-
-short voice[MAX_SAMPLES];
-volatile int voice_pos = 0;
-
-
-void MicCB(void *led,const int16_t* buff,int num_samples)
-{
-  int sum = 0;
-
-  int dest_pos = voice_pos;
-  
-  for ( int n = 0; n < num_samples; n++ )
-      {
-        short s = buff[n];
-
-        voice[dest_pos+n] = s;
-        
-        if ( s < 0 )
-         s = -s;
-
-        sum += s;
-      }
-
-  dest_pos += num_samples;
-  if ( dest_pos == MAX_SAMPLES )
-   dest_pos = 0;
-  voice_pos = dest_pos;
-      
-  sum /= num_samples;
-  
-  reinterpret_cast<CLED*>(led)->SetState(sum>1000);
-}
-*/
 
 
 
@@ -50,8 +15,9 @@ struct {
 } gps_data;
 
 
-unsigned last_ts_time = 0;  // no CS needed
-OURTIME last_ts_value = 0;
+unsigned last_ts_time = 0;
+OURTIME last_ts_value = 0;  // TS value, not shifted
+
 
 
 void OnTS(void *led,OURTIME ts,OURTIME)
@@ -91,21 +57,68 @@ void OnGPS(void *parm,OURTIME _time,double _lat,double _lon,short _gnss)
 }
 
 
+volatile bool mic_alert = false;
+volatile unsigned last_alert_time = 0;
+
+
+void MicCB(void *led,const int16_t* buff,int num_samples)
+{
+  int sum = 0;
+
+  for ( int n = 0; n < num_samples; n++ )
+      {
+        short s = buff[n];
+        if ( s < 0 )
+         s = -s;
+        sum += s;
+      }
+
+  sum /= num_samples;
+
+  bool alert = sum>20000;
+
+  if ( alert )
+     {
+       if ( CSysTicks::GetCounter() - last_alert_time > 2000 )
+          {
+            last_alert_time = CSysTicks::GetCounter();
+            mic_alert = true;
+          }
+     }
+  
+  reinterpret_cast<CLED*>(led)->SetState(alert);
+}
+
+
+
+void PrintTopOfHeap()
+{
+  void *p = malloc(1);
+  printf("%p\n",p);
+  free(p);
+}
+
 
 int main()
 {
-  CLED *led = new CBoardLED(BOARD_LED4);
+  CLED *led4 = new CBoardLED(BOARD_LED4);
+  CLED *led3 = new CBoardLED(BOARD_LED3);
+  CLED *led2 = new CBoardLED(BOARD_LED2);
+  CLED *led1 = new CBoardLED(BOARD_LED1);
+
+
   
   CCPUTicks::Init();
   CSysTicks::Init();
   CDebugger::Init();
 
-  if ( !CRTC::Init(20,2,29,RTC_Weekday_Tuesday,23,59,50,OnTS,led) )
+
+  if ( !CRTC::Init(20,2,29,RTC_Weekday_Tuesday,23,59,50,OnTS,led4) )
      {
-       CBoardLED(BOARD_LED1).On();
-       CBoardLED(BOARD_LED2).On();
-       CBoardLED(BOARD_LED3).On();
-       CBoardLED(BOARD_LED4).On();
+       led1->On();
+       led2->On();
+       led3->On();
+       led4->On();
        CSysTicks::DelayInfinite();
      }
 
@@ -121,11 +134,20 @@ int main()
   gps->EnableOnlyRMC();
   gps->SetSearchMode(true/*GPS*/,true/*GLONASS*/,false,false);
 
+  CMic::Init(MicCB,led3);
 
   bool old_synced = false;
 
-  CLog log(NULL,true);
+  bool init_sdcard_ok = CSDCard::InitCard();
+
+  FATFS ffs;
+  CLEAROBJ(ffs);
+  f_mount(&ffs,"0:",1);  // should always succeed in our case
+
+  CLog log("alerts.txt",true);
   log.Add("--- System started ---");
+
+  log.Add("SDCard Init %s",init_sdcard_ok?"OK":"failed");
 
   while (1)
   {
@@ -161,10 +183,35 @@ int main()
          old_synced = is_synced;
        }
 
-    unsigned ref_sec = (unsigned)(CRTC::GetTime()/1000);
-    while ( (unsigned)(CRTC::GetTime()/1000) == ref_sec ) {}
-    
-    log.Add("(%s) %lld, %c%c: %.6f %.6f",is_synced?"!":" ",CRTC::GetShift(),(gnss>>8)&0xFF,gnss&0xFF,lat,lon);
+    led1->SetState(is_synced);
+
+    if ( mic_alert )
+       {
+         mic_alert = false;
+         unsigned ev_time = last_alert_time;
+
+         if ( is_synced )
+            {
+              OURTIME true_time = last_ts_value + (ev_time - last_ts_time) + CRTC::GetShift();
+
+              char s[100];
+              COurTime(true_time).ToString(s);
+
+              log.Add("Event at %s !!!",s);
+            }
+         else
+            {
+              log.Add("Alert, but no time sync");
+            }
+
+         led2->On();
+         CCPUTicks::Delay(100);
+         led2->Off();
+       }
+
+    //unsigned ref_sec = (unsigned)(CRTC::GetTime()/1000);
+    //while ( (unsigned)(CRTC::GetTime()/1000) == ref_sec ) {}
+    //log.Add("(%s) %u %u %u, %c%c: %.6f %.6f",is_synced?"!":" ",mic_irq,delta_ticks_sys,delta_ticks_cpu,(gnss>>8)&0xFF,gnss&0xFF,lat,lon);
   }
 
 

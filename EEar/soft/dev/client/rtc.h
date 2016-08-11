@@ -21,9 +21,9 @@ class CRTC
                            TCALLBACK cbts=NULL,void *cbparm=NULL,int irq_priority=2);
 
           static void SetShift(OURTIME shift);
-          static OURTIME GetShift(); // for debug
+          static OURTIME GetShift();
 
-          static OURTIME GetTime(); // WARNING!!! it waits for 1/32768 sec, not thread-safe! returns shifted time
+          static OURTIME GetTime(bool use_shift=true); // WARNING!!! it waits for 1/32768 sec, not thread-safe!
           
           static bool GetTS(OURTIME& _time,bool use_shift=false);  // use it for polling mode only (non-interrupt!)
 
