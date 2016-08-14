@@ -6,11 +6,13 @@
 class CUART;
 
 
+// this class uses CSysTicks, which should be initialized before!
 class CModem
 {
           unsigned char *p_recv_buff;  // circular recv buffer, should include AT-cmd length itself because of echo
           unsigned m_recv_buff_size;
           volatile unsigned m_recv_buff_idx;  // next write idx, updated from IRQ only
+          volatile unsigned m_last_rx_time;   // last time of RX callback, updated from IRQ only
 
           CUART *p_uart;
 
@@ -20,6 +22,7 @@ class CModem
 
           void SendATCmd(const char *cmd);  // not \r should be at end!
           const unsigned char* RecvBuffAccess(unsigned& _wpos,unsigned& _size) const;
+          unsigned GetLastRXTime() const { return m_last_rx_time; }
 
   private:
           static void OnRXCallbackWrapper(void*,unsigned char data);
@@ -45,6 +48,7 @@ class CTelitModem
 
           void SendATCmd(const char *cmd);  // not \r should be at end!
           const unsigned char* RecvBuffAccess(unsigned& _wpos,unsigned& _size) const;
+          unsigned GetLastRXTime() const;
 };
 
 
@@ -55,13 +59,14 @@ class CBoardModem
 
   public:
           // constructor takes about ~300 msec!
-          CBoardModem(int rate,unsigned recv_buff_size,int irq_priority);
+          CBoardModem(int rate,unsigned recv_buff_size,int irq_priority=4);
           ~CBoardModem();
 
           void ResetModem();  // takes about ~2.3 sec!
 
           void SendATCmd(const char *cmd);  // not \r should be at end!
           const unsigned char* RecvBuffAccess(unsigned& _wpos,unsigned& _size) const;
+          unsigned GetLastRXTime() const;
 };
 
 

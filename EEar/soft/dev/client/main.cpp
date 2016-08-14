@@ -5,6 +5,8 @@
 
 
 
+CLog *plog = NULL;
+
 
 struct {
  CCriticalSection o_cs;
@@ -57,36 +59,79 @@ void OnGPS(void *parm,OURTIME _time,double _lat,double _lon,short _gnss)
 }
 
 
-volatile bool mic_alert = false;
-volatile unsigned last_alert_time = 0;
+//static const unsigned BUFFSAMPLES = CMic::SAMPLE_RATE*2;  // 2 sec
+//short samples[BUFFSAMPLES];
+//volatile unsigned samples_wto = 0;
+//bool mic_pause = false;
+
+
+bool mic_alert = false;
+unsigned last_alert_time = 0;
+
+static const unsigned MAX_MIC_SUMS = 50;
+int mic_sums[MAX_MIC_SUMS];
+unsigned mic_sums_widx = 0;
+volatile unsigned mic_cb_counter = 0;
 
 
 void MicCB(void *led,const int16_t* buff,int num_samples)
 {
-  int sum = 0;
+  mic_cb_counter++;
 
-  for ( int n = 0; n < num_samples; n++ )
-      {
-        short s = buff[n];
-        if ( s < 0 )
-         s = -s;
-        sum += s;
-      }
+//  int sum = 0;
 
-  sum /= num_samples;
-
-  bool alert = sum>20000;
-
-  if ( alert )
-     {
-       if ( CSysTicks::GetCounter() - last_alert_time > 2000 )
-          {
-            last_alert_time = CSysTicks::GetCounter();
-            mic_alert = true;
-          }
-     }
+//  if ( !mic_pause )
+/*     {
+       for ( int n = 0; n < num_samples; n++ )
+           {
+             short s = buff[n];
+             if ( s < 0 )
+              s = -s;
+             sum += s;
+           }
   
-  reinterpret_cast<CLED*>(led)->SetState(alert);
+       sum /= num_samples;
+
+       mic_sums[mic_sums_widx++] = sum;
+       if ( mic_sums_widx == MAX_MIC_SUMS )
+          {
+            mic_sums_widx = 0;
+          }
+
+       sum = 0;
+       for ( unsigned n = 0; n < MAX_MIC_SUMS; n++ )
+       {
+         sum += mic_sums[n];
+       }
+       sum /= MAX_MIC_SUMS;
+       
+       bool alert = sum>25000;
+
+       if ( alert )
+          {
+            if ( CSysTicks::GetCounter() - last_alert_time > 2000 )
+               {
+                 last_alert_time = CSysTicks::GetCounter();
+                 mic_alert = true;
+               }
+          }
+       
+     }*/
+
+//  reinterpret_cast<CLED*>(led)->SetState(sum>2000);
+//
+//  unsigned idx = samples_wto;
+//
+//  for ( int n = 0; n < num_samples; n++ )
+//      {
+//        samples[idx+n] = mic_pause ? 0 : buff[n];
+//      }
+//
+//  idx += num_samples;
+//  if ( idx == BUFFSAMPLES )
+//    idx = 0;
+//
+//  samples_wto = idx;
 }
 
 
@@ -98,20 +143,92 @@ void PrintTopOfHeap()
   free(p);
 }
 
+/*
+void OnUSSD(void *parm,int id,const char *cmd,const char *answer,bool is_timeout,bool is_answered_ok)
+{
+  if ( !is_timeout )
+     {
+       if ( !is_answered_ok )
+        printf("USSD: failed\n");
+       else
+        printf("USSD: %s\n",CMobile::DecodeUSSDAnswer(answer).c_str());
+     }
+  else
+   printf("USSD: timeout\n");
+}
+
+
+void OnSMS(void *parm,int id,const char *cmd,const char *answer,bool is_timeout,bool is_answered_ok)
+{
+  if ( !is_timeout )
+     {
+       if ( !is_answered_ok )
+        printf("SMS: failed\n");
+       else
+        printf("SMS: OK\n");
+     }
+  else
+   printf("SMS: timeout\n");
+}
+*/
+
+/*
+void OnSendString(void *parm,int id,const char *cmd,const char *answer,bool is_timeout,bool is_answered_ok)
+{
+  if ( !is_timeout )
+     {
+       if ( !is_answered_ok )
+        plog->Add("TCPSend: failed\n");
+       else
+        plog->Add("TCPSend: OK\n");
+     }
+  else
+   plog->Add("TCPSend: timeout\n");
+
+  mic_pause = false;
+}
+*/
+
+
+void OnButton(void*parm)
+{
+  reinterpret_cast<CUART*>(parm)->SendByte(5);
+
+  last_alert_time = mic_cb_counter; //CSysTicks::GetCounter();
+  mic_alert = true;
+}
+
+
+void OnUart(void*,unsigned char data)
+{
+  if ( data == 5 )
+     {
+       last_alert_time = mic_cb_counter; //CSysTicks::GetCounter();
+       mic_alert = true;
+     }
+}
+
 
 int main()
 {
-  CLED *led4 = new CBoardLED(BOARD_LED4);
-  CLED *led3 = new CBoardLED(BOARD_LED3);
-  CLED *led2 = new CBoardLED(BOARD_LED2);
-  CLED *led1 = new CBoardLED(BOARD_LED1);
-
+  CLEAROBJ(mic_sums);
 
   
   CCPUTicks::Init();
   CSysTicks::Init();
   CDebugger::Init();
 
+
+//  CUART *uart = new CBoardUART(BOARD_UART_DEBUG,115200,true,true,OnUart);
+
+  CLED *led4 = new CBoardLED(BOARD_LED4);
+  CLED *led3 = new CBoardLED(BOARD_LED3);
+  CLED *led2 = new CBoardLED(BOARD_LED2);
+  CLED *led1 = new CBoardLED(BOARD_LED1);
+
+  CBoardButton btn1(BOARD_BUTTON1/*,OnButton,uart*/);
+  CBoardButton btn2(BOARD_BUTTON2);
+  CBoardButton btn3(BOARD_BUTTON3);
 
   if ( !CRTC::Init(20,2,29,RTC_Weekday_Tuesday,23,59,50,OnTS,led4) )
      {
@@ -122,6 +239,15 @@ int main()
        CSysTicks::DelayInfinite();
      }
 
+  bool init_sdcard_ok = CSDCard::InitCard();
+
+  FATFS ffs;
+  CLEAROBJ(ffs);
+  f_mount(&ffs,"0:",1);  // should always succeed in our case
+
+  plog = new CLog("log.txt",false/*true*/);  //!!!!!!!!!!!!!!!!
+  plog->Add("--- System started ---");
+
   gps_data.lat = 0;
   gps_data.lon = 0;
   gps_data.gnss = 0x3f3f;
@@ -130,27 +256,75 @@ int main()
 
   CBoardGPS *gps = new CBoardGPS(115200,OnGPS,NULL);
 
-  CSysTicks::Delay(100);
-  gps->EnableOnlyRMC();
-  gps->SetSearchMode(true/*GPS*/,true/*GLONASS*/,false,false);
-
-  CMic::Init(MicCB,led3);
+  unsigned gps_starttime = CSysTicks::GetCounter();
+  bool gps_initialized = false;
 
   bool old_synced = false;
 
-  bool init_sdcard_ok = CSDCard::InitCard();
+//  CMobile *term = new CMobile(115200);
+//
+//  if ( !term->Startup() )
+//     {
+//       led1->On();
+//       led2->On();
+//       led3->On();
+//       led4->On();
+//       CSysTicks::DelayInfinite();
+//     }
 
-  FATFS ffs;
-  CLEAROBJ(ffs);
-  f_mount(&ffs,"0:",1);  // should always succeed in our case
+//  unsigned last_term_update_time = CSysTicks::GetCounter() - 10000;
+//  unsigned last_send_time = CSysTicks::GetCounter();
 
-  CLog log("alerts.txt",true);
-  log.Add("--- System started ---");
+  CMic::Init(MicCB,led1);
 
-  log.Add("SDCard Init %s",init_sdcard_ok?"OK":"failed");
+//  unsigned old_mic_safe_read = 1;
+//
+//  CLEAROBJ(samples);
+
+//  FIL voicef;
+//  f_open(&voicef,"mic.raw",FA_WRITE|FA_OPEN_APPEND);
 
   while (1)
   {
+    if ( !gps_initialized )
+       {
+         if ( CSysTicks::GetCounter() - gps_starttime > gps->GetWarmingUpTime() )
+            {
+              gps->EnableOnlyRMC();
+
+              //gps->SetSearchMode(true/*GPS*/,true/*GLONASS*/,false,false);
+
+              gps->SetSearchMode(true/*GPS*/,false/*GLONASS*/,false,false);
+              //gps->SetSearchMode(false/*GPS*/,true/*GLONASS*/,false,false);
+
+              gps_initialized = true;
+            }
+       }
+    
+    
+//    unsigned mic_safe_read = samples_wto >= BUFFSAMPLES/2 ? 0 : 1;
+//    
+//    if ( mic_safe_read != old_mic_safe_read )
+//       {
+//         UINT wb = 0;
+//         f_write(&voicef,&samples[mic_safe_read*BUFFSAMPLES/2],BUFFSAMPLES/2*sizeof(short),&wb);
+//
+//         old_mic_safe_read = mic_safe_read;
+//       }
+    
+//    if ( btn1.IsDown() )
+//       {
+//         f_close(&voicef);
+//
+//         led1->On();
+//         led2->On();
+//         led3->On();
+//         led4->On();
+//         CSysTicks::DelayInfinite();
+//       }
+//       
+//    term->Poll();
+    
     double lat,lon;
     short gnss;
     bool is_synced;
@@ -176,43 +350,92 @@ int main()
     if ( old_synced != is_synced )
        {
          if ( is_synced )
-           log.Add("Time sync event !!!");
+           plog->Add("Time sync event !!! %c%c",(gnss>>8)&0xFF,gnss&0xFF);
          else
-           log.Add("We\'ve lost time sync...");
+           plog->Add("We\'ve lost time sync...");
 
          old_synced = is_synced;
        }
 
-    led1->SetState(is_synced);
+    {
+      char id = is_synced ? (char)(gnss&0xFF) : '?';
+      led2->SetState(id=='N'||id=='P');
+      led3->SetState(id=='N'||id=='L');
+    }
+
+//    if ( CSysTicks::GetCounter() - last_term_update_time > 2000 )
+//       {
+//         //term->UpdateSIMStatus();
+//         term->UpdateNetStatus();
+//         //term->UpdateGPRSStatus();
+//         //term->UpdateSignalQuality();
+//         //term->UpdateInternetConnectionStatus();
+//
+//         last_term_update_time = CSysTicks::GetCounter();
+//       }
+//
+//    led3->SetState(term->GetNetStatus()==NET_REGISTERED_HOME);
+//
+//    if ( CSysTicks::GetCounter() - last_send_time > 30000 )
+//       {
+//         //mic_pause = true;
+//         
+//         term->InitiateInternetConnection("internet");
+//         
+//         char tim[100];
+//         COurTime(CRTC::GetTime()).ToString(tim);
+//
+//         char s[100];
+//         sprintf(s,"[%s] %.7f %.7f",tim,lat,lon);
+//         term->SendStringTCP("195.234.5.137",81,s,OnSendString);
+//         //term->SendSMS("+380935237031",s,OnSendString);
+//
+//         plog->Add("(%s) %c%c: %.7f %.7f",is_synced?"!":" ",(gnss>>8)&0xFF,gnss&0xFF,lat,lon);
+//
+//         last_send_time = CSysTicks::GetCounter();
+//       }
+
+
 
     if ( mic_alert )
        {
          mic_alert = false;
          unsigned ev_time = last_alert_time;
 
-         if ( is_synced )
+         plog->Add("Alert at mic counter: %u",ev_time);
+         
+         /*if ( is_synced )
             {
               OURTIME true_time = last_ts_value + (ev_time - last_ts_time) + CRTC::GetShift();
 
               char s[100];
               COurTime(true_time).ToString(s);
 
-              log.Add("Event at %s !!!",s);
+              plog->Add("Event at %s (%c%c) %.7f %.7f !!!",s,(gnss>>8)&0xFF,gnss&0xFF,lat,lon);
             }
          else
             {
-              log.Add("Alert, but no time sync");
-            }
+              plog->Add("Alert, but no time sync");
+            }*/
 
-         led2->On();
+         led1->On();
+         led4->On();
          CCPUTicks::Delay(100);
-         led2->Off();
+         led1->Off();
+         led4->Off();
        }
 
     //unsigned ref_sec = (unsigned)(CRTC::GetTime()/1000);
     //while ( (unsigned)(CRTC::GetTime()/1000) == ref_sec ) {}
     //log.Add("(%s) %u %u %u, %c%c: %.6f %.6f",is_synced?"!":" ",mic_irq,delta_ticks_sys,delta_ticks_cpu,(gnss>>8)&0xFF,gnss&0xFF,lat,lon);
   }
+
+
+
+
+
+
+
 
 
 //  unsigned read_pos = 0;

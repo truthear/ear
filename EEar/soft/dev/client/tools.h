@@ -8,6 +8,10 @@
 
 #define CLEAROBJ(o)   memset(&(o),0,sizeof(o))
 
+#define NNS(str)   ((str)?(str):"")
+
+#define SAFEDELETE(obj)   { if ( obj ) delete obj; obj = NULL; }
+
 
 typedef signed long long OURTIME;   // number of msec since 2000-01-01, must be signed (because of arithmetic operations)!
 
@@ -28,6 +32,7 @@ class COurTime
 
           bool Unpack(int& yy,int& mm,int& dd,int& hh,int& nn,int& ss,int& msec) const;
           char* ToString(char *s) const;
+          std::string AsString() const;
 
   private:
           static bool IsLeapYear(int yy);
@@ -66,6 +71,30 @@ class CCSGuard
           CCSGuard(CCriticalSection& _cs) : o_cs(_cs) { o_cs.Lock(); }
           ~CCSGuard() { o_cs.Unlock(); }
 };
+
+
+template<int _size>
+class CFormatStr
+{
+          char m_buffer[_size];
+  public:
+          CFormatStr(const char *format,...)
+          {
+            m_buffer[0] = 0;
+            va_list args;
+            va_start(args,format);
+            vsprintf(m_buffer,format,args);
+            va_end(args);
+          }
+
+          operator const char* () const { return m_buffer; }
+};
+
+
+typedef CFormatStr<256> CFormat;
+
+
+bool IsStrEmpty(const char *s);
 
 
 

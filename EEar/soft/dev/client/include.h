@@ -7,6 +7,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <stdlib.h>
+#include <alloca.h>
 #include <assert.h>
 #include <string>
 #include <vector>
@@ -24,6 +25,8 @@
 #include "log.h"
 #include "gps.h"
 #include "modem.h"
+#include "terminal.h"
+#include "mobile.h"
 
 
 #endif
