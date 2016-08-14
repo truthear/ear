@@ -33,7 +33,6 @@ CSOURCES+=$(DRV_COMMON)/src/stm32f4xx_rtc.c
 CSOURCES+=$(DRV_COMMON)/src/stm32f4xx_sdio.c
 CSOURCES+=$(DRV_COMMON)/src/stm32f4xx_spi.c
 CSOURCES+=$(DRV_COMMON)/src/stm32f4xx_syscfg.c
-CSOURCES+=$(DRV_COMMON)/src/stm32f4xx_tim.c
 CSOURCES+=$(DRV_COMMON)/src/stm32f4xx_usart.c
 CSOURCES+=$(wildcard *.c)
 
@@ -68,7 +67,7 @@ ifneq ($(CXXSOURCES),)
 else
 	$(CC) $(LDFLAGS) -o $(PROJ_NAME).elf $(OBJS) $(LIBS)
 endif
-	$(OBJSIZE) $(PROJ_NAME).elf
+#	$(OBJSIZE) $(PROJ_NAME).elf
 	$(OBJCOPY) -O binary $(PROJ_NAME).elf $(PROJ_NAME).bin
 
 cleanup:
