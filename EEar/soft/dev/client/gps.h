@@ -42,6 +42,9 @@ class CTelitGPS : public CGPS
           CTelitGPS(EBoardUarts uart,int rate,TCALLBACK cb,void *cbparm,int irq_priority)
             : CGPS(uart,rate,cb,cbparm,irq_priority) {}
 
+          unsigned GetWarmingUpTime() const { return 2200; }
+          
+          // these 'write-to-module' functions are available only after warming up time after power on!
           void EnableOnlyRMC();
           void SetSearchMode(bool use_gps,bool use_glonass,bool use_galileo,bool use_beidou);
 
