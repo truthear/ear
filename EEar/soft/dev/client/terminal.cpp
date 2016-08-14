@@ -17,6 +17,7 @@ CTerminal::CTerminal(CBoardModem *_modem,unsigned max_queue_cmds,unsigned warmin
   m_min_at_cmd_interval = min_at_cmd_interval;
 
   m_max_queue_cmds = MAX(max_queue_cmds,1);
+  m_cmds.reserve(m_max_queue_cmds);  // reallocations not needed
 
   m_next_id = 0;
 
@@ -44,34 +45,36 @@ int CTerminal::Push(const char *atcmd,TCALLBACK cb,void *cbparm,unsigned max_wai
 {
   int rc = -1;
 
-  if ( !IsStrEmpty(atcmd) )
+  if ( IsStrEmpty(atcmd) )
      {
-       if ( max_wait <= min_wait )
+       atcmd = "AT";
+     }
+
+  if ( max_wait <= min_wait )
+     {
+       max_wait = min_wait+1;
+     }
+
+  if ( m_cmds.size() < m_max_queue_cmds )
+     {
+       TCMD *pcmd = new TCMD;
+
+       pcmd->id = m_next_id;
+       pcmd->cmd = atcmd;
+       pcmd->cb = cb;
+       pcmd->cbparm = cbparm;
+       pcmd->min_wait = min_wait;
+       pcmd->max_wait = max_wait;
+
+       m_cmds.push_back(pcmd);
+
+       m_next_id++;
+       if ( m_next_id < 0 )
           {
-            max_wait = min_wait+1;
+            m_next_id = 0;
           }
 
-       if ( m_cmds.size() < m_max_queue_cmds )
-          {
-            TCMD *pcmd = new TCMD;
-
-            pcmd->id = m_next_id;
-            pcmd->cmd = atcmd;
-            pcmd->cb = cb;
-            pcmd->cbparm = cbparm;
-            pcmd->min_wait = min_wait;
-            pcmd->max_wait = max_wait;
-
-            m_cmds.push_back(pcmd);
-
-            m_next_id++;
-            if ( m_next_id < 0 )
-               {
-                 m_next_id = 0;
-               }
-
-            rc = pcmd->id;
-          }
+       rc = pcmd->id;
      }
 
   return rc;
@@ -97,83 +100,35 @@ void CTerminal::InternalSyncCB(void *parm,int id,const char *cmd,const char *ans
 }
 
 
-void CTerminal::PushAndWaitComplete(const char *atcmd,std::string& _answer,bool& _is_timeout,bool& _is_answered_ok,unsigned total_max_wait,unsigned command_max_wait,unsigned command_min_wait)
+void CTerminal::SyncProcessCmd(const char *atcmd,std::string& _answer,bool& _is_timeout,bool& _is_answered_ok,
+                               unsigned command_max_wait,unsigned command_min_wait)
 {
-  if ( total_max_wait <= command_max_wait )
-     {
-       total_max_wait = command_max_wait + 1;
-     }
-
-  unsigned queue_wait = total_max_wait - command_max_wait;
-     
-
   TINTERNALSYNCCB i;
   i.complete = false;
 
-  int id = -1;
-
-  unsigned starttime = CSysTicks::GetCounter();
-
-  while ( id < 0 && CSysTicks::GetCounter() - starttime < queue_wait )
+  while ( Push(atcmd,InternalSyncCB,&i,command_max_wait,command_min_wait) < 0 )
   {
-    id = Push(atcmd,InternalSyncCB,&i,command_max_wait,command_min_wait);
+    Poll();
   }
-  
-  if ( id >= 0 )
-     {
-       while ( 1 )
-       {
-         Poll();
 
-         if ( i.complete )
-            {
-              _answer = i.answer;
-              _is_timeout = i.is_timeout;
-              _is_answered_ok = i.is_answered_ok;
-              break;
-            }
+  while ( !i.complete )
+  {
+    Poll();
+  }
 
-         if ( CSysTicks::GetCounter() - starttime >= total_max_wait )
-            {
-              // dispose from queue or work ptr
-              for ( TCMDSAR::iterator it = m_cmds.begin(); it != m_cmds.end(); ++it )
-                  {
-                    if ( (*it)->id == id )
-                       {
-                         delete *it;
-                         m_cmds.erase(it);
-                         break;
-                       }
-                  }
-
-              if ( p_work_cmd && p_work_cmd->id == id )
-                 {
-                   SAFEDELETE(p_work_cmd);
-                 }
-              
-              _answer = "Total timeout";
-              _is_timeout = true;
-              _is_answered_ok = false;
-              break;
-            }
-       }
-     }
-  else
-     {
-       _answer = "Queue timeout";
-       _is_timeout = true;
-       _is_answered_ok = false;
-     }
+  _answer = i.answer;
+  _is_timeout = i.is_timeout;
+  _is_answered_ok = i.is_answered_ok;
 }
 
 
-bool CTerminal::PushAndWaitCompleteSimpleCmd(const char *atcmd,unsigned total_max_wait,unsigned command_max_wait)
+bool CTerminal::SyncProcessCmdSimple(const char *atcmd,unsigned command_max_wait)
 {
   std::string answer;
   bool is_timeout = true;
   bool is_answered_ok = false;
   
-  PushAndWaitComplete(atcmd,answer,is_timeout,is_answered_ok,total_max_wait,command_max_wait,0);
+  SyncProcessCmd(atcmd,answer,is_timeout,is_answered_ok,command_max_wait,0);
 
   return !is_timeout && is_answered_ok;
 }
@@ -194,10 +149,8 @@ void CTerminal::Poll()
      {
        if ( p_work_cmd )
           {
-            unsigned now = CSysTicks::GetCounter();
-
             // check min time wait first
-            if ( now - m_work_cmd_starttime >= p_work_cmd->min_wait )
+            if ( CSysTicks::GetCounter() - m_work_cmd_starttime >= p_work_cmd->min_wait )
                {
                  // get answer if ready
                  unsigned widx = 0;
@@ -213,10 +166,10 @@ void CTerminal::Poll()
 
                            const std::string& atcmd = p_work_cmd->cmd;
 
-                           char *atstart = strstr(s,atcmd.c_str());
+                           const char *atstart = strstr(s,atcmd.c_str());
                            if ( !atstart || *(atstart+atcmd.size()) != '\r' )
                               {
-                                DisposeWorkCmd("Buffer overrun",false,false);
+                                DisposeWorkCmd("Buffer error",true/*inform as timeout*/,false);
                               }
                            else
                               {
@@ -236,7 +189,7 @@ void CTerminal::Poll()
                  // check for timeout
                  if ( p_work_cmd )
                     {
-                      if ( now - m_work_cmd_starttime > p_work_cmd->max_wait )
+                      if ( CSysTicks::GetCounter() - m_work_cmd_starttime > p_work_cmd->max_wait )
                          {
                            DisposeWorkCmd("Timeout",true,false);
                          }
@@ -251,16 +204,16 @@ void CTerminal::Poll()
                {
                  p_work_cmd = m_cmds[0];
                  m_cmds.erase(m_cmds.begin());
-                 m_work_cmd_starttime = CSysTicks::GetCounter();
 
+                 // optional delay
                  unsigned last_rx_time = p_modem->GetLastRXTime();
-                 unsigned now = CSysTicks::GetCounter();
-                 unsigned delta = now - last_rx_time;
+                 unsigned delta = CSysTicks::GetCounter() - last_rx_time;
                  if ( delta < m_min_at_cmd_interval )
                     {
                       CSysTicks::Delay(m_min_at_cmd_interval-delta);
                     }
                     
+                 m_work_cmd_starttime = CSysTicks::GetCounter();
                  unsigned buffsize;
                  p_modem->RecvBuffAccess(m_wbuff_idx,buffsize);  // save buff position
                  p_modem->SendATCmd(p_work_cmd->cmd.c_str());

@@ -3,7 +3,8 @@
 
 
 
-CMobile::CMobile(int rate,unsigned max_queue_cmds)
+
+CTelitMobile::CTelitMobile(int rate,unsigned max_queue_cmds)
 {
   m_baudrate = rate;
   p_modem = new CBoardModem(rate,RECV_BUFF_SIZE);
@@ -17,20 +18,20 @@ CMobile::CMobile(int rate,unsigned max_queue_cmds)
 }
 
 
-CMobile::~CMobile()
+CTelitMobile::~CTelitMobile()
 {
   SAFEDELETE(p_trm);
   SAFEDELETE(p_modem);
 }
 
 
-void CMobile::Poll()
+void CTelitMobile::Poll()
 {
   p_trm->Poll();
 }
 
 
-void CMobile::ResetModem()
+void CTelitMobile::ResetModem()
 {
   p_trm->ResetModem();
 
@@ -38,55 +39,56 @@ void CMobile::ResetModem()
 }
 
 
-bool CMobile::Startup(bool use_auto_answer_mode)
+bool CTelitMobile::Startup(bool use_auto_answer_mode)
 {
   bool rc = true;
   
-  rc = (rc && p_trm->PushAndWaitCompleteSimpleCmd(CFormat("AT+IPR=%d",m_baudrate)));
-  rc = (rc && p_trm->PushAndWaitCompleteSimpleCmd("AT+CMEE=2"));
-  rc = (rc && p_trm->PushAndWaitCompleteSimpleCmd(use_auto_answer_mode?"ATS0=1":"ATS0=0"));
+  rc = (p_trm->SyncProcessCmdSimple("AT") && rc);
+  rc = (p_trm->SyncProcessCmdSimple(CFormat("AT+IPR=%d",m_baudrate)) && rc);
+  rc = (p_trm->SyncProcessCmdSimple("AT+CMEE=2") && rc);
+  rc = (p_trm->SyncProcessCmdSimple(use_auto_answer_mode?"ATS0=1":"ATS0=0") && rc);
 
   return rc;
 }
 
 
-void CMobile::UpdateSIMStatus()
+void CTelitMobile::UpdateSIMStatus()
 {
   p_trm->Push("AT+CPIN?",GeneralStatusCBWrapper,this,6000);
 }
 
 
-void CMobile::UpdateNetStatus()
+void CTelitMobile::UpdateNetStatus()
 {
   p_trm->Push("AT+CREG?",GeneralStatusCBWrapper,this,2000);
 }
 
 
-void CMobile::UpdateGPRSStatus()
+void CTelitMobile::UpdateGPRSStatus()
 {
   p_trm->Push("AT+CGREG?",GeneralStatusCBWrapper,this,2000);
 }
 
 
-void CMobile::UpdateSignalQuality()
+void CTelitMobile::UpdateSignalQuality()
 {
   p_trm->Push("AT+CSQ",GeneralStatusCBWrapper,this,2000);
 }
 
 
-void CMobile::UpdateInternetConnectionStatus()
+void CTelitMobile::UpdateInternetConnectionStatus()
 {
   p_trm->Push("AT#SGACT?",GeneralStatusCBWrapper,this,2000);
 }
 
 
-void CMobile::GeneralStatusCBWrapper(void *parm,int id,const char *cmd,const char *answer,bool is_timeout,bool is_answered_ok)
+void CTelitMobile::GeneralStatusCBWrapper(void *parm,int id,const char *cmd,const char *answer,bool is_timeout,bool is_answered_ok)
 {
-  reinterpret_cast<CMobile*>(parm)->GeneralStatusCB(id,cmd,answer,is_timeout,is_answered_ok);
+  reinterpret_cast<CTelitMobile*>(parm)->GeneralStatusCB(id,cmd,answer,is_timeout,is_answered_ok);
 }
 
 
-void CMobile::GeneralStatusCB(int id,const char *cmd,const char *answer,bool is_timeout,bool is_answered_ok)
+void CTelitMobile::GeneralStatusCB(int id,const char *cmd,const char *answer,bool is_timeout,bool is_answered_ok)
 {
   if ( !is_timeout && !IsStrEmpty(answer) )
      {
@@ -97,62 +99,12 @@ void CMobile::GeneralStatusCB(int id,const char *cmd,const char *answer,bool is_
        else
        if ( !strcmp(cmd,"AT+CREG?") )
           {
-            if ( !is_answered_ok )
-               {
-                 m_net_status = NET_UNKNOWN;
-               }
-            else
-               {
-                 if ( strstr(answer,"+CREG: 0,0") )
-                  m_net_status = NET_NOT_REGISTERED;
-                 else
-                 if ( strstr(answer,"+CREG: 0,1") )
-                  m_net_status = NET_REGISTERED_HOME;
-                 else
-                 if ( strstr(answer,"+CREG: 0,2") )
-                  m_net_status = NET_SEARCHING;
-                 else
-                 if ( strstr(answer,"+CREG: 0,3") )
-                  m_net_status = NET_DENIED;
-                 else
-                 if ( strstr(answer,"+CREG: 0,4") )
-                  m_net_status = NET_UNKNOWN;
-                 else
-                 if ( strstr(answer,"+CREG: 0,5") )
-                  m_net_status = NET_REGISTERED_ROAMING;
-                 else
-                  m_net_status = NET_UNKNOWN;
-               }
+            m_net_status = GetNetRegResultInternal(is_answered_ok,answer,"+CREG: 0,");
           }
        else
        if ( !strcmp(cmd,"AT+CGREG?") )
           {
-            if ( !is_answered_ok )
-               {
-                 m_gprs_status = NET_UNKNOWN;
-               }
-            else
-               {
-                 if ( strstr(answer,"+CGREG: 0,0") )
-                  m_gprs_status = NET_NOT_REGISTERED;
-                 else
-                 if ( strstr(answer,"+CGREG: 0,1") )
-                  m_gprs_status = NET_REGISTERED_HOME;
-                 else
-                 if ( strstr(answer,"+CGREG: 0,2") )
-                  m_gprs_status = NET_SEARCHING;
-                 else
-                 if ( strstr(answer,"+CGREG: 0,3") )
-                  m_gprs_status = NET_DENIED;
-                 else
-                 if ( strstr(answer,"+CGREG: 0,4") )
-                  m_gprs_status = NET_UNKNOWN;
-                 else
-                 if ( strstr(answer,"+CGREG: 0,5") )
-                  m_gprs_status = NET_REGISTERED_ROAMING;
-                 else
-                  m_gprs_status = NET_UNKNOWN;
-               }
+            m_gprs_status = GetNetRegResultInternal(is_answered_ok,answer,"+CGREG: 0,");
           }
        else
        if ( !strcmp(cmd,"AT+CSQ") )
@@ -194,13 +146,48 @@ void CMobile::GeneralStatusCB(int id,const char *cmd,const char *answer,bool is_
 }
 
 
-int CMobile::InitUSSDRequest(const char *ussd,CTerminal::TCALLBACK cb,void *cbparm,unsigned max_time_to_wait_answer)
+ENetStatus CTelitMobile::GetNetRegResultInternal(bool is_answered_ok,const char *answer,const char *srch)
+{
+  ENetStatus rc = NET_UNKNOWN;
+            
+  if ( is_answered_ok )
+     {
+       const char *p = strstr(answer,srch);
+       if ( p )
+          {
+            p += strlen(srch);
+            
+            if ( *p == '0' )
+             rc = NET_NOT_REGISTERED;
+            else
+            if ( *p == '1' )
+             rc = NET_REGISTERED_HOME;
+            else
+            if ( *p == '2' )
+             rc = NET_SEARCHING;
+            else
+            if ( *p == '3' )
+             rc = NET_DENIED;
+            else
+            if ( *p == '4' )
+             rc = NET_UNKNOWN;
+            else
+            if ( *p == '5' )
+             rc = NET_REGISTERED_ROAMING;
+          }
+     }
+
+  return rc;
+}
+
+
+int CTelitMobile::InitUSSDRequest(const char *ussd,CTerminal::TCALLBACK cb,void *cbparm,unsigned max_time_to_wait_answer)
 {
   return p_trm->Push(CFormat("AT+CUSD=1,\"%s\"",NNS(ussd)),cb,cbparm,max_time_to_wait_answer,max_time_to_wait_answer);
 }
 
 
-std::string CMobile::DecodeUSSDAnswer(const char *answer)
+std::string CTelitMobile::DecodeUSSDAnswer(const char *answer)
 {
   std::string rc;
 
@@ -232,16 +219,16 @@ std::string CMobile::DecodeUSSDAnswer(const char *answer)
 }
 
 
-int CMobile::SendSMS(const char *phone,const char *text,CTerminal::TCALLBACK cb,void *cbparm,unsigned timeout)
+int CTelitMobile::SendSMS(const char *phone,const char *text,CTerminal::TCALLBACK cb,void *cbparm,unsigned timeout)
 {
-  p_trm->Push("AT+CMGF=1");
+  p_trm->Push("AT+CMGF=1");  // set text mode for SMS
 
   std::string s = "AT#CMGS=\"" + std::string(NNS(phone)) + "\",\"" + std::string(NNS(text)) + "\"";
   return p_trm->Push(s.c_str(),cb,cbparm,timeout);
 }
 
 
-void CMobile::InitiateInternetConnection(const char *apn,const char *user,const char *pwd,unsigned timeout)
+void CTelitMobile::InitiateInternetConnection(const char *apn,const char *user,const char *pwd,unsigned timeout)
 {
   p_trm->Push(CFormat("AT+CGDCONT=1,\"IP\",\"%s\"",NNS(apn)));
   p_trm->Push("AT#SCFG=1,1,300,90,600,50");  // set default socket parameters (needed)
@@ -260,33 +247,25 @@ void CMobile::InitiateInternetConnection(const char *apn,const char *user,const 
 }
 
 
-void CMobile::ShutdownInternetConnection(unsigned timeout)
+void CTelitMobile::ShutdownInternetConnection(unsigned timeout)
 {
   p_trm->Push("AT#SGACT=1,0",NULL,NULL,timeout);
 }
 
 
-int CMobile::SendStringTCP(const char *server,int port,const char *str,CTerminal::TCALLBACK cb,void *cbparm,unsigned conn_timeout,unsigned total_timeout)
+int CTelitMobile::SendStringTCP(const char *server,int port,const char *str,CTerminal::TCALLBACK cb,void *cbparm,
+                                unsigned conn_timeout,unsigned total_timeout)
 {
   conn_timeout /= 100;  // value in hundreds of msec
   conn_timeout = MAX(conn_timeout,10);
   conn_timeout = MIN(conn_timeout,1200);
-
   p_trm->Push(CFormat("AT#SCFG=1,1,0,0,%u,50",conn_timeout));
+
   p_trm->Push(CFormat("AT#IPCONSUMECFG=1,0,\"%s\",%d",NNS(server),port));
 
   std::string at = "AT#SSENDLINE=\""+std::string(NNS(str))+"\"";
   return p_trm->Push(at.c_str(),cb,cbparm,total_timeout);
 }
-
-
-
-
-
-
-
-
-
 
 
 

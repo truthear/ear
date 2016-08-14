@@ -25,8 +25,8 @@ class CTerminal
            std::string cmd;     // AT command (no '\r' at end!)
            TCALLBACK cb;
            void *cbparm;
-           unsigned min_wait;   // in ms
-           unsigned max_wait;   // in ms
+           unsigned min_wait;   // in ms, this time not includes time spending in queue
+           unsigned max_wait;   // in ms, this time not includes time spending in queue
           } TCMD;
 
           typedef std::vector<TCMD*> TCMDSAR;
@@ -47,11 +47,12 @@ class CTerminal
 
           // returns -1 if queue is full, or unique id if operation success
           int Push(const char *atcmd,TCALLBACK cb=NULL,void *cbparm=NULL,unsigned max_wait=1000,unsigned min_wait=0);
-
-          void PushAndWaitComplete(const char *atcmd,std::string& _answer,bool& _is_timeout,bool& _is_answered_ok,unsigned total_max_wait,unsigned command_max_wait,unsigned command_min_wait=0);
-          bool PushAndWaitCompleteSimpleCmd(const char *atcmd,unsigned total_max_wait=2000,unsigned command_max_wait=1000);
+          void SyncProcessCmd(const char *atcmd,std::string& _answer,bool& _is_timeout,bool& _is_answered_ok,
+                              unsigned command_max_wait=1000,unsigned command_min_wait=0);
+          bool SyncProcessCmdSimple(const char *atcmd,unsigned command_max_wait=1000);
           
           void Poll();
+
           void ResetModem();
 
   private:
