@@ -10,6 +10,8 @@ CModem::CModem(EBoardUarts uart,int rate,unsigned recv_buff_size,int irq_priorit
   m_recv_buff_idx = 0;
   p_recv_buff = (unsigned char*)malloc(m_recv_buff_size);
 
+  m_last_rx_time = CSysTicks::GetCounter();
+
   p_uart = new CBoardUART(uart,rate,true,true,OnRXCallbackWrapper,this,irq_priority);
 }
 
@@ -66,6 +68,8 @@ void CModem::OnRXCallback(unsigned char data)
      }
 
   m_recv_buff_idx = idx;  // update volatile idx at end
+
+  m_last_rx_time = CSysTicks::GetCounter();
 }
 
 
@@ -125,6 +129,13 @@ const unsigned char* CTelitModem::RecvBuffAccess(unsigned& _wpos,unsigned& _size
 }
 
 
+unsigned CTelitModem::GetLastRXTime() const
+{
+  return p_modem->GetLastRXTime();
+}
+
+
+
 
 CBoardModem::CBoardModem(int rate,unsigned recv_buff_size,int irq_priority)
 {
@@ -168,5 +179,9 @@ const unsigned char* CBoardModem::RecvBuffAccess(unsigned& _wpos,unsigned& _size
 }
 
 
+unsigned CBoardModem::GetLastRXTime() const
+{
+  return p_modem->GetLastRXTime();
+}
 
 

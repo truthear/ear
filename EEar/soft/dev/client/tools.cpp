@@ -101,6 +101,13 @@ char* COurTime::ToString(char *s) const
 }
 
 
+std::string COurTime::AsString() const
+{
+  char s[64];
+  return ToString(s);
+}
+
+
 bool COurTime::IsLeapYear(int yy)
 {
   return (yy % 4) == 0;  // true for 21'th century
@@ -114,4 +121,14 @@ const int* COurTime::GetMonthTable(int yy)
   
   return IsLeapYear(yy) ? leap_year : normal_year;
 }
+
+
+////////////////////
+
+
+bool IsStrEmpty(const char *s)
+{
+  return !s || !s[0];
+}
+
 
