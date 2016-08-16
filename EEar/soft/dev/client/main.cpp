@@ -162,7 +162,7 @@ void OnSMS(void *parm,int id,const char *cmd,const char *answer,bool is_timeout,
   if ( !is_timeout )
      {
        if ( !is_answered_ok )
-        printf("SMS: failed\n");
+        printf("SMS: failed \"%s\"\n",answer);
        else
         printf("SMS: OK\n");
      }
@@ -176,7 +176,7 @@ void OnSendString(void *parm,int id,const char *cmd,const char *answer,bool is_t
   if ( !is_timeout )
      {
        if ( !is_answered_ok )
-        printf("TCPSend: failed\n");
+        printf("TCPSend: failed \"%s\"\n",answer);
        else
         printf("TCPSend: OK\n");
      }
@@ -203,7 +203,6 @@ void OnSendString(void *parm,int id,const char *cmd,const char *answer,bool is_t
 //       mic_alert = true;
 //     }
 //}
-
 
 
 int main()
@@ -383,7 +382,9 @@ int main()
          CSysTicks::Delay(1000);
          //term->ShutdownInternetConnection();
          //term->SendSMS("+380509386084",COurTime(CRTC::GetTime()).AsString().c_str(),OnSMS);
-         term->SendStringTCP("195.234.5.137",81,CFormat("[%s] %.7f %.7f",COurTime(CRTC::GetTime()).AsString().c_str(),lat,lon),OnSendString);
+         //term->SendStringTCP("195.234.5.137",81,CFormat("[%s] %.7f %.7f",COurTime(CRTC::GetTime()).AsString().c_str(),lat,lon),OnSendString);
+         term->SendStringTCP("195.234.5.137",81,"ABCDabcdefghijklmnopqrstuvwxyz0123456789+/=0123456789",OnSendString);
+         //term->SendSMS("+380509386084","ABCDabcdefghijklmnopqrstuvwxyz0123456789+/=0123456789_0123456789_0123456789_0123456789_0123456789",OnSMS);
        }
 
     if ( btn3.IsDown() )
