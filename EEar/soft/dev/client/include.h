@@ -27,6 +27,8 @@
 #include "modem.h"
 #include "terminal.h"
 #include "mobile.h"
+#include "aes.h"
+#include "crc32.h"
 
 
 #endif
