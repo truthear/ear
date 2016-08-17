@@ -383,7 +383,8 @@ int main()
          //term->ShutdownInternetConnection();
          //term->SendSMS("+380509386084",COurTime(CRTC::GetTime()).AsString().c_str(),OnSMS);
          //term->SendStringTCP("195.234.5.137",81,CFormat("[%s] %.7f %.7f",COurTime(CRTC::GetTime()).AsString().c_str(),lat,lon),OnSendString);
-         term->SendStringTCP("195.234.5.137",81,"ABCDabcdefghijklmnopqrstuvwxyz0123456789+/=0123456789",OnSendString);
+         //term->SendStringTCP("195.234.5.137",81,"ABCDabcdefghijklmnopqrstuvwxyz0123456789+/=0123456789",OnSendString);
+         term->SendStringUDP("195.234.5.137",81,"ABCDabcdefghijklmnopqrstuvwxyz0123456789+/=0123456789",OnSendString);
          //term->SendSMS("+380509386084","ABCDabcdefghijklmnopqrstuvwxyz0123456789+/=0123456789_0123456789_0123456789_0123456789_0123456789",OnSMS);
        }
 
