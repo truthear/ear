@@ -77,6 +77,8 @@ class CTelitMobile
           // Warning! InitiateInternetConnection() should be called first
           int SendStringTCP(const char *server,int port,const char *str,CTerminal::TCALLBACK cb,void *cbparm=NULL,
                             unsigned conn_timeout=10000,unsigned total_timeout=15000);
+          int SendStringUDP(const char *server,int port,const char *str,CTerminal::TCALLBACK cb,void *cbparm=NULL,
+                            unsigned total_timeout=8000);
 
   private:
           static void GeneralStatusCBWrapper(void *parm,int id,const char *cmd,const char *answer,bool is_timeout,bool is_answered_ok);

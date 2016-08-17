@@ -268,5 +268,17 @@ int CTelitMobile::SendStringTCP(const char *server,int port,const char *str,CTer
 }
 
 
+int CTelitMobile::SendStringUDP(const char *server,int port,const char *str,CTerminal::TCALLBACK cb,void *cbparm,
+                                unsigned total_timeout)
+{
+  p_trm->Push("AT#SCFG=1,1,0,0,50,50");
+
+  p_trm->Push(CFormat("AT#IPCONSUMECFG=1,1,\"%s\",%d",NNS(server),port));
+
+  std::string at = "AT#SSENDLINE=\""+std::string(NNS(str))+"\"";
+  return p_trm->Push(at.c_str(),cb,cbparm,total_timeout);
+}
+
+
 
 
