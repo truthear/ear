@@ -44,7 +44,7 @@ class CTelitMobile
 
   public:
           // constructor takes about ~300 msec!
-          CTelitMobile(int rate=115200,unsigned max_queue_cmds=25);
+          CTelitMobile(int rate,unsigned max_queue_cmds); // each queued cmd allocates about ~64+cmd_len bytes in heap!
           ~CTelitMobile();
 
           // to work properly these function needs a calls to correspondent UpdateXXX() functions

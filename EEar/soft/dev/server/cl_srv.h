@@ -13,12 +13,14 @@
 
 enum {
 CMDID_SERVER_PING = 1,
+CMDID_USSD_BALANCE = 2,
 
 };
 
 
+// this struct should be at the beginning of any packet!!!
 typedef struct {
-unsigned char cmd_id;
+unsigned char cmd_id;   // should be first byte in packet!
 unsigned char sector;
 unsigned short device_id;
 unsigned short client_ver;
@@ -36,6 +38,11 @@ OURTIME time_utc;
 TGeo geo;
 unsigned last_timesync_ms;  // how many msec ago was last time sync
 } TCmdServerPing;
+
+typedef struct {
+TCmdHeader header;
+char text[1];  // NULL terminated text
+} TCmdUSSDBalance;
 
 
 

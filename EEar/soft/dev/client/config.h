@@ -10,6 +10,7 @@ unsigned char sector;
 int port_tcp;
 int port_udp;
 std::string server;
+std::string ussd_balance;
 
 } TCFG;
 

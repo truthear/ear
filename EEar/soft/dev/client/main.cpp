@@ -4,6 +4,7 @@
 
 
 CLog *plog = NULL;
+TCFG m_cfg;
 
 
 struct {
@@ -143,70 +144,6 @@ void MicCB(void *led,const int16_t* buff,int num_samples)
 
 
 
-void OnUSSD(void *parm,int id,const char *cmd,const char *answer,bool is_timeout,bool is_answered_ok)
-{
-  if ( !is_timeout )
-     {
-       if ( !is_answered_ok )
-        printf("USSD: failed\n");
-       else
-        printf("USSD: \"%s\"\n",CTelitMobile::DecodeUSSDAnswer(answer).c_str());
-     }
-  else
-   printf("USSD: timeout\n");
-}
-
-
-void OnSMS(void *parm,int id,const char *cmd,const char *answer,bool is_timeout,bool is_answered_ok)
-{
-  if ( !is_timeout )
-     {
-       if ( !is_answered_ok )
-        printf("SMS: failed \"%s\"\n",answer);
-       else
-        printf("SMS: OK\n");
-     }
-  else
-   printf("SMS: timeout\n");
-}
-
-
-void OnSendString(void *parm,int id,const char *cmd,const char *answer,bool is_timeout,bool is_answered_ok)
-{
-  if ( !is_timeout )
-     {
-       if ( !is_answered_ok )
-        printf("Send: failed \"%s\"\n",answer);
-       else
-        printf("Send: OK\n");
-     }
-  else
-   printf("Send: timeout\n");
-}
-
-
-
-//void OnButton(void*parm)
-//{
-//  reinterpret_cast<CUART*>(parm)->SendByte(5);
-//
-//  last_alert_time = mic_cb_counter; //CSysTicks::GetCounter();
-//  mic_alert = true;
-//}
-//
-//
-//void OnUart(void*,unsigned char data)
-//{
-//  if ( data == 5 )
-//     {
-//       last_alert_time = mic_cb_counter; //CSysTicks::GetCounter();
-//       mic_alert = true;
-//     }
-//}
-
-TCFG m_cfg;
-
-
 // returns Base64 string of [CRC32+AES]
 std::string EncodePacket(const void *sbuff,unsigned ssize)
 {
@@ -261,6 +198,98 @@ std::string PreparePingPacket()
 }
 
 
+std::string PrepareUSSDPacket(const char *text)
+{
+  text = NNS(text);
+
+  unsigned size = sizeof(TCmdHeader)+strlen(text)+1;
+  
+  TCmdUSSDBalance *i = (TCmdUSSDBalance*)alloca(size);  // not need to free
+
+  i->header.cmd_id = CMDID_USSD_BALANCE;
+  i->header.sector = m_cfg.sector;
+  i->header.device_id = m_cfg.device_id;
+  i->header.client_ver = CLIENT_VER;
+  i->header.fdetect_ver = FDETECT_VER;
+  strcpy(i->text,text);
+
+  return EncodePacket(i,size);
+}
+
+
+void OnSMS(void *parm,int id,const char *cmd,const char *answer,bool is_timeout,bool is_answered_ok)
+{
+  if ( !is_timeout )
+     {
+       if ( !is_answered_ok )
+        printf("SMS: failed \"%s\"\n",answer);
+       else
+        printf("SMS: OK\n");
+     }
+  else
+   printf("SMS: timeout\n");
+}
+
+
+void OnSendString(void *parm,int id,const char *cmd,const char *answer,bool is_timeout,bool is_answered_ok)
+{
+  if ( !is_timeout )
+     {
+       if ( !is_answered_ok )
+        printf("Send: failed \"%s\"\n",answer);
+       else
+        printf("Send: OK\n");
+     }
+  else
+   printf("Send: timeout\n");
+}
+
+void OnUSSD(void *parm,int id,const char *cmd,const char *answer,bool is_timeout,bool is_answered_ok)
+{
+  if ( !is_timeout )
+     {
+       if ( !is_answered_ok )
+        printf("USSD: failed\n");
+       else
+       {
+         std::string ussd = CTelitMobile::DecodeUSSDAnswer(answer);
+         
+         printf("USSD: \"%s\"\n",ussd.c_str());
+
+         CTelitMobile *term = reinterpret_cast<CTelitMobile*>(parm);
+
+         std::string packet = PrepareUSSDPacket(ussd.c_str());
+
+         term->SendStringUDP(m_cfg.server.c_str(),m_cfg.port_udp,packet.c_str(),OnSendString);
+         printf("UDP: %s\n",packet.c_str());
+      }
+     }
+  else
+   printf("USSD: timeout\n");
+}
+
+
+
+//void OnButton(void*parm)
+//{
+//  reinterpret_cast<CUART*>(parm)->SendByte(5);
+//
+//  last_alert_time = mic_cb_counter; //CSysTicks::GetCounter();
+//  mic_alert = true;
+//}
+//
+//
+//void OnUart(void*,unsigned char data)
+//{
+//  if ( data == 5 )
+//     {
+//       last_alert_time = mic_cb_counter; //CSysTicks::GetCounter();
+//       mic_alert = true;
+//     }
+//}
+
+
+
 
 int main()
 {
@@ -313,7 +342,7 @@ int main()
 
   bool old_synced = false;
 
-  CTelitMobile *term = new CTelitMobile();
+  CTelitMobile *term = new CTelitMobile(115200,100);
 
   if ( !term->Startup() )
      {
@@ -446,18 +475,24 @@ int main()
 
     if ( btn3.IsDown() )
        {
+         //led1->Off();
+         //led2->Off();
+         //led3->Off();
+         //led4->Off();
+         
          CSysTicks::Delay(1000);
-         std::string packet = PreparePingPacket();
-         term->SendStringUDP(m_cfg.server.c_str(),m_cfg.port_udp,packet.c_str(),OnSendString);
-         printf("UDP: %s\n",packet.c_str());
-         //term->InitUSSDRequest("*111#",OnUSSD);
+         //std::string packet = PreparePingPacket();
+         //term->SendStringUDP(m_cfg.server.c_str(),m_cfg.port_udp,packet.c_str(),OnSendString);
+         //printf("UDP: %s\n",packet.c_str());
+         term->InitUSSDRequest(m_cfg.ussd_balance.c_str(),OnUSSD,term);
+         printf("USSD initiated...\n");
        }
 
-    if ( CSysTicks::GetCounter() - last_send_time > 30000 )
-       {
-
-         last_send_time = CSysTicks::GetCounter();
-       }
+    //if ( CSysTicks::GetCounter() - last_send_time > 30000 )
+    //   {
+    //
+    //     last_send_time = CSysTicks::GetCounter();
+    //   }
 
 
     if ( CSysTicks::GetCounter() - last_display_time > 1000 )
