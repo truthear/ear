@@ -113,12 +113,14 @@ void CServer::ThreadProc()
     if ( CanReadNonBlocked(h_socket_udp) )
        {
          char buff[MAX_INCOMING_PACKET_SIZE];
-         int rbytes = recvfrom(h_socket_udp,buff,sizeof(buff),0,NULL,NULL);
+         struct sockaddr_in s_in;
+         int i_s_in_len = sizeof(s_in);
+         int rbytes = recvfrom(h_socket_udp,buff,sizeof(buff),0,(struct sockaddr*)&s_in,&i_s_in_len);
          if ( rbytes > 0 )
             {
               std::string b64(buff,(size_t)rbytes);
               std::string bin_packet = DecodePacket(b64);
-              DispatchPacket(bin_packet);
+              DispatchPacket(bin_packet,s_in.sin_addr.s_addr==0x0100007f);
             }
        }
 
@@ -160,7 +162,7 @@ void CServer::ThreadProc()
 
              if ( need_delete )
                 {
-                  DispatchPacket(DecodePacket(cl));  // try to dispatch data
+                  DispatchPacket(DecodePacket(cl),FALSE);  // try to dispatch data
                   SAFEDELETE(pcl);
                   clients.erase(it);
                   b_deleted = TRUE;
@@ -254,19 +256,70 @@ std::string CServer::DecodePacket(const std::string& b64)
 }
 
 
-void CServer::DispatchPacket(const std::string& bin)
+void CServer::DispatchPacket(const std::string& bin,BOOL is_from_localhost)
 {
   if ( !bin.empty() )
      {
        unsigned char cmd = (unsigned char)bin[0];
 
-       //...
-
-
-
+       if ( cmd == CMDID_SERVER_PING )
+          {
+            if ( bin.size() >= sizeof(TCmdServerPing) )
+               {
+                 OnServerPing(*(const TCmdServerPing*)bin.data(),is_from_localhost);
+               }
+          }
+       //else
+       //  ...
      }
 }
 
+
+void CServer::OnServerPing(const TCmdServerPing& cmd,BOOL is_from_sms)
+{
+  OURTIME srv_time_lcl = GetNowOurTime();
+  std::wstring srv_time_s = (const WCHAR*)CUnicode(OurTimeToString(srv_time_lcl).c_str());
+  std::wstring cl_time_s = (const WCHAR*)CUnicode((OurTimeToString(cmd.time_utc)+" UTC").c_str());
+  double lat = INT2GEO(cmd.geo.lat);
+  double lon = INT2GEO(cmd.geo.lon);
+
+  CLocalDB sql;
+
+  sql.Exec(L"CREATE TABLE IF NOT EXISTS TPing(dev_id INT NOT NULL PRIMARY KEY,sector INT,cl_ver INT,fd_ver INT,last_ts_ms INT,cl_time_utc INT,cl_time_s TEXT,srv_time_lcl INT,srv_time_s TEXT,lat REAL,lon REAL)");
+
+  CSQLiteQuery *q = sql.CreateQuery(L"UPDATE TPing SET sector=?,cl_ver=?,fd_ver=?,last_ts_ms=?,cl_time_utc=?,cl_time_s=?,srv_time_lcl=?,srv_time_s=?,lat=?,lon=? WHERE dev_id=?");
+  q->BindAsInt(cmd.header.sector);
+  q->BindAsInt(cmd.header.client_ver);
+  q->BindAsInt(cmd.header.fdetect_ver);
+  q->BindAsInt(cmd.last_timesync_ms);
+  q->BindAsInt64(cmd.time_utc);
+  q->BindAsText(cl_time_s);
+  q->BindAsInt64(srv_time_lcl);
+  q->BindAsText(srv_time_s);
+  q->BindAsDouble(lat);
+  q->BindAsDouble(lon);
+  q->BindAsInt(cmd.header.device_id);
+  BOOL need_insert = (q->Step() && sql.GetNumRowsAffected() == 0);
+  q->Destroy();
+
+  if ( need_insert )
+     {
+       CSQLiteQuery *q = sql.CreateQuery(L"INSERT INTO TPing VALUES(?,?,?,?,?,?,?,?,?,?,?)");
+       q->BindAsInt(cmd.header.device_id);
+       q->BindAsInt(cmd.header.sector);
+       q->BindAsInt(cmd.header.client_ver);
+       q->BindAsInt(cmd.header.fdetect_ver);
+       q->BindAsInt(cmd.last_timesync_ms);
+       q->BindAsInt64(cmd.time_utc);
+       q->BindAsText(cl_time_s);
+       q->BindAsInt64(srv_time_lcl);
+       q->BindAsText(srv_time_s);
+       q->BindAsDouble(lat);
+       q->BindAsDouble(lon);
+       q->Step();
+       q->Destroy();
+     }
+}
 
 
 

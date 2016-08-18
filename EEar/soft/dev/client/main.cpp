@@ -176,12 +176,12 @@ void OnSendString(void *parm,int id,const char *cmd,const char *answer,bool is_t
   if ( !is_timeout )
      {
        if ( !is_answered_ok )
-        printf("TCPSend: failed \"%s\"\n",answer);
+        printf("Send: failed \"%s\"\n",answer);
        else
-        printf("TCPSend: OK\n");
+        printf("Send: OK\n");
      }
   else
-   printf("TCPSend: timeout\n");
+   printf("Send: timeout\n");
 }
 
 
@@ -204,6 +204,63 @@ void OnSendString(void *parm,int id,const char *cmd,const char *answer,bool is_t
 //     }
 //}
 
+TCFG m_cfg;
+
+
+// returns Base64 string of [CRC32+AES]
+std::string EncodePacket(const void *sbuff,unsigned ssize)
+{
+  std::string rc;
+  
+  if ( ssize > 0 )
+     {
+       unsigned numblocks = (ssize+15)/16;
+       unsigned align_size = numblocks*16;
+       unsigned total_size = sizeof(unsigned)+align_size; // CRC32+16_aligned_packet
+
+       char *p = (char*)alloca(total_size);  // not need to free
+
+       // copy src packet
+       memcpy(p+sizeof(unsigned),sbuff,ssize);
+
+       // calc and save CRC32 of [packet+align_shit]:
+       *(unsigned*)p = CRC32(0,(const unsigned char*)(p+sizeof(unsigned)),align_size);  
+
+       // encode aligned data:
+       AESCONTEXT ctx;
+       aes_setkey_enc(&ctx,(const unsigned char*)OUR_AES_KEY,OUR_AES_KEY_SIZE);
+       for ( unsigned n = 0; n < numblocks; n++ )
+           {
+             unsigned char *ioblock = (unsigned char*)(p+sizeof(unsigned)+n*16);
+             aes_crypt_ecb_enc(&ctx,ioblock,ioblock);
+           }
+
+       // base64 of all data:
+       rc = Base64Encode(p,total_size);
+     }
+
+  return rc;
+}
+
+
+std::string PreparePingPacket()
+{
+  TCmdServerPing i;
+
+  i.header.cmd_id = CMDID_SERVER_PING;
+  i.header.sector = m_cfg.sector;
+  i.header.device_id = m_cfg.device_id;
+  i.header.client_ver = CLIENT_VER;
+  i.header.fdetect_ver = FDETECT_VER;
+  i.time_utc = CRTC::GetTime();
+  i.geo.lat = GEO2INT(gps_data.lat);
+  i.geo.lon = GEO2INT(gps_data.lon);
+  i.last_timesync_ms = CSysTicks::GetCounter()-gps_data.last_sync_time;
+
+  return EncodePacket(&i,sizeof(i));
+}
+
+
 
 int main()
 {
@@ -212,6 +269,8 @@ int main()
   CCPUTicks::Init();
   CSysTicks::Init();
   CDebugger::Init();
+
+  ReadConfig(m_cfg);
 
 //  CUART *uart = new CBoardUART(BOARD_UART_DEBUG,115200,true,true,OnUart);
 
@@ -380,18 +439,18 @@ int main()
     if ( btn2.IsDown() )
        {
          CSysTicks::Delay(1000);
-         //term->ShutdownInternetConnection();
-         //term->SendSMS("+380509386084",COurTime(CRTC::GetTime()).AsString().c_str(),OnSMS);
-         //term->SendStringTCP("195.234.5.137",81,CFormat("[%s] %.7f %.7f",COurTime(CRTC::GetTime()).AsString().c_str(),lat,lon),OnSendString);
-         //term->SendStringTCP("195.234.5.137",81,"ABCDabcdefghijklmnopqrstuvwxyz0123456789+/=0123456789",OnSendString);
-         term->SendStringUDP("195.234.5.137",81,"ABCDabcdefghijklmnopqrstuvwxyz0123456789+/=0123456789",OnSendString);
-         //term->SendSMS("+380509386084","ABCDabcdefghijklmnopqrstuvwxyz0123456789+/=0123456789_0123456789_0123456789_0123456789_0123456789",OnSMS);
+         std::string packet = PreparePingPacket();
+         term->SendStringTCP(m_cfg.server.c_str(),m_cfg.port_tcp,packet.c_str(),OnSendString);
+         printf("TCP: %s\n",packet.c_str());
        }
 
     if ( btn3.IsDown() )
        {
          CSysTicks::Delay(1000);
-         term->InitUSSDRequest("*111#",OnUSSD);
+         std::string packet = PreparePingPacket();
+         term->SendStringUDP(m_cfg.server.c_str(),m_cfg.port_udp,packet.c_str(),OnSendString);
+         printf("UDP: %s\n",packet.c_str());
+         //term->InitUSSDRequest("*111#",OnUSSD);
        }
 
     if ( CSysTicks::GetCounter() - last_send_time > 30000 )

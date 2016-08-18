@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 #include "stm32f4xx.h"
+#include "def.h"
 #include "tools.h"
 #include "led.h"
 #include "button.h"
@@ -29,6 +30,8 @@
 #include "mobile.h"
 #include "aes.h"
 #include "crc32.h"
+#include "../server/cl_srv.h"
+#include "config.h"
 
 
 #endif
