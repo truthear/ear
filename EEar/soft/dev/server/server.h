@@ -22,7 +22,8 @@ class CServer
           void ThreadProc();
           void BindSocket(SOCKET s,unsigned short port,const char *proto_desc);
           std::string DecodePacket(const std::string& b64);
-          void DispatchPacket(const std::string& bin);
+          void DispatchPacket(const std::string& bin,BOOL is_from_localhost);
+          void OnServerPing(const TCmdServerPing& cmd,BOOL is_from_sms);
 };
 
 

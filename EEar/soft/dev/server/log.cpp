@@ -13,8 +13,7 @@ void CLog::Add(const char *format,...)
   vsprintf(buffer,format,args);
   va_end(args);
 
-  CSQLite sql(GetDBFilename().c_str(),DB_LOCK_WRITE_TIMEOUT_MS,FALSE);
-  sql.TurnOffSyncWrite();  // speedup
+  CLocalDB sql;
 
   sql.Exec(L"CREATE TABLE IF NOT EXISTS TLog(ev_time INT,ev_desc TEXT)");
   sql.Exec(L"CREATE INDEX IF NOT EXISTS ILog ON TLog(ev_time)");
@@ -40,7 +39,7 @@ BOOL CLog::SaveLog(const char *filename)
        fwrite(&prefix,2,1,f);
 
        {
-         CSQLite sql(GetDBFilename().c_str(),DB_LOCK_READ_TIMEOUT_MS,TRUE);
+         CLocalDB sql(TRUE);
 
          CSQLiteQuery *q = sql.CreateQuery(L"SELECT ev_time,ev_desc FROM TLog ORDER BY ev_time DESC LIMIT 50000");
 
