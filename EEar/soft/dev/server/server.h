@@ -24,6 +24,7 @@ class CServer
           std::string DecodePacket(const std::string& b64);
           void DispatchPacket(const std::string& bin,BOOL is_from_localhost);
           void OnServerPing(const TCmdServerPing& cmd,BOOL is_from_sms);
+          void OnUSSDBalance(const TCmdUSSDBalance& cmd,BOOL is_from_sms);
 };
 
 

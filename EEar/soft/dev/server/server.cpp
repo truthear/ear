@@ -269,6 +269,14 @@ void CServer::DispatchPacket(const std::string& bin,BOOL is_from_localhost)
                  OnServerPing(*(const TCmdServerPing*)bin.data(),is_from_localhost);
                }
           }
+       else
+       if ( cmd == CMDID_USSD_BALANCE )
+          {
+            if ( bin.size() >= sizeof(TCmdHeader)+1 )
+               {
+                 OnUSSDBalance(*(const TCmdUSSDBalance*)bin.data(),is_from_localhost);
+               }
+          }
        //else
        //  ...
      }
@@ -316,6 +324,38 @@ void CServer::OnServerPing(const TCmdServerPing& cmd,BOOL is_from_sms)
        q->BindAsText(srv_time_s);
        q->BindAsDouble(lat);
        q->BindAsDouble(lon);
+       q->Step();
+       q->Destroy();
+     }
+}
+
+
+void CServer::OnUSSDBalance(const TCmdUSSDBalance& cmd,BOOL is_from_sms)
+{
+  std::wstring srv_time_s = (const WCHAR*)CUnicode(OurTimeToString(GetNowOurTime()).c_str());
+
+  char *txt = (char*)alloca(lstrlen(cmd.text)+1);  // not need to free
+  lstrcpy(txt,cmd.text);
+  StrTrim(txt," \r\n\t\"");
+  std::wstring ussd = (const WCHAR*)CUnicode(txt);
+
+  CLocalDB sql;
+
+  sql.Exec(L"CREATE TABLE IF NOT EXISTS TBalance(dev_id INT NOT NULL PRIMARY KEY,srv_time_s TEXT,ussd TEXT)");
+
+  CSQLiteQuery *q = sql.CreateQuery(L"UPDATE TBalance SET srv_time_s=?,ussd=? WHERE dev_id=?");
+  q->BindAsText(srv_time_s);
+  q->BindAsText(ussd);
+  q->BindAsInt(cmd.header.device_id);
+  BOOL need_insert = (q->Step() && sql.GetNumRowsAffected() == 0);
+  q->Destroy();
+
+  if ( need_insert )
+     {
+       CSQLiteQuery *q = sql.CreateQuery(L"INSERT INTO TBalance VALUES(?,?,?)");
+       q->BindAsInt(cmd.header.device_id);
+       q->BindAsText(srv_time_s);
+       q->BindAsText(ussd);
        q->Step();
        q->Destroy();
      }
