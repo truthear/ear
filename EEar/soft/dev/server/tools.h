@@ -103,5 +103,26 @@ class CLocalDB : public CSQLite
 };
 
 
+template<int _size>
+class CFormatStr
+{
+          char m_buffer[_size];
+  public:
+          CFormatStr(const char *format,...)
+          {
+            m_buffer[0] = 0;
+            va_list args;
+            va_start(args,format);
+            vsprintf(m_buffer,format,args);
+            va_end(args);
+          }
+
+          operator const char* () const { return m_buffer; }
+};
+
+
+typedef CFormatStr<1024> CFormat;
+
+
 
 #endif

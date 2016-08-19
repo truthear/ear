@@ -1,5 +1,7 @@
 
 #include <windows.h>
+#include <stdio.h>
+#include <stdarg.h>
 #include <string>
 #include "sqlite3.h"
 #include "sqlite.h"
