@@ -88,6 +88,9 @@ void FinishSocket(SOCKET& s);
 
 class CLocalDB : public CSQLite
 {
+          static const unsigned DB_LOCK_WRITE_TIMEOUT_MS = 1000;
+          static const unsigned DB_LOCK_READ_TIMEOUT_MS  = 1000;
+
   public:
           CLocalDB(BOOL is_read_only=FALSE)
              : CSQLite(::GetDBFilename().c_str(),is_read_only?DB_LOCK_READ_TIMEOUT_MS:DB_LOCK_WRITE_TIMEOUT_MS,is_read_only)
