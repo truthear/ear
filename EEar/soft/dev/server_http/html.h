@@ -25,6 +25,8 @@ class COutput
 
 std::string HTMLFilter(const std::string& s);
 std::wstring HTMLFilter(const std::wstring& s);
+std::string HTMLFilter(const char *s);
+std::wstring HTMLFilter(const WCHAR *s);
 
 
 

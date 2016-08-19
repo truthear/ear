@@ -114,3 +114,15 @@ std::wstring HTMLFilter(const std::wstring& s)
 }
 
 
+std::string HTMLFilter(const char *s)
+{
+  return HTMLFilter(std::string(NNS(s)));
+}
+
+
+std::wstring HTMLFilter(const WCHAR *s)
+{
+  return HTMLFilter(std::wstring(NNSW(s)));
+}
+
+
