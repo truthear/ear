@@ -1,0 +1,15 @@
+<Files "*.ini">
+deny from all
+</Files>
+
+<Files "*.dll">
+deny from all
+</Files>
+
+<Files "*.dat">
+deny from all
+</Files>
+
+<Files "earsvc.exe">
+deny from all
+</Files>
