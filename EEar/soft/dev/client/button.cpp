@@ -38,7 +38,7 @@ CButton::CButton(GPIO_TypeDef *_port,uint16_t _pin,uint32_t _clk,
   NVIC_InitTypeDef NVIC_InitStructure;
   NVIC_InitStructure.NVIC_IRQChannel = _irqn;
   NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 15;
-  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 15;
+  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
   NVIC_Init(&NVIC_InitStructure); 
 }

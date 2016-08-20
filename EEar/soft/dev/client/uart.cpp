@@ -97,7 +97,7 @@ CBoardUART::CBoardUART(EBoardUarts uart,int rate,bool allow_rx,bool allow_tx,
        NVIC_InitTypeDef nvic;
        nvic.NVIC_IRQChannel = UART_IRQn[uart];
        nvic.NVIC_IRQChannelPreemptionPriority = irq_priority;
-       nvic.NVIC_IRQChannelSubPriority = irq_priority;
+       nvic.NVIC_IRQChannelSubPriority = 0;
        nvic.NVIC_IRQChannelCmd = ENABLE;
        NVIC_Init(&nvic);
 
