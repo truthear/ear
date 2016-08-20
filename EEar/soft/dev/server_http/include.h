@@ -17,6 +17,7 @@
 #include "../server/tools.h"
 #include "mod_intf.h"
 #include "html.h"
+#include "db.h"
 
 
 #endif
