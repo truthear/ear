@@ -14,9 +14,6 @@ bool CSDCard::InitCard()
   
   if ( b_init_ok )
      {
-       //// Configure the NVIC Preemption Priority Bits
-       //NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
-
        NVIC_InitTypeDef NVIC_InitStructure;
        NVIC_InitStructure.NVIC_IRQChannel = SDIO_IRQn;
        NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;

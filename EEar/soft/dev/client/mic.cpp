@@ -19,7 +19,7 @@ void* CMic::p_cbparm = NULL;
 
 
 
-void CMic::Init(TCALLBACK cb,void *cbparm)
+void CMic::Init(TCALLBACK cb,void *cbparm,int irq_priority)
 {
   p_cb = cb;
   p_cbparm = cbparm;
@@ -111,8 +111,8 @@ void CMic::Init(TCALLBACK cb,void *cbparm)
   
   NVIC_InitTypeDef NVIC_InitStructure;
   NVIC_InitStructure.NVIC_IRQChannel = DMA1_Stream3_IRQn;
-  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 10;
-  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 10;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = irq_priority;
+  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
   NVIC_Init(&NVIC_InitStructure);
   

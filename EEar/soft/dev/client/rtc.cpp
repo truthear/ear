@@ -79,7 +79,7 @@ bool CRTC::Init(char yy,char mm,char dd,char wd,char hh,char nn,char ss,
             NVIC_InitTypeDef NVIC_InitStructure;
             NVIC_InitStructure.NVIC_IRQChannel = TAMP_STAMP_IRQn;
             NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = irq_priority;
-            NVIC_InitStructure.NVIC_IRQChannelSubPriority = irq_priority;
+            NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
             NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
             NVIC_Init(&NVIC_InitStructure); 
 

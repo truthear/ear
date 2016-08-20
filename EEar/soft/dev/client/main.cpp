@@ -294,6 +294,9 @@ void OnUSSD(void *parm,int id,const char *cmd,const char *answer,bool is_timeout
 int main()
 {
 //  CLEAROBJ(mic_sums);
+
+
+  NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);  // 4 bits for preemption priority, 0 for subpriority
   
   CCPUTicks::Init();
   CSysTicks::Init();

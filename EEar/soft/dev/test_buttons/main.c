@@ -62,14 +62,14 @@ void ButtonInit(int Button,int priority)
     /* Configure Button EXTI line */
     EXTI_InitStructure.EXTI_Line = BUTTON_EXTI_LINE[Button];
     EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;  
+    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;  
     EXTI_InitStructure.EXTI_LineCmd = ENABLE;
     EXTI_Init(&EXTI_InitStructure);
 
     /* Enable and set Button EXTI Interrupt to the lowest priority */
     NVIC_InitStructure.NVIC_IRQChannel = BUTTON_IRQn[Button];
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = priority;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = priority;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 
     NVIC_Init(&NVIC_InitStructure); 
@@ -80,6 +80,8 @@ void ButtonInit(int Button,int priority)
 
 int main(void)
 {
+  NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
+  
   InitUART3();
   
   STM_EVAL_LEDInit(LED3);
@@ -87,9 +89,9 @@ int main(void)
   STM_EVAL_LEDInit(LED5);
   STM_EVAL_LEDInit(LED6);
 
-  ButtonInit(0,10);
-  ButtonInit(1,1);
-  ButtonInit(2,1);
+  ButtonInit(0, 2);
+  ButtonInit(1, 1);
+  ButtonInit(2, 0);
   
   while (1)
   {
@@ -120,7 +122,7 @@ void EXTI9_5_IRQHandler()
 //    delay_ms(100);
 //    STM_EVAL_LEDOff(LED3);
 
-    printf("%d\n",++cnt);
+//    printf("%d\n",++cnt);
     
     delay_ms(2000);
 
@@ -133,21 +135,26 @@ void EXTI15_10_IRQHandler()
 {
   if ( EXTI_GetITStatus(BUTTON2_EXTI_LINE) != RESET )
   {
-    cnt += 100;
-    printf("%d\n",++cnt);
+    EXTI_ClearITPendingBit(BUTTON2_EXTI_LINE);  
+
+    STM_EVAL_LEDToggle(LED4);
+
+    delay_ms(2000);
+
+//    cnt += 100;
+//    printf("%d\n",++cnt);
     
     //STM_EVAL_LEDOn(LED4);
     //delay_ms(100);
     //STM_EVAL_LEDOff(LED4);
   
-    EXTI_ClearITPendingBit(BUTTON2_EXTI_LINE);  
   }
   
   if ( EXTI_GetITStatus(BUTTON3_EXTI_LINE) != RESET )
   {
-    STM_EVAL_LEDOn(LED5);
-    delay_ms(100);
-    STM_EVAL_LEDOff(LED5);
+    STM_EVAL_LEDToggle(LED5);
+    //delay_ms(100);
+    //STM_EVAL_LEDOff(LED5);
   
     EXTI_ClearITPendingBit(BUTTON3_EXTI_LINE);  
   }

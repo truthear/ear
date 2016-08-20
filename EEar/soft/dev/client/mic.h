@@ -15,7 +15,7 @@ class CMic
           static void *p_cbparm;
 
   public:
-          static void Init(TCALLBACK cb,void *cbparm=NULL);
+          static void Init(TCALLBACK cb,void *cbparm=NULL,int irq_priority=10);
 
   public:
           // used internally:
