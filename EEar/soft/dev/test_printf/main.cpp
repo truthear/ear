@@ -3,8 +3,8 @@
 #include "stm32f4xx.h"
 #include <stdio.h>
 //#include <stdarg.h>
-//#include <stdlib.h>
-//#include <vector>
+#include <stdlib.h>
+#include <vector>
 #include "dbg_uart.h"
 
 
@@ -19,20 +19,28 @@ void delay_ms_not_strict(uint32_t ms)
 }
 
 
+int v_data=1;
+int v_bss;
+std::vector<int> v;
+
+void Test()
+{
+  volatile char st[1000];
+  st[0] = 0;
+  st[sizeof(st)-1] = 0;
+  
+  printf("data: %p, bss: %p, stack: %p, malloc: %p, %f, %lf\n",&v_data,&v_bss,st,malloc(1000),1.,1.);
+
+  delay_ms_not_strict(1000);
+
+  Test();
+}
+
 
 int main(void)
 {
   InitUART3();
 
-  RCC_ClocksTypeDef clk;
-  RCC_GetClocksFreq(&clk);
-  
-  while (1)
-  {
-    printf("%u %u %u %u\n",(unsigned)clk.SYSCLK_Frequency,(unsigned)clk.HCLK_Frequency,(unsigned)clk.PCLK1_Frequency,(unsigned)clk.PCLK2_Frequency);
-
-    delay_ms_not_strict(1000);
-  }
-
+  Test();
 }
 

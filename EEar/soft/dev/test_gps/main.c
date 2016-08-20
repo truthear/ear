@@ -97,7 +97,10 @@ void TAMP_STAMP_IRQHandler()
        
        EXTI_ClearITPendingBit(TIMESTAMP_EXTI_LINE);
 
-       STM_EVAL_LEDToggle(LED5);
+       STM_EVAL_LEDOn(LED5);
+       delay_ms_not_strict(50);
+       STM_EVAL_LEDOff(LED5);
+       delay_ms_not_strict(50);
      }
 }
 
@@ -463,7 +466,11 @@ void EXTI15_10_IRQHandler()
   
   if ( EXTI_GetITStatus(BUTTON3_EXTI_LINE) != RESET )
   {
-    
+//    SendStringWithCRC("$PMTK314,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1");
+    SendStringWithCRC("$PMTK314,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0");
+    SendStringWithCRC("$PMTK353,1,0,0,0,0");  // GPS only
+
+  
     EXTI_ClearITPendingBit(BUTTON3_EXTI_LINE);  
   }
   
@@ -494,7 +501,13 @@ int main(void)
   InitUART3(); // debug
   InitUART1(); // GPS
 
+
+  //msDelay(1800);
+  //SendStringWithCRC("$PMTK314,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0");
+  //SendStringWithCRC("$PMTK353,1,0,0,0,0");  // GPS only
+
   STM_EVAL_LEDOn(LED4);
+
   
   while (1)
   {

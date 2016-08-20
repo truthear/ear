@@ -3,6 +3,7 @@
 #include "stm32f4xx.h"
 #include "stm32f4_discovery.h"
 #include <stdio.h>
+#include "dbg_uart.h"
 
 
 #define BUTTON1_PIN                GPIO_Pin_9
@@ -39,7 +40,7 @@ static const uint8_t BUTTON_PIN_SOURCE[]  = {BUTTON1_EXTI_PIN_SOURCE  ,BUTTON2_E
 static const uint8_t BUTTON_IRQn[]        = {BUTTON1_EXTI_IRQn        ,BUTTON2_EXTI_IRQn        ,BUTTON3_EXTI_IRQn        };
 
 
-void ButtonInit(int Button)
+void ButtonInit(int Button,int priority)
 {
   GPIO_InitTypeDef GPIO_InitStructure;
   EXTI_InitTypeDef EXTI_InitStructure;
@@ -61,14 +62,14 @@ void ButtonInit(int Button)
     /* Configure Button EXTI line */
     EXTI_InitStructure.EXTI_Line = BUTTON_EXTI_LINE[Button];
     EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;  
+    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;  
     EXTI_InitStructure.EXTI_LineCmd = ENABLE;
     EXTI_Init(&EXTI_InitStructure);
 
     /* Enable and set Button EXTI Interrupt to the lowest priority */
     NVIC_InitStructure.NVIC_IRQChannel = BUTTON_IRQn[Button];
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x0F;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x0F;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = priority;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = priority;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 
     NVIC_Init(&NVIC_InitStructure); 
@@ -79,14 +80,16 @@ void ButtonInit(int Button)
 
 int main(void)
 {
+  InitUART3();
+  
   STM_EVAL_LEDInit(LED3);
   STM_EVAL_LEDInit(LED4);
   STM_EVAL_LEDInit(LED5);
   STM_EVAL_LEDInit(LED6);
 
-  ButtonInit(0);
-  ButtonInit(1);
-  ButtonInit(2);
+  ButtonInit(0,10);
+  ButtonInit(1,1);
+  ButtonInit(2,1);
   
   while (1)
   {
@@ -105,16 +108,23 @@ void delay_ms(uint32_t ms)
 }
 
 
+volatile int cnt = 0;
 
 void EXTI9_5_IRQHandler()
 {
   if ( EXTI_GetITStatus(BUTTON1_EXTI_LINE) != RESET )
   {
-    STM_EVAL_LEDOn(LED3);
-    delay_ms(100);
-    STM_EVAL_LEDOff(LED3);
-  
     EXTI_ClearITPendingBit(BUTTON1_EXTI_LINE);  
+
+    STM_EVAL_LEDToggle(LED3);
+//    delay_ms(100);
+//    STM_EVAL_LEDOff(LED3);
+
+    printf("%d\n",++cnt);
+    
+    delay_ms(2000);
+
+  
   }
 }
 
@@ -123,9 +133,12 @@ void EXTI15_10_IRQHandler()
 {
   if ( EXTI_GetITStatus(BUTTON2_EXTI_LINE) != RESET )
   {
-    STM_EVAL_LEDOn(LED4);
-    delay_ms(100);
-    STM_EVAL_LEDOff(LED4);
+    cnt += 100;
+    printf("%d\n",++cnt);
+    
+    //STM_EVAL_LEDOn(LED4);
+    //delay_ms(100);
+    //STM_EVAL_LEDOff(LED4);
   
     EXTI_ClearITPendingBit(BUTTON2_EXTI_LINE);  
   }

@@ -92,8 +92,8 @@ void USART2_IRQHandler()
 {
   if ( USART_GetITStatus(USART2,USART_IT_RXNE) != RESET )
      {
-       uint16_t c = USART_ReceiveData(USART2);
        USART_ClearITPendingBit(USART2,USART_IT_RXNE);
+       uint16_t c = USART_ReceiveData(USART2);
        
        BuffWrite(&device2debug,(unsigned char)c);
      }
@@ -356,15 +356,24 @@ int main(void)
 //  ButtonInit(1);
 //  ButtonInit(2);
 
-  
   InitUART3(); // debug
   InitUART2(); // GSM
+
+  GSM_Reset_Init();
+  GSM_Reset_Off(); // Off by default, but needed (not worked when ON)
+
+
+//  delay_ms_not_strict(300);  // here symbol 0 can be sent after power_on, at least 200 msec need to wait
+                             // after hardware reset no 0 will sent
 
   
   //delay_ms_not_strict(3000);
   
-  GSM_Reset_Init();
-  GSM_Reset_Off(); // Off
+
+
+
+
+
 //  delay_ms_not_strict(1000);
 //  GSM_Reset_ON();
 //  delay_ms_not_strict(300);
