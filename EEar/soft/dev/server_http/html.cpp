@@ -4,7 +4,7 @@
 
 
 
-COutput::COutput(TMODINTF *i,const WCHAR *title)
+CHTML::CHTML(TMODINTF *i,const WCHAR *title)
 {
   p_itf = i;
 
@@ -16,7 +16,7 @@ COutput::COutput(TMODINTF *i,const WCHAR *title)
   p_itf->Echo("<html>\n");
   p_itf->Echo("<head>\n");
   p_itf->Echo("<meta charset=\"utf-8\">\n");
-  p_itf->Echo(CFormat("<title>%s</title>\n",(const char*)CUTF8Encoder(title)));
+  p_itf->Echo(CFormat("<title>%s</title>\n",(const char*)CUTF8Encoder(HTMLFilter(title).c_str())));
   p_itf->Echo("<link rel=\"icon\" href=\"favicon.ico\" type=\"image/x-icon\" />\n");
   p_itf->Echo("<link rel=\"shortcut icon\" href=\"favicon.ico\" type=\"image/x-icon\" />\n");
   p_itf->Echo("</head>\n");
@@ -24,34 +24,52 @@ COutput::COutput(TMODINTF *i,const WCHAR *title)
 }
 
 
-COutput::~COutput()
+CHTML::~CHTML()
 {
   p_itf->Echo("</body>\n");
   p_itf->Echo("</html>\n");
 }
 
 
-void COutput::operator += (const char *s)
+void CHTML::operator += (const char *s)
 {
   p_itf->Echo((const char*)CUTF8Encoder((const WCHAR*)CUnicode(s)));
 }
 
 
-void COutput::operator += (const WCHAR *s)
+void CHTML::operator += (const WCHAR *s)
 {
   p_itf->Echo((const char*)CUTF8Encoder(s));
 }
 
 
-void COutput::operator += (const std::string& s)
+void CHTML::operator += (const std::string& s)
 {
   (*this) += s.c_str();
 }
 
 
-void COutput::operator += (const std::wstring& s)
+void CHTML::operator += (const std::wstring& s)
 {
   (*this) += s.c_str();
+}
+
+
+void CHTML::operator += (int v)
+{
+  (*this) += CFormat("%d",v);
+}
+
+
+void CHTML::operator += (__int64 v)
+{
+  (*this) += CFormat("%I64d",v);
+}
+
+
+void CHTML::operator += (double v)
+{
+  (*this) += CFormat("%.7f",v);
 }
 
 

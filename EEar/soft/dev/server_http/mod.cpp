@@ -6,130 +6,88 @@
 
 void ProcessLog(TMODINTF *i)
 {
-  COutput out(i,L"Server Log");
-
-  out += "<pre>\n";
+  CHTML out(i,L"Server Log");
 
   {
-    CLocalDB sql(TRUE);
+    CPre pre(i);
 
-    CSQLiteQuery *q = sql.CreateQuery(L"SELECT ev_time,ev_desc FROM TLog ORDER BY ev_time DESC LIMIT 50000");
-
-    BOOL is_data = FALSE;
-    while ( q->Step(&is_data) && is_data )
     {
-      out += HTMLFilter("["+OurTimeToString(q->GetAsInt64(0))+"] ");
-      out += HTMLFilter(q->GetAsText(1));
-      out += "\n";
+      CReadDBTable db(L"SELECT ev_time,ev_desc FROM TLog ORDER BY ev_time DESC LIMIT 50000");
+
+      while ( db.FetchRow() )
+      {
+        out += HTMLFilter("["+OurTimeToString(db.GetAsInt64(0))+"] ");
+        out += HTMLFilter(db.GetAsText(1));
+        out += "\n";
+      }
     }
-
-    q->Destroy();
   }
-
-  out += "</pre>\n";
 }
 
 
 void ProcessPing(TMODINTF *i)
 {
-  COutput out(i,L"Clients Ping");
+  CHTML out(i,L"Clients Ping");
 
   {
-    CLocalDB sql(TRUE);
+    CReadDBTable db(L"SELECT dev_id,sector,cl_ver,fd_ver,last_ts_ms,cl_time_s,srv_time_s,lat,lon FROM TPing ORDER BY srv_time_lcl DESC");
 
-    CSQLiteQuery *q = sql.CreateQuery(L"SELECT dev_id,sector,cl_ver,fd_ver,last_ts_ms,cl_time_s,srv_time_s,lat,lon FROM TPing ORDER BY dev_id");
+    CTable tbl(i);
 
-    out += "<table border=\"1\" cellspacing=\"0\" cellpadding=\"3\">\n";
-
-    out += "<tr>"
-           "<td align=\"center\"><b>dev_id</b></td>"
-           "<td align=\"center\"><b>sector</b></td>"
-           "<td align=\"center\"><b>version</b></td>"
-           "<td align=\"center\"><b>last_ts (msec)</b></td>"
-           "<td align=\"center\"><b>client time (UTC)</b></td>"
-           "<td align=\"center\"><b>server time (local)</b></td>"
-           "<td align=\"center\"><b>geo location</b></td>"
-           "</tr>\n";
-
-    BOOL is_data = FALSE;
-    while ( q->Step(&is_data) && is_data )
     {
-      out += "<tr>\n";
-
-      out += "<td>\n";
-      out += HTMLFilter(CFormat("%d",q->GetAsInt(0)));
-      out += "</td>\n";
-      
-      out += "<td>\n";
-      out += HTMLFilter(CFormat("%d",q->GetAsInt(1)));
-      out += "</td>\n";
-      
-      out += "<td>\n";
-      out += HTMLFilter(CFormat("v%X (%X)",q->GetAsInt(2),q->GetAsInt(3)));
-      out += "</td>\n";
-      
-      out += "<td>\n";
-      out += HTMLFilter(CFormat("%d",q->GetAsInt(4)));
-      out += "</td>\n";
-
-      out += "<td>\n";
-      out += HTMLFilter(q->GetAsText(5));
-      out += "</td>\n";
-      
-      out += "<td>\n";
-      out += HTMLFilter(q->GetAsText(6));
-      out += "</td>\n";
-
-      out += "<td>\n";
-      out += CFormat("<a href=\"https://maps.google.com/maps?ll=%.7f,%.7f&spn=0.001,0.001&t=m&q=%.7f,%.7f\" target=\"_blank\">%.7f,%.7f</a>",q->GetAsDouble(7),q->GetAsDouble(8),q->GetAsDouble(7),q->GetAsDouble(8),q->GetAsDouble(7),q->GetAsDouble(8));
-      out += "</td>\n";
-
-      out += "</tr>\n";
+      CTableRow r(i);
+      { CTableCellHeader c(i); out += HTMLFilter("dev_id"); }
+      { CTableCellHeader c(i); out += HTMLFilter("sector"); }
+      { CTableCellHeader c(i); out += HTMLFilter("version"); }
+      { CTableCellHeader c(i); out += HTMLFilter("last_ts (msec)"); }
+      { CTableCellHeader c(i); out += HTMLFilter("client time (UTC)"); }
+      { CTableCellHeader c(i); CUnderline u(i); out += HTMLFilter("SERVER TIME (LOCAL)"); }
+      { CTableCellHeader c(i); out += HTMLFilter("geo location"); }
     }
 
-    out += "</table>\n";
-
-    q->Destroy();
+    while ( db.FetchRow() )
+    {
+      CTableRow r(i);
+      { CTableCell c(i); out += db.GetAsInt(0); }
+      { CTableCell c(i); out += db.GetAsInt(1); }
+      { CTableCell c(i); out += HTMLFilter(CFormat("v%X (%X)",db.GetAsInt(2),db.GetAsInt(3))); }
+      { CTableCell c(i); out += db.GetAsInt(4); }
+      { CTableCell c(i); out += HTMLFilter(db.GetAsText(5)); }
+      { CTableCell c(i); out += HTMLFilter(db.GetAsText(6)); }
+      { 
+        CTableCell c(i); 
+        std::string ll = CFormat("%.7f,%.7f",db.GetAsDouble(7),db.GetAsDouble(8));
+        CAnchor a(i,CFormat("https://maps.google.com/maps?ll=%s&spn=0.001,0.001&t=m&q=%s",ll.c_str(),ll.c_str()));
+        out += ll;
+      }
+    }
   }
 }
 
 
 void ProcessBalance(TMODINTF *i)
 {
-  COutput out(i,L"Clients USSD-Balance");
+  CHTML out(i,L"Clients Balance");
 
   {
-    CLocalDB sql(TRUE);
+    CReadDBTable db(L"SELECT dev_id,srv_time_s,ussd FROM TBalance ORDER BY dev_id");
 
-    CSQLiteQuery *q = sql.CreateQuery(L"SELECT dev_id,srv_time_s,ussd FROM TBalance ORDER BY dev_id");
+    CTable tbl(i);
 
-    out += "<table border=\"1\" cellspacing=\"0\" cellpadding=\"3\">\n";
-
-    out += "<tr><td align=\"center\"><b>dev_id</b></td><td align=\"center\"><b>server time</b></td><td align=\"center\"><b>ussd</b></td></tr>\n";
-
-    BOOL is_data = FALSE;
-    while ( q->Step(&is_data) && is_data )
     {
-      out += "<tr>\n";
-
-      out += "<td>\n";
-      out += HTMLFilter(CFormat("%d",q->GetAsInt(0)));
-      out += "</td>\n";
-      
-      out += "<td>\n";
-      out += HTMLFilter(q->GetAsText(1));
-      out += "</td>\n";
-      
-      out += "<td>\n";
-      out += HTMLFilter(q->GetAsText(2));
-      out += "</td>\n";
-
-      out += "</tr>\n";
+      CTableRow r(i);
+      { CTableCellHeader c(i); CUnderline u(i); out += HTMLFilter("DEV_ID"); }
+      { CTableCellHeader c(i); out += HTMLFilter("server time (local)"); }
+      { CTableCellHeader c(i); out += HTMLFilter("USSD answer"); }
     }
 
-    out += "</table>\n";
-
-    q->Destroy();
+    while ( db.FetchRow() )
+    {
+      CTableRow r(i);
+      { CTableCell c(i); out += db.GetAsInt(0); }
+      { CTableCell c(i); out += HTMLFilter(db.GetAsText(1)); }
+      { CTableCell c(i); out += HTMLFilter(db.GetAsText(2)); }
+    }
   }
 }
 
@@ -169,7 +127,6 @@ void ProcessSMS(TMODINTF *i)
 }
 
 
-extern "C"
 void __stdcall Processing(TMODINTF *i)
 {
   std::string action = i->_REQUEST("action");
