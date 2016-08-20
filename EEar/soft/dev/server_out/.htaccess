@@ -13,3 +13,9 @@ deny from all
 <Files "earsvc.exe">
 deny from all
 </Files>
+
+RewriteEngine On
+RewriteRule ^log$ cgi-ear.exe?action=log
+RewriteRule ^balance$ cgi-ear.exe?action=balance
+RewriteRule ^ping$ cgi-ear.exe?action=ping
+RewriteRule ^sms$ cgi-ear.exe?action=sms
