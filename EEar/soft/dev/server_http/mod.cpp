@@ -3,74 +3,124 @@
 
 
 
+HINSTANCE g_instance = NULL;
+
+
+struct TGeoLabel 
+{
+  double lat,lon;
+  std::string label;
+  TGeoLabel(double _lat,double _lon,const std::string& _label) : lat(_lat), lon(_lon), label(_label) {}
+};
+
+typedef std::vector<TGeoLabel> TGeoLabels;
+
+
+void ProduceGoogleMap(TMODINTF *i,const WCHAR *title,const TGeoLabels& labels)
+{
+  CHTML out(i,title,"onload=\"Init()\"");
+
+  out.AddRawString(LoadRawResource(g_instance,IDR_MAPBEGIN));
+
+  for ( unsigned n = 0; n < labels.size(); n++ )
+      {
+        const TGeoLabel& l = labels[n];
+
+        std::string s = l.label;
+        s = ReplaceSymbol(s,'\"','\'');
+        s = ReplaceSymbol(s,'\\','/');
+        s = ReplaceSymbol(s,'\r',' ');
+        s = ReplaceSymbol(s,'\n',' ');
+        s = ReplaceSymbol(s,'\t',' ');
+        
+        out += CFormat("%c[%.7f,%.7f,\"%s\"]\n",n==0?' ':',',l.lat,l.lon,s.c_str());
+      }
+
+  out.AddRawString(LoadRawResource(g_instance,IDR_MAPEND));
+}
+
+
+
 
 void ProcessLog(TMODINTF *i)
 {
-  CHTML out(i,L"Server Log");
+  CReadDBTable db(L"SELECT ev_time,ev_desc FROM TLog ORDER BY ev_time DESC LIMIT 5000");
 
   {
+    CHTML out(i,L"Server Log");
+
     CPre pre(i);
 
+    while ( db.FetchRow() )
     {
-      CReadDBTable db(L"SELECT ev_time,ev_desc FROM TLog ORDER BY ev_time DESC LIMIT 5000");
-
-      while ( db.FetchRow() )
-      {
-        out += HTMLFilter("["+OurTimeToString(db.GetAsInt64(0))+"] ");
-        out += HTMLFilter(db.GetAsText(1));
-        out += "\n";
-      }
+      out += HTMLFilter("["+OurTimeToString(db.GetAsInt64(0))+"] ");
+      out += HTMLFilter(db.GetAsText(1));
+      out += "\n";
     }
   }
 }
 
 
-void ProcessPing(TMODINTF *i)
+void ProcessPing(TMODINTF *i,BOOL map_view)
 {
-  CHTML out(i,L"Clients Ping");
+  const WCHAR *title = L"Clients Ping";
+  
+  CReadDBTable db(L"SELECT dev_id,sector,cl_ver,fd_ver,last_ts_ms,cl_time_s,srv_time_s,lat,lon FROM TPing ORDER BY srv_time_lcl DESC");
 
-  {
-    CReadDBTable db(L"SELECT dev_id,sector,cl_ver,fd_ver,last_ts_ms,cl_time_s,srv_time_s,lat,lon FROM TPing ORDER BY srv_time_lcl DESC");
+  if ( !map_view )
+     {
+       CHTML out(i,title);
 
-    CTable tbl(i);
+       CTable tbl(i);
 
-    {
-      CTableRow r(i);
-      { CTableCellHeader c(i); out += HTMLFilter("dev_id"); }
-      { CTableCellHeader c(i); out += HTMLFilter("sector"); }
-      { CTableCellHeader c(i); out += HTMLFilter("version"); }
-      { CTableCellHeader c(i); out += HTMLFilter("last_ts (msec)"); }
-      { CTableCellHeader c(i); out += HTMLFilter("client time (UTC)"); }
-      { CTableCellHeader c(i); CUnderline u(i); out += HTMLFilter("SERVER TIME (LOCAL)"); }
-      { CTableCellHeader c(i); out += HTMLFilter("geo location"); }
-    }
+       {
+         CTableRow r(i);
+         { CTableCellHeader c(i); out += HTMLFilter("dev_id"); }
+         { CTableCellHeader c(i); out += HTMLFilter("sector"); }
+         { CTableCellHeader c(i); out += HTMLFilter("version"); }
+         { CTableCellHeader c(i); out += HTMLFilter("last_ts (msec)"); }
+         { CTableCellHeader c(i); out += HTMLFilter("client time (UTC)"); }
+         { CTableCellHeader c(i); CUnderline u(i); out += HTMLFilter("SERVER TIME (LOCAL)"); }
+         { CTableCellHeader c(i); out += HTMLFilter("geo location"); }
+       }
 
-    while ( db.FetchRow() )
-    {
-      CTableRow r(i);
-      { CTableCell c(i); out += db.GetAsInt(0); }
-      { CTableCell c(i); out += db.GetAsInt(1); }
-      { CTableCell c(i); out += HTMLFilter(CFormat("v%X (%X)",db.GetAsInt(2),db.GetAsInt(3))); }
-      { CTableCell c(i); out += db.GetAsInt(4); }
-      { CTableCell c(i); out += HTMLFilter(db.GetAsText(5)); }
-      { CTableCell c(i); out += HTMLFilter(db.GetAsText(6)); }
-      { 
-        CTableCell c(i); 
-        std::string ll = CFormat("%.7f,%.7f",db.GetAsDouble(7),db.GetAsDouble(8));
-        CAnchor a(i,CFormat("https://maps.google.com/maps?ll=%s&spn=0.001,0.001&t=m&q=%s",ll.c_str(),ll.c_str()));
-        out += ll;
-      }
-    }
-  }
+       while ( db.FetchRow() )
+       {
+         CTableRow r(i);
+         { CTableCell c(i); out += db.GetAsInt(0); }
+         { CTableCell c(i); out += db.GetAsInt(1); }
+         { CTableCell c(i); out += HTMLFilter(CFormat("v%X (%X)",db.GetAsInt(2),db.GetAsInt(3))); }
+         { CTableCell c(i); out += db.GetAsInt(4); }
+         { CTableCell c(i); out += HTMLFilter(db.GetAsText(5)); }
+         { CTableCell c(i); out += HTMLFilter(db.GetAsText(6)); }
+         { 
+           CTableCell c(i); 
+           std::string ll = CFormat("%.7f,%.7f",db.GetAsDouble(7),db.GetAsDouble(8));
+           CAnchor a(i,CFormat("https://maps.google.com/maps?ll=%s&spn=0.001,0.001&t=m&q=%s",ll.c_str(),ll.c_str()));
+           out += ll;
+         }
+       }
+     }
+  else
+     {
+       TGeoLabels ar;
+     
+       while ( db.FetchRow() )
+       {
+         ar.push_back(TGeoLabel(db.GetAsDouble(7),db.GetAsDouble(8),(const char*)CFormat("%d/%d [%ws] %ws",db.GetAsInt(0),db.GetAsInt(1),db.GetAsText(5).c_str(),db.GetAsText(6).c_str())));
+       }
+
+       ProduceGoogleMap(i,title,ar);
+     }
 }
 
 
 void ProcessBalance(TMODINTF *i)
 {
-  CHTML out(i,L"Clients Balance");
+  CReadDBTable db(L"SELECT dev_id,srv_time_s,ussd FROM TBalance ORDER BY dev_id");
 
   {
-    CReadDBTable db(L"SELECT dev_id,srv_time_s,ussd FROM TBalance ORDER BY dev_id");
+    CHTML out(i,L"Clients Balance");
 
     CTable tbl(i);
 
@@ -94,10 +144,10 @@ void ProcessBalance(TMODINTF *i)
 
 void ProcessFDetect(TMODINTF *i)
 {
-  CHTML out(i,L"Single f-detect results");
+  CReadDBTable db(L"SELECT dev_id,sector,cl_ver,fd_ver,event_time_utc,srv_time_lcl,lat,lon,is_from_sms FROM TFDetect ORDER BY srv_time_lcl DESC LIMIT 5000");
 
   {
-    CReadDBTable db(L"SELECT dev_id,sector,cl_ver,fd_ver,event_time_utc,srv_time_lcl,lat,lon,is_from_sms FROM TFDetect ORDER BY srv_time_lcl DESC LIMIT 5000");
+    CHTML out(i,L"Single f-detect results");
 
     CTable tbl(i);
 
@@ -132,37 +182,51 @@ void ProcessFDetect(TMODINTF *i)
 }
 
 
-void ProcessResult(TMODINTF *i)
+void ProcessResult(TMODINTF *i,BOOL map_view)
 {
-  CHTML out(i,L"Results");
+  const WCHAR *title = L"Results";
+  
+  CReadDBTable db(L"SELECT sector,time_utc,lat,lon,numsources FROM TResult ORDER BY time_utc DESC LIMIT 5000");
 
-  {
-    CReadDBTable db(L"SELECT sector,time_utc,lat,lon,numsources FROM TResult ORDER BY time_utc DESC LIMIT 5000");
+  if ( !map_view )
+     {
+       CHTML out(i,title);
 
-    CTable tbl(i);
+       CTable tbl(i);
 
-    {
-      CTableRow r(i);
-      { CTableCellHeader c(i); out += HTMLFilter("sector"); }
-      { CTableCellHeader c(i); CUnderline u(i); out += HTMLFilter("TIME (UTC)"); }
-      { CTableCellHeader c(i); out += HTMLFilter("geo location"); }
-      { CTableCellHeader c(i); out += HTMLFilter("sources"); }
-    }
+       {
+         CTableRow r(i);
+         { CTableCellHeader c(i); out += HTMLFilter("sector"); }
+         { CTableCellHeader c(i); CUnderline u(i); out += HTMLFilter("TIME (UTC)"); }
+         { CTableCellHeader c(i); out += HTMLFilter("geo location"); }
+         { CTableCellHeader c(i); out += HTMLFilter("sources"); }
+       }
 
-    while ( db.FetchRow() )
-    {
-      CTableRow r(i);
-      { CTableCell c(i); out += db.GetAsInt(0); }
-      { CTableCell c(i); out += HTMLFilter(OurTimeToString(db.GetAsInt64(1))+" UTC"); }
-      { 
-        CTableCell c(i); 
-        std::string ll = CFormat("%.7f,%.7f",db.GetAsDouble(2),db.GetAsDouble(3));
-        CAnchor a(i,CFormat("https://maps.google.com/maps?ll=%s&spn=0.001,0.001&t=m&q=%s",ll.c_str(),ll.c_str()));
-        out += ll;
-      }
-      { CTableCell c(i); out += db.GetAsInt(4); }
-    }
-  }
+       while ( db.FetchRow() )
+       {
+         CTableRow r(i);
+         { CTableCell c(i); out += db.GetAsInt(0); }
+         { CTableCell c(i); out += HTMLFilter(OurTimeToString(db.GetAsInt64(1))+" UTC"); }
+         { 
+           CTableCell c(i); 
+           std::string ll = CFormat("%.7f,%.7f",db.GetAsDouble(2),db.GetAsDouble(3));
+           CAnchor a(i,CFormat("https://maps.google.com/maps?ll=%s&spn=0.001,0.001&t=m&q=%s",ll.c_str(),ll.c_str()));
+           out += ll;
+         }
+         { CTableCell c(i); out += db.GetAsInt(4); }
+       }
+     }
+  else
+     {
+       TGeoLabels ar;
+     
+       while ( db.FetchRow() )
+       {
+         ar.push_back(TGeoLabel(db.GetAsDouble(2),db.GetAsDouble(3),OurTimeToString(db.GetAsInt64(1))+" UTC"));
+       }
+
+       ProduceGoogleMap(i,title,ar);
+     }
 }
 
 
@@ -204,6 +268,8 @@ void ProcessSMS(TMODINTF *i)
 void __stdcall Processing(TMODINTF *i)
 {
   std::string action = i->_REQUEST("action");
+  std::string map = i->_REQUEST("map");
+  BOOL is_map = (map=="true");
 
   if ( action == "log" )
      {
@@ -212,7 +278,7 @@ void __stdcall Processing(TMODINTF *i)
   else
   if ( action == "ping" )
      {
-       ProcessPing(i);
+       ProcessPing(i,is_map);
      }
   else
   if ( action == "balance" )
@@ -227,7 +293,7 @@ void __stdcall Processing(TMODINTF *i)
   else
   if ( action == "result" )
      {
-       ProcessResult(i);
+       ProcessResult(i,is_map);
      }
   else
   if ( action == "sms" )
@@ -238,6 +304,21 @@ void __stdcall Processing(TMODINTF *i)
      {
        i->Echo("What do you mean?");
      }
+}
+
+
+extern "C" BOOL WINAPI DllMain(HINSTANCE hInst,int reason,void *lpReserved)
+{
+  if ( reason == DLL_PROCESS_ATTACH )
+     {
+       g_instance = hInst;
+     }
+  else
+  if ( reason == DLL_PROCESS_DETACH )
+     {
+     }
+
+  return TRUE;
 }
 
 

@@ -9,8 +9,11 @@ class CHTML
           TMODINTF *p_itf;
 
   public:
-          CHTML(TMODINTF *i,const WCHAR *title);
+          CHTML(TMODINTF *i,const WCHAR *title,const char *body_parms=NULL);
           ~CHTML();
+
+          void AddRawString(const char *s); // no UTF8 conversion here!
+          void AddRawString(const std::string& s); // no UTF8 conversion here!
 
           void operator += (const char *s);
           void operator += (const WCHAR *s);
