@@ -25,6 +25,9 @@ class CServer
           void DispatchPacket(const std::string& bin,BOOL is_from_localhost);
           void OnServerPing(const TCmdServerPing& cmd,BOOL is_from_sms);
           void OnUSSDBalance(const TCmdUSSDBalance& cmd,BOOL is_from_sms);
+          void OnFDetect(const TCmdFDetect& cmd,BOOL is_from_sms);
+          void SaveFDetectInfo2DB(const TCmdFDetect& cmd,BOOL is_from_sms);
+          void SaveCalculationResult2DB(int sector,OURTIME time_utc,double lat,double lon,int numsources);
 };
 
 

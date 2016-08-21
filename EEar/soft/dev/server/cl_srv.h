@@ -14,6 +14,7 @@
 enum {
 CMDID_SERVER_PING = 1,
 CMDID_USSD_BALANCE = 2,
+CMDID_FDETECT = 3,
 
 };
 
@@ -43,6 +44,12 @@ typedef struct {
 TCmdHeader header;
 char text[1];  // NULL terminated text
 } TCmdUSSDBalance;
+
+typedef struct {
+TCmdHeader header;
+OURTIME time_utc;   // event time
+TGeo geo;
+} TCmdFDetect;
 
 
 

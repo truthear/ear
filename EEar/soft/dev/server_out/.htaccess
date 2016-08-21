@@ -18,4 +18,6 @@ RewriteEngine On
 RewriteRule ^log$ cgi-ear.exe?action=log
 RewriteRule ^balance$ cgi-ear.exe?action=balance
 RewriteRule ^ping$ cgi-ear.exe?action=ping
+RewriteRule ^fd$ cgi-ear.exe?action=fd
+RewriteRule ^result$ cgi-ear.exe?action=result
 RewriteRule ^sms$ cgi-ear.exe?action=sms

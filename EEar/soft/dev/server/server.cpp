@@ -277,6 +277,14 @@ void CServer::DispatchPacket(const std::string& bin,BOOL is_from_localhost)
                  OnUSSDBalance(*(const TCmdUSSDBalance*)bin.data(),is_from_localhost);
                }
           }
+       else
+       if ( cmd == CMDID_FDETECT )
+          {
+            if ( bin.size() >= sizeof(TCmdFDetect) )
+               {
+                 OnFDetect(*(const TCmdFDetect*)bin.data(),is_from_localhost);
+               }
+          }
        //else
        //  ...
      }
@@ -362,15 +370,59 @@ void CServer::OnUSSDBalance(const TCmdUSSDBalance& cmd,BOOL is_from_sms)
 }
 
 
+void CServer::OnFDetect(const TCmdFDetect& cmd,BOOL is_from_sms)
+{
+  SaveFDetectInfo2DB(cmd,is_from_sms);
+
+  // ....
+  int sector = cmd.header.sector;
+  double lat = INT2GEO(cmd.geo.lat);
+  double lon = INT2GEO(cmd.geo.lon);
+  OURTIME time_utc = cmd.time_utc;
+  int numsources = 5;
+  SaveCalculationResult2DB(sector,time_utc,lat,lon,numsources);
+  ADD2LOG(("Got FDetect result! %.7f,%.7f [%s UTC] from %d sources",lat,lon,OurTimeToString(time_utc).c_str(),numsources));
+}
 
 
+void CServer::SaveFDetectInfo2DB(const TCmdFDetect& cmd,BOOL is_from_sms)
+{
+  CLocalDB sql;
+
+  sql.Exec(L"CREATE TABLE IF NOT EXISTS TFDetect(dev_id INT,sector INT,cl_ver INT,fd_ver INT,event_time_utc INT,srv_time_lcl INT,lat REAL,lon REAL,is_from_sms INT)");
+  sql.Exec(L"CREATE INDEX IF NOT EXISTS IFDetect1 ON TFDetect(srv_time_lcl)");
+
+  CSQLiteQuery *q = sql.CreateQuery(L"INSERT INTO TFDetect VALUES(?,?,?,?,?,?,?,?,?)");
+  q->BindAsInt(cmd.header.device_id);
+  q->BindAsInt(cmd.header.sector);
+  q->BindAsInt(cmd.header.client_ver);
+  q->BindAsInt(cmd.header.fdetect_ver);
+  q->BindAsInt64(cmd.time_utc);
+  q->BindAsInt64(GetNowOurTime());
+  q->BindAsDouble(INT2GEO(cmd.geo.lat));
+  q->BindAsDouble(INT2GEO(cmd.geo.lon));
+  q->BindAsInt(is_from_sms);
+  q->Step();
+  q->Destroy();
+}
 
 
+void CServer::SaveCalculationResult2DB(int sector,OURTIME time_utc,double lat,double lon,int numsources)
+{
+  CLocalDB sql;
 
+  sql.Exec(L"CREATE TABLE IF NOT EXISTS TResult(sector INT,time_utc INT,lat REAL,lon REAL,numsources INT)");
+  sql.Exec(L"CREATE INDEX IF NOT EXISTS IResult1 ON TResult(time_utc)");
 
-
-
-
+  CSQLiteQuery *q = sql.CreateQuery(L"INSERT INTO TResult VALUES(?,?,?,?,?)");
+  q->BindAsInt(sector);
+  q->BindAsInt64(time_utc);
+  q->BindAsDouble(lat);
+  q->BindAsDouble(lon);
+  q->BindAsInt(numsources);
+  q->Step();
+  q->Destroy();
+}
 
 
 
