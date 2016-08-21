@@ -1,0 +1,8 @@
+
+#include <windows.h>
+#include "resource.h"
+
+
+IDR_MAPBEGIN RCDATA "map_begin.html"
+IDR_MAPEND   RCDATA "map_end.html"
+

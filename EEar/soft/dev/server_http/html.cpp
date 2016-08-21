@@ -4,7 +4,7 @@
 
 
 
-CHTML::CHTML(TMODINTF *i,const WCHAR *title)
+CHTML::CHTML(TMODINTF *i,const WCHAR *title,const char *body_parms)
 {
   p_itf = i;
 
@@ -20,7 +20,7 @@ CHTML::CHTML(TMODINTF *i,const WCHAR *title)
   p_itf->Echo("<link rel=\"icon\" href=\"favicon.ico\" type=\"image/x-icon\" />\n");
   p_itf->Echo("<link rel=\"shortcut icon\" href=\"favicon.ico\" type=\"image/x-icon\" />\n");
   p_itf->Echo("</head>\n");
-  p_itf->Echo("<body>\n");
+  p_itf->Echo(IsStrEmpty(body_parms)?"<body>\n":CFormat("<body %s>\n",body_parms));
 }
 
 
@@ -28,6 +28,18 @@ CHTML::~CHTML()
 {
   p_itf->Echo("</body>\n");
   p_itf->Echo("</html>\n");
+}
+
+
+void CHTML::AddRawString(const char *s)
+{
+  p_itf->Echo(NNS(s));
+}
+
+
+void CHTML::AddRawString(const std::string& s)
+{
+  AddRawString(s.c_str());
 }
 
 

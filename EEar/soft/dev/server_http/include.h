@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string>
+#include <vector>
 #include "../server/def.h"
 #include "../server/ourtime.h"
 #include "../server/config.h"
@@ -18,6 +19,7 @@
 #include "mod_intf.h"
 #include "html.h"
 #include "db.h"
+#include "resource.h"
 
 
 #endif
