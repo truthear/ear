@@ -176,6 +176,13 @@ void FinishSocket(SOCKET& s)
 }
 
 
+int GetTimeZoneOffsetMinutes()
+{
+  TIME_ZONE_INFORMATION i;
+  ZeroMemory(&i,sizeof(i));
+  GetTimeZoneInformation(&i);
+  return -i.Bias;
+}
 
 
 

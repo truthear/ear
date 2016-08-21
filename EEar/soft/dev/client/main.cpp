@@ -217,6 +217,25 @@ std::string PrepareUSSDPacket(const char *text)
 }
 
 
+std::string PrepareFDetectPacket(OURTIME event_time)
+{
+  TCmdFDetect i;
+
+  i.header.cmd_id = CMDID_FDETECT;
+  i.header.sector = m_cfg.sector;
+  i.header.device_id = m_cfg.device_id;
+  i.header.client_ver = CLIENT_VER;
+  i.header.fdetect_ver = FDETECT_VER;
+  i.time_utc = event_time;
+  i.geo.lat = GEO2INT(gps_data.lat);
+  i.geo.lon = GEO2INT(gps_data.lon);
+
+  return EncodePacket(&i,sizeof(i));
+}
+
+
+
+
 void OnSMS(void *parm,int id,const char *cmd,const char *answer,bool is_timeout,bool is_answered_ok)
 {
   if ( !is_timeout )
@@ -471,7 +490,8 @@ int main()
     if ( btn2.IsDown() )
        {
          CSysTicks::Delay(1000);
-         std::string packet = PreparePingPacket();
+         //std::string packet = PreparePingPacket();
+         std::string packet = PrepareFDetectPacket(CRTC::GetTime());
          term->SendStringTCP(m_cfg.server.c_str(),m_cfg.port_tcp,packet.c_str(),OnSendString);
          printf("TCP: %s\n",packet.c_str());
        }

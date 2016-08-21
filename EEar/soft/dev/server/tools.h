@@ -83,7 +83,7 @@ std::string Base64Decode(const char *b64);
 std::wstring GetDBFilename();
 BOOL CanReadNonBlocked(SOCKET s,unsigned timeout_ms=0);
 void FinishSocket(SOCKET& s);
-
+int GetTimeZoneOffsetMinutes();
 
 
 class CLocalDB : public CSQLite
