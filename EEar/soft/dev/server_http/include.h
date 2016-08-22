@@ -17,9 +17,11 @@
 #include "../server/sqlite/sqlite.h"
 #include "../server/tools.h"
 #include "mod_intf.h"
-#include "html.h"
+#include "dll.h"
 #include "db.h"
+#include "html.h"
 #include "resource.h"
+#include "utils.h"
 
 
 #endif

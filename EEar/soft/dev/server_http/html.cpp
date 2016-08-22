@@ -16,7 +16,7 @@ CHTML::CHTML(TMODINTF *i,const WCHAR *title,const char *body_parms)
   p_itf->Echo("<html>\n");
   p_itf->Echo("<head>\n");
   p_itf->Echo("<meta charset=\"utf-8\">\n");
-  p_itf->Echo(CFormat("<title>%s</title>\n",(const char*)CUTF8Encoder(HTMLFilter(title).c_str())));
+  p_itf->Echo(CFormat("<title>%s</title>\n",(const char*)CUTF8Encoder(CHTMLTools::Filter(title).c_str())));
   p_itf->Echo("<link rel=\"icon\" href=\"favicon.ico\" type=\"image/x-icon\" />\n");
   p_itf->Echo("<link rel=\"shortcut icon\" href=\"favicon.ico\" type=\"image/x-icon\" />\n");
   p_itf->Echo("</head>\n");
@@ -88,7 +88,7 @@ void CHTML::operator += (double v)
 /////////////////
 
 
-std::string HTMLFilter(const std::string& s)
+std::string CHTMLTools::Filter(const std::string& s)
 {
   std::string rc;
   
@@ -116,7 +116,7 @@ std::string HTMLFilter(const std::string& s)
 }
 
 
-std::wstring HTMLFilter(const std::wstring& s)
+std::wstring CHTMLTools::Filter(const std::wstring& s)
 {
   std::wstring rc;
   
@@ -144,15 +144,70 @@ std::wstring HTMLFilter(const std::wstring& s)
 }
 
 
-std::string HTMLFilter(const char *s)
+std::string CHTMLTools::Filter(const char *s)
 {
-  return HTMLFilter(std::string(NNS(s)));
+  return Filter(std::string(NNS(s)));
 }
 
 
-std::wstring HTMLFilter(const WCHAR *s)
+std::wstring CHTMLTools::Filter(const WCHAR *s)
 {
-  return HTMLFilter(std::wstring(NNSW(s)));
+  return Filter(std::wstring(NNSW(s)));
 }
+
+
+void CHTMLTools::ProduceHeaderCell(TMODINTF *i,CHTML& out,const char *text,BOOL mark)
+{
+  CTableCellHeader c(i); 
+
+  if ( mark )
+     { 
+       CUnderline u(i); 
+       out += Filter(text); 
+     }
+  else
+     {
+       out += Filter(text); 
+     }
+}
+
+
+void CHTMLTools::ProduceGeoCell(TMODINTF *i,CHTML& out,CReadDBTable& db,int lat,int lon)
+{
+  CTableCell c(i); 
+  std::string ll = CFormat("%.7f,%.7f",db.GetAsDouble(lat),db.GetAsDouble(lon));
+  CAnchor a(i,CFormat("https://maps.google.com/maps?ll=%s&spn=0.001,0.001&t=m&q=%s",ll.c_str(),ll.c_str()));
+  out += Filter(ll);
+}
+
+
+void CHTMLTools::ProduceVerCell(TMODINTF *i,CHTML& out,CReadDBTable& db,int ver1,int ver2)
+{
+  CTableCell c(i); 
+  out += Filter(CFormat("v%X (%X)",db.GetAsInt(ver1),db.GetAsInt(ver2)));
+}
+
+
+void CHTMLTools::ProduceIntCell(TMODINTF *i,CHTML& out,CReadDBTable& db,int col)
+{
+  CTableCell c(i); 
+  out += db.GetAsInt(col);
+}
+
+
+void CHTMLTools::ProduceTextCell(TMODINTF *i,CHTML& out,CReadDBTable& db,int col)
+{
+  CTableCell c(i); 
+  out += Filter(db.GetAsText(col));
+}
+
+
+void CHTMLTools::ProduceTimeCell(TMODINTF *i,CHTML& out,CReadDBTable& db,int col,const char *postfix)
+{
+  CTableCell c(i); 
+  out += Filter(OurTimeToString(db.GetAsInt64(col))+NNS(postfix));
+}
+
+
 
 

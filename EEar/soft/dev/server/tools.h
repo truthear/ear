@@ -84,10 +84,6 @@ std::wstring GetDBFilename();
 BOOL CanReadNonBlocked(SOCKET s,unsigned timeout_ms=0);
 void FinishSocket(SOCKET& s);
 int GetTimeZoneOffsetMinutes();
-const void* LoadRawResource(HINSTANCE our_instance,int id,unsigned& _size);
-std::string LoadRawResource(HINSTANCE our_instance,int id);
-std::wstring ReplaceSymbol(const std::wstring& s,WCHAR from,WCHAR to);
-std::string ReplaceSymbol(const std::string& s,char from,char to);
 
 
 class CLocalDB : public CSQLite
