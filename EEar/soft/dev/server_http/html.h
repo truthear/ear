@@ -136,11 +136,22 @@ class CAnchor
 };
 
 
+class CHTMLTools
+{
+  public:
+          static std::string Filter(const std::string& s);
+          static std::wstring Filter(const std::wstring& s);
+          static std::string Filter(const char *s);
+          static std::wstring Filter(const WCHAR *s);
+          static void ProduceHeaderCell(TMODINTF *i,CHTML& out,const char *text,BOOL mark=FALSE);
+          static void ProduceGeoCell(TMODINTF *i,CHTML& out,CReadDBTable& db,int lat,int lon);
+          static void ProduceVerCell(TMODINTF *i,CHTML& out,CReadDBTable& db,int ver1,int ver2);
+          static void ProduceIntCell(TMODINTF *i,CHTML& out,CReadDBTable& db,int col);
+          static void ProduceTextCell(TMODINTF *i,CHTML& out,CReadDBTable& db,int col);
+          static void ProduceTimeCell(TMODINTF *i,CHTML& out,CReadDBTable& db,int col,const char *postfix=NULL);
 
-std::string HTMLFilter(const std::string& s);
-std::wstring HTMLFilter(const std::wstring& s);
-std::string HTMLFilter(const char *s);
-std::wstring HTMLFilter(const WCHAR *s);
+};
+
 
 
 
