@@ -28,6 +28,7 @@
 #include "modem.h"
 #include "terminal.h"
 #include "mobile.h"
+#include "satellite.h"
 #include "aes.h"
 #include "crc32.h"
 #include "../server/cl_srv.h"

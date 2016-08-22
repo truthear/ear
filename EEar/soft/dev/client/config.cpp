@@ -5,7 +5,7 @@
 
 void ReadConfig(TCFG &cfg)
 {
-  cfg.device_id = 13;
+  cfg.device_id = 12;
   cfg.sector = 22;
   cfg.port_tcp = DEFAULT_TCP_PORT;
   cfg.port_udp = DEFAULT_UDP_PORT;

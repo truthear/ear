@@ -6,56 +6,20 @@
 CLog *plog = NULL;
 TCFG m_cfg;
 
-
-struct {
- CCriticalSection o_cs;
- double lat,lon;
- short gnss;
- bool is_synced;
- unsigned last_sync_time;
-} gps_data;
-
-
-unsigned last_ts_time = 0;
-OURTIME last_ts_value = 0;  // TS value, not shifted
+CLED *led4 = NULL;
+CLED *led3 = NULL;
+CLED *led2 = NULL;
+CLED *led1 = NULL;
 
 
 
-void OnTS(void *led,OURTIME ts,OURTIME)
+void OnTS(void *sat,OURTIME ts,OURTIME)
 {
-  last_ts_time = CSysTicks::GetCounter();
-  last_ts_value = ts;
-
-  //reinterpret_cast<CLED*>(led)->Toggle();
+  reinterpret_cast<CSatellite*>(sat)->OnTS(ts);
+//  led4->Toggle();
 }
 
 
-void OnGPS(void *parm,OURTIME _time,double _lat,double _lon,short _gnss)
-{
-  if ( (_time % 1000) == 0 )  // only PPS time needed
-     {
-       bool synced = false;
-       
-       if ( CSysTicks::GetCounter() - last_ts_time < 1000 )
-          {
-            CRTC::SetShift(_time - last_ts_value);
-            synced = true;
-          }
-
-       if ( gps_data.o_cs.IsUnlocked() )
-          {
-            gps_data.lat = _lat;
-            gps_data.lon = _lon;
-            gps_data.gnss = _gnss;
-
-            if ( synced )
-               {
-                 gps_data.is_synced = true;
-                 gps_data.last_sync_time = CSysTicks::GetCounter();
-               }
-          }
-     }
-}
 
 
 //static const unsigned BUFFSAMPLES = CMic::SAMPLE_RATE*2;  // 2 sec
@@ -180,7 +144,7 @@ std::string EncodePacket(const void *sbuff,unsigned ssize)
 }
 
 
-std::string PreparePingPacket()
+std::string PreparePingPacket(double lat,double lon,unsigned last_time_sync)
 {
   TCmdServerPing i;
 
@@ -190,9 +154,9 @@ std::string PreparePingPacket()
   i.header.client_ver = CLIENT_VER;
   i.header.fdetect_ver = FDETECT_VER;
   i.time_utc = CRTC::GetTime();
-  i.geo.lat = GEO2INT(gps_data.lat);
-  i.geo.lon = GEO2INT(gps_data.lon);
-  i.last_timesync_ms = CSysTicks::GetCounter()-gps_data.last_sync_time;
+  i.geo.lat = GEO2INT(lat);
+  i.geo.lon = GEO2INT(lon);
+  i.last_timesync_ms = CSysTicks::GetCounter()-last_time_sync;
 
   return EncodePacket(&i,sizeof(i));
 }
@@ -217,7 +181,7 @@ std::string PrepareUSSDPacket(const char *text)
 }
 
 
-std::string PrepareFDetectPacket(OURTIME event_time)
+std::string PrepareFDetectPacket(OURTIME event_time,double lat,double lon)
 {
   TCmdFDetect i;
 
@@ -227,8 +191,8 @@ std::string PrepareFDetectPacket(OURTIME event_time)
   i.header.client_ver = CLIENT_VER;
   i.header.fdetect_ver = FDETECT_VER;
   i.time_utc = event_time;
-  i.geo.lat = GEO2INT(gps_data.lat);
-  i.geo.lon = GEO2INT(gps_data.lon);
+  i.geo.lat = GEO2INT(lat);
+  i.geo.lon = GEO2INT(lon);
 
   return EncodePacket(&i,sizeof(i));
 }
@@ -241,12 +205,12 @@ void OnSMS(void *parm,int id,const char *cmd,const char *answer,bool is_timeout,
   if ( !is_timeout )
      {
        if ( !is_answered_ok )
-        printf("SMS: failed \"%s\"\n",answer);
+        plog->Add("SMS: failed \"%s\"\n",answer);
        else
-        printf("SMS: OK\n");
+        plog->Add("SMS: OK\n");
      }
   else
-   printf("SMS: timeout\n");
+   plog->Add("SMS: timeout\n");
 }
 
 
@@ -255,12 +219,12 @@ void OnSendString(void *parm,int id,const char *cmd,const char *answer,bool is_t
   if ( !is_timeout )
      {
        if ( !is_answered_ok )
-        printf("Send: failed \"%s\"\n",answer);
+        plog->Add("Send: failed \"%s\"\n",answer);
        else
-        printf("Send: OK\n");
+        plog->Add("Send: OK\n");
      }
   else
-   printf("Send: timeout\n");
+   plog->Add("Send: timeout\n");
 }
 
 void OnUSSD(void *parm,int id,const char *cmd,const char *answer,bool is_timeout,bool is_answered_ok)
@@ -268,23 +232,23 @@ void OnUSSD(void *parm,int id,const char *cmd,const char *answer,bool is_timeout
   if ( !is_timeout )
      {
        if ( !is_answered_ok )
-        printf("USSD: failed\n");
+        plog->Add("USSD: failed\n");
        else
        {
          std::string ussd = CTelitMobile::DecodeUSSDAnswer(answer);
          
-         printf("USSD: \"%s\"\n",ussd.c_str());
+         plog->Add("USSD: \"%s\"\n",ussd.c_str());
 
          CTelitMobile *term = reinterpret_cast<CTelitMobile*>(parm);
 
          std::string packet = PrepareUSSDPacket(ussd.c_str());
 
          term->SendStringUDP(m_cfg.server.c_str(),m_cfg.port_udp,packet.c_str(),OnSendString);
-         printf("UDP: %s\n",packet.c_str());
+         plog->Add("UDP: %s\n",packet.c_str());
       }
      }
   else
-   printf("USSD: timeout\n");
+   plog->Add("USSD: timeout\n");
 }
 
 
@@ -323,18 +287,18 @@ int main()
 
   ReadConfig(m_cfg);
 
-//  CUART *uart = new CBoardUART(BOARD_UART_DEBUG,115200,true,true,OnUart);
-
-  CLED *led4 = new CBoardLED(BOARD_LED4);
-  CLED *led3 = new CBoardLED(BOARD_LED3);
-  CLED *led2 = new CBoardLED(BOARD_LED2);
-  CLED *led1 = new CBoardLED(BOARD_LED1);
+  led4 = new CBoardLED(BOARD_LED4);
+  led3 = new CBoardLED(BOARD_LED3);
+  led2 = new CBoardLED(BOARD_LED2);
+  led1 = new CBoardLED(BOARD_LED1);
 
   CBoardButton btn1(BOARD_BUTTON1);
   CBoardButton btn2(BOARD_BUTTON2);
   CBoardButton btn3(BOARD_BUTTON3);
 
-  if ( !CRTC::Init(20,2,29,RTC_Weekday_Tuesday,23,59,50,OnTS,led4) )
+  CSatellite *sat = new CSatellite(115200,true/*GPS*/,true/*Glonass*/,false,false);
+
+  if ( !CRTC::Init(20,2,29,RTC_Weekday_Tuesday,23,59,50,OnTS,sat) )
      {
        led1->On();
        led2->On();
@@ -343,24 +307,21 @@ int main()
        CSysTicks::DelayInfinite();
      }
 
-//  bool init_sdcard_ok = CSDCard::InitCard();
+//  if ( !CSDCard::InitCard() )
+//     {
+//       led1->On();
+//       led2->On();
+//       led3->On();
+//       led4->On();
+//       CSysTicks::DelayInfinite();
+//     }
 
 //  FATFS ffs;
 //  CLEAROBJ(ffs);
 //  f_mount(&ffs,"0:",1);  // should always succeed in our case
 
-  plog = new CLog(NULL/*"log.txt"*/,true);
+  plog = new CLog(NULL/*"log3.txt"*/,true);
   plog->Add("--- System started ---");
-
-  gps_data.lat = 0;
-  gps_data.lon = 0;
-  gps_data.gnss = 0x3f3f;
-  gps_data.is_synced = false;
-  gps_data.last_sync_time = 0;
-
-  CBoardGPS *gps = new CBoardGPS(115200,OnGPS,NULL);
-  unsigned gps_starttime = CSysTicks::GetCounter();
-  bool gps_initialized = false;
 
   bool old_synced = false;
 
@@ -376,7 +337,7 @@ int main()
      }
 
   unsigned last_term_update_time = CSysTicks::GetCounter() - 10000;
-  unsigned last_send_time = CSysTicks::GetCounter();
+  //unsigned last_send_time = CSysTicks::GetCounter();
   unsigned last_display_time = CSysTicks::GetCounter();
 
 //  CMic::Init(MicCB,led1);
@@ -392,15 +353,6 @@ int main()
 
   while (1)
   {
-    if ( !gps_initialized )
-       {
-         if ( CSysTicks::GetCounter() - gps_starttime > gps->GetWarmingUpTime() )
-            {
-              gps->EnableOnlyRMC();
-              gps->SetSearchMode(true/*GPS*/,true/*GLONASS*/,false,false);
-              gps_initialized = true;
-            }
-       }
     
     
 //    unsigned mic_safe_read = samples_wto >= BUFFSAMPLES/2 ? 0 : 1;
@@ -425,34 +377,27 @@ int main()
 //       }
 //       
 
+    sat->Poll();
     term->Poll();
     
-    double lat,lon;
-    short gnss;
-    bool is_synced;
-    
-    {
-      CCSGuard g(gps_data.o_cs);
+    double lat=0,lon=0;
+    short gnss=0x3f3f;
+    if ( !sat->GetNavData(lat,lon,gnss) )
+       {
+         gnss = 0x3f3f;
+       }
 
-      lat = gps_data.lat;
-      lon = gps_data.lon;
-      gnss = gps_data.gnss;
-
-      if ( gps_data.is_synced )
-         {
-           if ( CSysTicks::GetCounter() - gps_data.last_sync_time > 30000 )
-              {
-                gps_data.is_synced = false;
-              }
-         }
-      
-      is_synced = gps_data.is_synced;
-    }
+    OURTIME shift = 0;
+    bool is_synced = sat->GetTimeData(shift);
+    if ( is_synced )
+       {
+         CRTC::SetShift(shift);
+       }
 
     if ( old_synced != is_synced )
        {
          if ( is_synced )
-           plog->Add("Time sync event !!! %c%c",(gnss>>8)&0xFF,gnss&0xFF);
+           plog->Add("Time sync event !!!");
          else
            plog->Add("We\'ve lost time sync...");
 
@@ -490,10 +435,10 @@ int main()
     if ( btn2.IsDown() )
        {
          CSysTicks::Delay(1000);
-         //std::string packet = PreparePingPacket();
-         std::string packet = PrepareFDetectPacket(CRTC::GetTime());
+         //std::string packet = PreparePingPacket(lat,lon,sat->GetLastSyncTime());
+         std::string packet = PrepareFDetectPacket(CRTC::GetTime(),lat,lon);
          term->SendStringTCP(m_cfg.server.c_str(),m_cfg.port_tcp,packet.c_str(),OnSendString);
-         printf("TCP: %s\n",packet.c_str());
+         //plog->Add("TCP: %s\n",packet.c_str());
        }
 
     if ( btn3.IsDown() )
@@ -504,11 +449,11 @@ int main()
          //led4->Off();
          
          CSysTicks::Delay(1000);
-         //std::string packet = PreparePingPacket();
-         //term->SendStringUDP(m_cfg.server.c_str(),m_cfg.port_udp,packet.c_str(),OnSendString);
-         //printf("UDP: %s\n",packet.c_str());
-         term->InitUSSDRequest(m_cfg.ussd_balance.c_str(),OnUSSD,term);
-         printf("USSD initiated...\n");
+         std::string packet = PreparePingPacket(lat,lon,sat->GetLastSyncTime());
+         term->SendStringUDP(m_cfg.server.c_str(),m_cfg.port_udp,packet.c_str(),OnSendString);
+         //plog->Add("UDP: %s\n",packet.c_str());
+         //term->InitUSSDRequest(m_cfg.ussd_balance.c_str(),OnUSSD,term);
+         //plog->Add("USSD initiated...\n");
        }
 
     //if ( CSysTicks::GetCounter() - last_send_time > 30000 )
@@ -520,11 +465,12 @@ int main()
 
     if ( CSysTicks::GetCounter() - last_display_time > 1000 )
        {
-         plog->Add("SIM: %d, Net: %d, GPRS: %d, Inet: %d, Line: %d",term->GetSIMStatus(),
+         plog->Add("SIM:%d, Net:%d, GPRS:%d, Inet:%d, Line:%2d, GNSS:%c%c",term->GetSIMStatus(),
                                                                     term->GetNetStatus(),
                                                                     term->GetGPRSStatus(),
                                                                     (int)term->GetInternetConnectionStatus(),
-                                                                    term->GetSignalQuality());
+                                                                    term->GetSignalQuality(),
+                                                                    (gnss>>8)&0xFF,gnss&0xFF);
 
          last_display_time = CSysTicks::GetCounter();
        }
