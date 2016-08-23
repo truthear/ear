@@ -285,8 +285,6 @@ int main()
   CSysTicks::Init();
   CDebugger::Init();
 
-  ReadConfig(m_cfg);
-
   led4 = new CBoardLED(BOARD_LED4);
   led3 = new CBoardLED(BOARD_LED3);
   led2 = new CBoardLED(BOARD_LED2);
@@ -307,18 +305,25 @@ int main()
        CSysTicks::DelayInfinite();
      }
 
-//  if ( !CSDCard::InitCard() )
-//     {
-//       led1->On();
-//       led2->On();
-//       led3->On();
-//       led4->On();
-//       CSysTicks::DelayInfinite();
-//     }
+  if ( !CSDCard::InitCard() )
+     {
+       led1->On();
+       led2->On();
+       led3->On();
+       led4->On();
+       CSysTicks::DelayInfinite();
+     }
 
-//  FATFS ffs;
-//  CLEAROBJ(ffs);
-//  f_mount(&ffs,"0:",1);  // should always succeed in our case
+  FATFS ffs;
+  CLEAROBJ(ffs);
+  f_mount(&ffs,"0:",1);  // should always succeed in our case
+
+  if ( !ReadConfig(m_cfg) )
+     {
+       led4->On();
+       CSysTicks::DelayInfinite();
+     }
+
 
   plog = new CLog(NULL/*"log3.txt"*/,true);
   plog->Add("--- System started ---");

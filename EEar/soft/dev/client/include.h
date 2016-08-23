@@ -11,6 +11,7 @@
 #include <assert.h>
 #include <string>
 #include <vector>
+#include <map>
 #include "stm32f4xx.h"
 #include "def.h"
 #include "tools.h"
