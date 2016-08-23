@@ -23,5 +23,8 @@ class CLog
 };
 
 
+#define ADD2LOG(arglist)   { p_log->Add arglist; }
+
+
 
 #endif

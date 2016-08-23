@@ -44,6 +44,9 @@ class CCPUTicks : public CTicksCommon
 };
 
 
+// like in windows:
+#define GetTickCount()   CSysTicks::GetCounter()
+
 
 #endif
 

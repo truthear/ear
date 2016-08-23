@@ -3,113 +3,242 @@
 
 
 
-CLog *plog = NULL;
-TCFG m_cfg;
-
-CLED *led4 = NULL;
-CLED *led3 = NULL;
-CLED *led2 = NULL;
-CLED *led1 = NULL;
-
-
-
-void OnTS(void *sat,OURTIME ts,OURTIME)
+class CEar
 {
-  reinterpret_cast<CSatellite*>(sat)->OnTS(ts);
-//  led4->Toggle();
-}
+          static const int GSM_MODEM_BAUDRATE = 115200;
+          static const unsigned MOBILE_TERMINAL_MAX_QUEUE_COMMANDS = 25;
+          static const bool MOBILE_TERMINAL_AUTO_ANSWER_MODE = true;
+          static const bool LOG_STDOUT_ECHO = true;
+          
+          
+          CLED* m_leds[4];   // base objects
+          CLED* p_led1;      // pointer alias
+          CLED* p_led2;      // pointer alias
+          CLED* p_led3;      // pointer alias
+          CLED* p_led4;      // pointer alias
+          CLED* p_led_mic;   // pointer alias
+          CLED* p_led_gsm;   // pointer alias
+          CLED* p_led_sync;  // pointer alias
+          CLED* p_led_nosim; // pointer alias
+
+          FATFS m_ffs;
+
+          TCFG m_cfg;
+
+          CSatellite *p_sat;
+          CTelitMobile *p_mob;
+
+          CLog *p_log;
+
+          CButton *p_btn1;
+          CButton *p_btn2;
+          CButton *p_btn3;
+
+
+  public:
+          CEar();
+          ~CEar();
+
+          void MainLoop();
+
+  private:
+          void FatalError();
+          static void IRQ_OnButton1Wrapper(void*);
+          static void IRQ_OnButton2Wrapper(void*);
+          static void IRQ_OnButton3Wrapper(void*);
+          void IRQ_OnButton1();
+          void IRQ_OnButton2();
+          void IRQ_OnButton3();
+          static void IRQ_OnTimeStamp(void*,OURTIME ts_unshifted,OURTIME ts_shifted);
+          static void IRQ_OnMicWrapper(void*,const int16_t* pcm_buff,int num_samples);
+          void IRQ_OnMic(const int16_t* pcm_buff,int num_samples);
+          std::string EncodePacket(const void *sbuff,unsigned ssize);
+          std::string PreparePingPacket(double lat,double lon,unsigned last_time_sync);
+          std::string PrepareUSSDPacket(const char *text);
+          std::string PrepareFDetectPacket(OURTIME event_time,double lat,double lon);
+
+};
 
 
 
-
-//static const unsigned BUFFSAMPLES = CMic::SAMPLE_RATE*2;  // 2 sec
-//short samples[BUFFSAMPLES];
-//volatile unsigned samples_wto = 0;
-//bool mic_pause = false;
-
-
-//bool mic_alert = false;
-//unsigned last_alert_time = 0;
-
-//static const unsigned MAX_MIC_SUMS = 50;
-//int mic_sums[MAX_MIC_SUMS];
-//unsigned mic_sums_widx = 0;
-//volatile unsigned mic_cb_counter = 0;
-
-
-void MicCB(void *led,const int16_t* buff,int num_samples)
+CEar::CEar()
 {
-//  mic_cb_counter++;
+  // clear variables
+  CLEAROBJ(m_leds);
+  p_led1 = NULL;
+  p_led2 = NULL;
+  p_led3 = NULL;
+  p_led4 = NULL;
+  p_led_mic = NULL;
+  p_led_gsm = NULL;
+  p_led_sync = NULL;
+  p_led_nosim = NULL;
+  p_sat = NULL;
+  p_mob = NULL;
+  p_log = NULL;
+  p_btn1 = NULL;
+  p_btn2 = NULL;
+  p_btn3 = NULL;
 
-//  int sum = 0;
-
-//  if ( !mic_pause )
-/*     {
-       for ( int n = 0; n < num_samples; n++ )
-           {
-             short s = buff[n];
-             if ( s < 0 )
-              s = -s;
-             sum += s;
-           }
+  // system init
+  NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);  // 4 bits for preemption priority, 0 for subpriority
   
-       sum /= num_samples;
+  CCPUTicks::Init();
+  CSysTicks::Init();
+  CDebugger::Init();
+  // start from this point we can use printf()!
 
-       mic_sums[mic_sums_widx++] = sum;
-       if ( mic_sums_widx == MAX_MIC_SUMS )
-          {
-            mic_sums_widx = 0;
-          }
+  m_leds[0] = new CBoardLED(BOARD_LED1);
+  m_leds[1] = new CBoardLED(BOARD_LED2);
+  m_leds[2] = new CBoardLED(BOARD_LED3);
+  m_leds[3] = new CBoardLED(BOARD_LED4);
+  p_led1 = m_leds[0];
+  p_led2 = m_leds[1];
+  p_led3 = m_leds[2];
+  p_led4 = m_leds[3];
+  p_led_mic = p_led1;
+  p_led_gsm = p_led2;
+  p_led_sync = p_led3;
+  p_led_nosim = p_led4;
+  // start from this point we can use FatalError()
 
-       sum = 0;
-       for ( unsigned n = 0; n < MAX_MIC_SUMS; n++ )
-       {
-         sum += mic_sums[n];
-       }
-       sum /= MAX_MIC_SUMS;
-       
-       bool alert = sum>25000;
+  CSysTicks::Delay(100);  // paranoja
 
-       if ( alert )
-          {
-            if ( CSysTicks::GetCounter() - last_alert_time > 2000 )
-               {
-                 last_alert_time = CSysTicks::GetCounter();
-                 mic_alert = true;
-               }
-          }
-       
-     }*/
+  if ( !CSDCard::InitCard() )
+     {
+       printf("SDCard init failed\n");
+       FatalError();
+     }
 
-//  reinterpret_cast<CLED*>(led)->SetState(sum>2000);
-//
-//  unsigned idx = samples_wto;
-//
-//  for ( int n = 0; n < num_samples; n++ )
-//      {
-//        samples[idx+n] = mic_pause ? 0 : buff[n];
-//      }
-//
-//  idx += num_samples;
-//  if ( idx == BUFFSAMPLES )
-//    idx = 0;
-//
-//  samples_wto = idx;
+  // FatFs init
+  CLEAROBJ(m_ffs);
+  f_mount(&m_ffs,"0:",1);  // should always succeed in our case
+  // start from this point we can use file i/o f_XXXX
+
+  if ( !ReadConfig(m_cfg) )
+     {
+       printf("Read config failed\n");
+       FatalError();
+     }
+  // start from this point we can use m_cfg.XXX
+
+  p_sat = new CSatellite(m_cfg.gps_baud,m_cfg.use_gps,m_cfg.use_glonass,m_cfg.use_galileo,m_cfg.use_beidou);
+
+  if ( !CRTC::Init(5,5,5,RTC_Weekday_Thursday,0,0,0,IRQ_OnTimeStamp,p_sat) )
+     {
+       printf("RTC init failed\n");
+       FatalError();
+     }
+  // start from this point we can use CRTC::XXX
+
+  p_mob = new CTelitMobile(GSM_MODEM_BAUDRATE,MOBILE_TERMINAL_MAX_QUEUE_COMMANDS);
+  if ( !p_mob->Startup(MOBILE_TERMINAL_AUTO_ANSWER_MODE) )
+     {
+       printf("Mobile init failed\n");
+       FatalError();
+     }
+
+  CMic::Init(IRQ_OnMicWrapper,this);
+
+  p_log = new CLog(LOG_FILENAME,LOG_STDOUT_ECHO);
+  // start from this point we can use ADD2LOG()
+
+  p_btn1 = new CBoardButton(BOARD_BUTTON1,IRQ_OnButton1Wrapper,this);
+  p_btn2 = new CBoardButton(BOARD_BUTTON2,IRQ_OnButton2Wrapper,this);
+  p_btn3 = new CBoardButton(BOARD_BUTTON3,IRQ_OnButton3Wrapper,this);
 }
 
 
+CEar::~CEar()
+{
+  assert(false);
+}
 
-//void PrintTopOfHeap()
-//{
-//  void *p = malloc(1);
-//  printf("%p\n",p);
-//  free(p);
-//}
 
+void CEar::FatalError()
+{
+  p_led1->On();
+  p_led2->On();
+  p_led3->On();
+  p_led4->On();
+  CTicksCommon::DelayInfinite();
+}
+
+
+// WARNING!!! This is an IRQ handler!
+void CEar::IRQ_OnButton1Wrapper(void *parm)
+{
+  reinterpret_cast<CEar*>(parm)->IRQ_OnButton1();
+}
+
+
+// WARNING!!! This is an IRQ handler!
+void CEar::IRQ_OnButton2Wrapper(void *parm)
+{
+  reinterpret_cast<CEar*>(parm)->IRQ_OnButton2();
+}
+
+
+// WARNING!!! This is an IRQ handler!
+void CEar::IRQ_OnButton3Wrapper(void *parm)
+{
+  reinterpret_cast<CEar*>(parm)->IRQ_OnButton3();
+}
+
+
+// WARNING!!! This is an IRQ handler!
+void CEar::IRQ_OnButton1()
+{
+}
+
+
+// WARNING!!! This is an IRQ handler!
+void CEar::IRQ_OnButton2()
+{
+}
+
+
+// WARNING!!! This is an IRQ handler!
+void CEar::IRQ_OnButton3()
+{
+}
+
+
+// WARNING!!! This is an IRQ handler!
+void CEar::IRQ_OnTimeStamp(void *parm,OURTIME ts_unshifted,OURTIME ts_shifted)
+{
+  reinterpret_cast<CSatellite*>(parm)->OnTS(ts_unshifted);
+}
+
+
+// WARNING!!! This is an IRQ handler!
+void CEar::IRQ_OnMicWrapper(void *parm,const int16_t* pcm_buff,int num_samples)
+{
+  reinterpret_cast<CEar*>(parm)->IRQ_OnMic(pcm_buff,num_samples);
+}
+
+
+// WARNING!!! This is an IRQ handler!
+void CEar::IRQ_OnMic(const int16_t* pcm_buff,int num_samples)
+{
+  int sum = 0;
+
+  for ( int n = 0; n < num_samples; n++ )
+      {
+        short s = pcm_buff[n];
+        if ( s < 0 )
+         s = -s;
+        sum += s;
+      }
+
+  sum /= num_samples;
+
+  p_led_mic->SetState(sum>2000);
+}
 
 
 // returns Base64 string of [CRC32+AES]
-std::string EncodePacket(const void *sbuff,unsigned ssize)
+std::string CEar::EncodePacket(const void *sbuff,unsigned ssize)
 {
   std::string rc;
   
@@ -144,7 +273,7 @@ std::string EncodePacket(const void *sbuff,unsigned ssize)
 }
 
 
-std::string PreparePingPacket(double lat,double lon,unsigned last_time_sync)
+std::string CEar::PreparePingPacket(double lat,double lon,unsigned last_time_sync)
 {
   TCmdServerPing i;
 
@@ -162,7 +291,7 @@ std::string PreparePingPacket(double lat,double lon,unsigned last_time_sync)
 }
 
 
-std::string PrepareUSSDPacket(const char *text)
+std::string CEar::PrepareUSSDPacket(const char *text)
 {
   text = NNS(text);
 
@@ -181,7 +310,7 @@ std::string PrepareUSSDPacket(const char *text)
 }
 
 
-std::string PrepareFDetectPacket(OURTIME event_time,double lat,double lon)
+std::string CEar::PrepareFDetectPacket(OURTIME event_time,double lat,double lon)
 {
   TCmdFDetect i;
 
@@ -198,319 +327,66 @@ std::string PrepareFDetectPacket(OURTIME event_time,double lat,double lon)
 }
 
 
-
-
-void OnSMS(void *parm,int id,const char *cmd,const char *answer,bool is_timeout,bool is_answered_ok)
+void CEar::MainLoop()
 {
-  if ( !is_timeout )
-     {
-       if ( !is_answered_ok )
-        plog->Add("SMS: failed \"%s\"\n",answer);
-       else
-        plog->Add("SMS: OK\n");
-     }
-  else
-   plog->Add("SMS: timeout\n");
-}
+  ADD2LOG(("--- System started ---"));
+  ADD2LOG(("device_id: %d, sector: %d",m_cfg.device_id,m_cfg.sector));
 
+  unsigned last_update_sync = GetTickCount();
+  bool b_sync = false;
 
-void OnSendString(void *parm,int id,const char *cmd,const char *answer,bool is_timeout,bool is_answered_ok)
-{
-  if ( !is_timeout )
-     {
-       if ( !is_answered_ok )
-        plog->Add("Send: failed \"%s\"\n",answer);
-       else
-        plog->Add("Send: OK\n");
-     }
-  else
-   plog->Add("Send: timeout\n");
-}
+  unsigned last_update_gsm = GetTickCount();
 
-void OnUSSD(void *parm,int id,const char *cmd,const char *answer,bool is_timeout,bool is_answered_ok)
-{
-  if ( !is_timeout )
-     {
-       if ( !is_answered_ok )
-        plog->Add("USSD: failed\n");
-       else
+  while ( 1 )
+  {
+    // time sync
+    if ( GetTickCount() - last_update_sync > 1000 )
        {
-         std::string ussd = CTelitMobile::DecodeUSSDAnswer(answer);
-         
-         plog->Add("USSD: \"%s\"\n",ussd.c_str());
+         OURTIME shift = 0;
+         bool sync = p_sat->GetTimeData(shift);
+         if ( sync )
+            {
+              CRTC::SetShift(shift);
+            }
 
-         CTelitMobile *term = reinterpret_cast<CTelitMobile*>(parm);
+         p_led_sync->SetState(sync);
+            
+         if ( sync != b_sync )
+            {
+              b_sync = sync;
 
-         std::string packet = PrepareUSSDPacket(ussd.c_str());
+              ADD2LOG(("Sync: %s",sync?"YES":"no"));
+            }
 
-         term->SendStringUDP(m_cfg.server.c_str(),m_cfg.port_udp,packet.c_str(),OnSendString);
-         plog->Add("UDP: %s\n",packet.c_str());
-      }
-     }
-  else
-   plog->Add("USSD: timeout\n");
+         last_update_sync = GetTickCount();
+       }
+
+    // gsm status
+    if ( GetTickCount() - last_update_gsm > 5000 )
+       {
+         p_mob->UpdateSIMStatus();
+         p_mob->UpdateNetStatus();
+
+         last_update_gsm = GetTickCount();
+       }
+
+    p_led_nosim->SetState(p_mob->GetSIMStatus()!=SIM_READY);
+    p_led_gsm->SetState(p_mob->GetNetStatus()==NET_REGISTERED_HOME);
+
+
+    // poll devices
+    p_sat->Poll();
+    p_mob->Poll();
+  }
 }
 
 
 
-//void OnButton(void*parm)
-//{
-//  reinterpret_cast<CUART*>(parm)->SendByte(5);
-//
-//  last_alert_time = mic_cb_counter; //CSysTicks::GetCounter();
-//  mic_alert = true;
-//}
-//
-//
-//void OnUart(void*,unsigned char data)
-//{
-//  if ( data == 5 )
-//     {
-//       last_alert_time = mic_cb_counter; //CSysTicks::GetCounter();
-//       mic_alert = true;
-//     }
-//}
-
-
+//////////////////
 
 
 int main()
 {
-//  CLEAROBJ(mic_sums);
-
-
-  NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);  // 4 bits for preemption priority, 0 for subpriority
-  
-  CCPUTicks::Init();
-  CSysTicks::Init();
-  CDebugger::Init();
-
-  led4 = new CBoardLED(BOARD_LED4);
-  led3 = new CBoardLED(BOARD_LED3);
-  led2 = new CBoardLED(BOARD_LED2);
-  led1 = new CBoardLED(BOARD_LED1);
-
-  CBoardButton btn1(BOARD_BUTTON1);
-  CBoardButton btn2(BOARD_BUTTON2);
-  CBoardButton btn3(BOARD_BUTTON3);
-
-  CSatellite *sat = new CSatellite(115200,true/*GPS*/,true/*Glonass*/,false,false);
-
-  if ( !CRTC::Init(20,2,29,RTC_Weekday_Tuesday,23,59,50,OnTS,sat) )
-     {
-       led1->On();
-       led2->On();
-       led3->On();
-       led4->On();
-       CSysTicks::DelayInfinite();
-     }
-
-  if ( !CSDCard::InitCard() )
-     {
-       led1->On();
-       led2->On();
-       led3->On();
-       led4->On();
-       CSysTicks::DelayInfinite();
-     }
-
-  FATFS ffs;
-  CLEAROBJ(ffs);
-  f_mount(&ffs,"0:",1);  // should always succeed in our case
-
-  if ( !ReadConfig(m_cfg) )
-     {
-       led4->On();
-       CSysTicks::DelayInfinite();
-     }
-
-
-  plog = new CLog(NULL/*"log3.txt"*/,true);
-  plog->Add("--- System started ---");
-
-  bool old_synced = false;
-
-  CTelitMobile *term = new CTelitMobile(115200,100);
-
-  if ( !term->Startup() )
-     {
-       led1->On();
-       led2->On();
-       led3->On();
-       led4->On();
-       CSysTicks::DelayInfinite();
-     }
-
-  unsigned last_term_update_time = CSysTicks::GetCounter() - 10000;
-  //unsigned last_send_time = CSysTicks::GetCounter();
-  unsigned last_display_time = CSysTicks::GetCounter();
-
-//  CMic::Init(MicCB,led1);
-
-//  unsigned old_mic_safe_read = 1;
-//
-//  CLEAROBJ(samples);
-
-//  FIL voicef;
-//  f_open(&voicef,"mic.raw",FA_WRITE|FA_OPEN_APPEND);
-
-
-
-  while (1)
-  {
-    
-    
-//    unsigned mic_safe_read = samples_wto >= BUFFSAMPLES/2 ? 0 : 1;
-//    
-//    if ( mic_safe_read != old_mic_safe_read )
-//       {
-//         UINT wb = 0;
-//         f_write(&voicef,&samples[mic_safe_read*BUFFSAMPLES/2],BUFFSAMPLES/2*sizeof(short),&wb);
-//
-//         old_mic_safe_read = mic_safe_read;
-//       }
-    
-//    if ( btn1.IsDown() )
-//       {
-//         f_close(&voicef);
-//
-//         led1->On();
-//         led2->On();
-//         led3->On();
-//         led4->On();
-//         CSysTicks::DelayInfinite();
-//       }
-//       
-
-    sat->Poll();
-    term->Poll();
-    
-    double lat=0,lon=0;
-    short gnss=0x3f3f;
-    if ( !sat->GetNavData(lat,lon,gnss) )
-       {
-         gnss = 0x3f3f;
-       }
-
-    OURTIME shift = 0;
-    bool is_synced = sat->GetTimeData(shift);
-    if ( is_synced )
-       {
-         CRTC::SetShift(shift);
-       }
-
-    if ( old_synced != is_synced )
-       {
-         if ( is_synced )
-           plog->Add("Time sync event !!!");
-         else
-           plog->Add("We\'ve lost time sync...");
-
-         old_synced = is_synced;
-       }
-
-    //{
-    //  char id = is_synced ? (char)(gnss&0xFF) : '?';
-    //  led2->SetState(id=='N'||id=='P');
-    //  led3->SetState(id=='N'||id=='L');
-    //}
-
-    if ( CSysTicks::GetCounter() - last_term_update_time > 2000 )
-       {
-         term->UpdateSIMStatus();
-         term->UpdateNetStatus();
-         term->UpdateGPRSStatus();
-         term->UpdateSignalQuality();
-         term->UpdateInternetConnectionStatus();
-
-         last_term_update_time = CSysTicks::GetCounter();
-       }
-
-    led1->SetState(term->GetSIMStatus()==SIM_READY);
-    led2->SetState(term->GetNetStatus()==NET_REGISTERED_HOME);
-    led3->SetState(term->GetGPRSStatus()==NET_REGISTERED_HOME);
-    led4->SetState(term->GetInternetConnectionStatus());
-
-    if ( btn1.IsDown() )
-       {
-         CSysTicks::Delay(1000);
-         term->InitiateInternetConnection("internet");
-       }
-
-    if ( btn2.IsDown() )
-       {
-         CSysTicks::Delay(1000);
-         //std::string packet = PreparePingPacket(lat,lon,sat->GetLastSyncTime());
-         std::string packet = PrepareFDetectPacket(CRTC::GetTime(),lat,lon);
-         term->SendStringTCP(m_cfg.server.c_str(),m_cfg.port_tcp,packet.c_str(),OnSendString);
-         //plog->Add("TCP: %s\n",packet.c_str());
-       }
-
-    if ( btn3.IsDown() )
-       {
-         //led1->Off();
-         //led2->Off();
-         //led3->Off();
-         //led4->Off();
-         
-         CSysTicks::Delay(1000);
-         std::string packet = PreparePingPacket(lat,lon,sat->GetLastSyncTime());
-         term->SendStringUDP(m_cfg.server.c_str(),m_cfg.port_udp,packet.c_str(),OnSendString);
-         //plog->Add("UDP: %s\n",packet.c_str());
-         //term->InitUSSDRequest(m_cfg.ussd_balance.c_str(),OnUSSD,term);
-         //plog->Add("USSD initiated...\n");
-       }
-
-    //if ( CSysTicks::GetCounter() - last_send_time > 30000 )
-    //   {
-    //
-    //     last_send_time = CSysTicks::GetCounter();
-    //   }
-
-
-    if ( CSysTicks::GetCounter() - last_display_time > 1000 )
-       {
-         plog->Add("SIM:%d, Net:%d, GPRS:%d, Inet:%d, Line:%2d, GNSS:%c%c",term->GetSIMStatus(),
-                                                                    term->GetNetStatus(),
-                                                                    term->GetGPRSStatus(),
-                                                                    (int)term->GetInternetConnectionStatus(),
-                                                                    term->GetSignalQuality(),
-                                                                    (gnss>>8)&0xFF,gnss&0xFF);
-
-         last_display_time = CSysTicks::GetCounter();
-       }
-
-
-
-   // if ( mic_alert )
-   //    {
-   //      mic_alert = false;
-   //      unsigned ev_time = last_alert_time;
-   //
-   //      plog->Add("Alert at mic counter: %u",ev_time);
-   //      
-   //      /*if ( is_synced )
-   //         {
-   //           OURTIME true_time = last_ts_value + (ev_time - last_ts_time) + CRTC::GetShift();
-   //
-   //           char s[100];
-   //           COurTime(true_time).ToString(s);
-   //
-   //           plog->Add("Event at %s (%c%c) %.7f %.7f !!!",s,(gnss>>8)&0xFF,gnss&0xFF,lat,lon);
-   //         }
-   //      else
-   //         {
-   //           plog->Add("Alert, but no time sync");
-   //         }*/
-   //
-   //      led1->On();
-   //      led4->On();
-   //      CCPUTicks::Delay(100);
-   //      led1->Off();
-   //      led4->Off();
-   //    }
-
-  }
-
-
+  (new CEar())->MainLoop();   // alloc object on heap, not stack!
 }
+
