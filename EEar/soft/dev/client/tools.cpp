@@ -180,3 +180,12 @@ std::string Base64Encode(const void *buff,unsigned len)
 
   return rc;
 }
+
+
+bool IsBoolEqu(bool b1,bool b2)
+{
+  return (b1 && b2) || (!b1 && !b2);
+}
+
+
+
