@@ -96,7 +96,7 @@ typedef CFormatStr<256> CFormat;
 
 bool IsStrEmpty(const char *s);
 std::string Base64Encode(const void *buff,unsigned len);
-
+bool IsBoolEqu(bool b1,bool b2);
 
 
 

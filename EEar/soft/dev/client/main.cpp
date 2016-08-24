@@ -9,6 +9,7 @@ class CEar
           static const unsigned MOBILE_TERMINAL_MAX_QUEUE_COMMANDS = 25;
           static const bool MOBILE_TERMINAL_AUTO_ANSWER_MODE = true;
           static const bool LOG_STDOUT_ECHO = true;
+          static const short INVALID_GNSS = 0x3f3f;  // '??'
           
           
           CLED* m_leds[4];   // base objects
@@ -23,7 +24,7 @@ class CEar
 
           FATFS m_ffs;
 
-          TCFG m_cfg;
+          TCFG m_cfg;  // do not zeromemory it!
 
           CSatellite *p_sat;
           CTelitMobile *p_mob;
@@ -34,6 +35,10 @@ class CEar
           CButton *p_btn2;
           CButton *p_btn3;
 
+          bool b_synced;  // is we are time syncronized with satellite? if true CRTC::GetTime() returns true UTC time
+          double m_lat;   // initially set to 0
+          double m_lon;   // initially set to 0
+          short m_gnss;   // initially set to INVALID_GNSS
 
   public:
           CEar();
@@ -42,6 +47,9 @@ class CEar
           void MainLoop();
 
   private:
+          bool IsSynced() const { return b_synced; }
+          bool IsGPSFix() const { return m_gnss != INVALID_GNSS; }
+          
           void FatalError();
           static void IRQ_OnButton1Wrapper(void*);
           static void IRQ_OnButton2Wrapper(void*);
@@ -53,9 +61,12 @@ class CEar
           static void IRQ_OnMicWrapper(void*,const int16_t* pcm_buff,int num_samples);
           void IRQ_OnMic(const int16_t* pcm_buff,int num_samples);
           std::string EncodePacket(const void *sbuff,unsigned ssize);
-          std::string PreparePingPacket(double lat,double lon,unsigned last_time_sync);
+          std::string PreparePingPacket();
           std::string PrepareUSSDPacket(const char *text);
-          std::string PrepareFDetectPacket(OURTIME event_time,double lat,double lon);
+          std::string PrepareFDetectPacket(OURTIME event_time);
+          void UpdateSync(unsigned& last_update_time);
+          void UpdateLatLon(unsigned& last_update_time);
+          void UpdateGSMStatuses(unsigned& last_update_time,bool actual_update);
 
 };
 
@@ -79,6 +90,11 @@ CEar::CEar()
   p_btn1 = NULL;
   p_btn2 = NULL;
   p_btn3 = NULL;
+  b_synced = false;
+  m_lat = 0.0;
+  m_lon = 0.0;
+  m_gnss = INVALID_GNSS;
+
 
   // system init
   NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);  // 4 bits for preemption priority, 0 for subpriority
@@ -273,7 +289,7 @@ std::string CEar::EncodePacket(const void *sbuff,unsigned ssize)
 }
 
 
-std::string CEar::PreparePingPacket(double lat,double lon,unsigned last_time_sync)
+std::string CEar::PreparePingPacket()
 {
   TCmdServerPing i;
 
@@ -283,9 +299,9 @@ std::string CEar::PreparePingPacket(double lat,double lon,unsigned last_time_syn
   i.header.client_ver = CLIENT_VER;
   i.header.fdetect_ver = FDETECT_VER;
   i.time_utc = CRTC::GetTime();
-  i.geo.lat = GEO2INT(lat);
-  i.geo.lon = GEO2INT(lon);
-  i.last_timesync_ms = CSysTicks::GetCounter()-last_time_sync;
+  i.geo.lat = GEO2INT(m_lat);
+  i.geo.lon = GEO2INT(m_lon);
+  i.last_timesync_ms = GetTickCount()-p_sat->GetLastSyncTime();
 
   return EncodePacket(&i,sizeof(i));
 }
@@ -310,7 +326,7 @@ std::string CEar::PrepareUSSDPacket(const char *text)
 }
 
 
-std::string CEar::PrepareFDetectPacket(OURTIME event_time,double lat,double lon)
+std::string CEar::PrepareFDetectPacket(OURTIME event_time)
 {
   TCmdFDetect i;
 
@@ -320,58 +336,95 @@ std::string CEar::PrepareFDetectPacket(OURTIME event_time,double lat,double lon)
   i.header.client_ver = CLIENT_VER;
   i.header.fdetect_ver = FDETECT_VER;
   i.time_utc = event_time;
-  i.geo.lat = GEO2INT(lat);
-  i.geo.lon = GEO2INT(lon);
+  i.geo.lat = GEO2INT(m_lat);
+  i.geo.lon = GEO2INT(m_lon);
 
   return EncodePacket(&i,sizeof(i));
 }
+
+
+void CEar::UpdateSync(unsigned& last_update_time)
+{    
+  if ( GetTickCount() - last_update_time > 1000 )
+     {
+       OURTIME shift = 0;
+       bool sync = p_sat->GetTimeData(shift);
+       if ( sync )
+          {
+            CRTC::SetShift(shift);  // update shift every second!
+          }
+
+       p_led_sync->SetState(sync);
+          
+       if ( !IsBoolEqu(sync,b_synced) )
+          {
+            b_synced = sync;
+
+            ADD2LOG(("Sync: %s",sync?"YES":"no"));
+          }
+
+       last_update_time = GetTickCount();
+     }
+}
+
+
+void CEar::UpdateLatLon(unsigned& last_update_time)
+{
+  if ( GetTickCount() - last_update_time > 1000 )
+     {
+       double lat,lon;
+       short gnss;
+       if ( p_sat->GetNavData(lat,lon,gnss) )
+          {
+            m_lat = lat;
+            m_lon = lon;
+            m_gnss = gnss;
+          }
+
+       last_update_time = GetTickCount();
+     }
+}
+
+
+void CEar::UpdateGSMStatuses(unsigned& last_update_time,bool actual_update)
+{
+  if ( GetTickCount() - last_update_time > 5000 )
+     {
+       if ( actual_update )
+          {
+            p_mob->UpdateSIMStatus();
+            p_mob->UpdateNetStatus();
+            //p_mob->UpdateGPRSStatus();     // used for debug log
+            //p_mob->UpdateSignalQuality();  // used for debug log
+            //p_mob->UpdateInternetConnectionStatus();  // used for debug log
+          }
+
+       last_update_time = GetTickCount();
+     }
+
+  p_led_nosim->SetState(p_mob->GetSIMStatus()!=SIM_READY);
+  p_led_gsm->SetState(p_mob->GetNetStatus()==NET_REGISTERED_HOME);
+}
+
 
 
 void CEar::MainLoop()
 {
   ADD2LOG(("--- System started ---"));
   ADD2LOG(("device_id: %d, sector: %d",m_cfg.device_id,m_cfg.sector));
+  ADD2LOG(("GPS:%d, Glonass:%d, Galileo:%d, Beidou:%d",m_cfg.use_gps,m_cfg.use_glonass,m_cfg.use_galileo,m_cfg.use_beidou));
+
 
   unsigned last_update_sync = GetTickCount();
-  bool b_sync = false;
-
-  unsigned last_update_gsm = GetTickCount();
+  unsigned last_update_latlon = GetTickCount();
+  unsigned last_update_gsm = GetTickCount()-5000;
 
   while ( 1 )
   {
-    // time sync
-    if ( GetTickCount() - last_update_sync > 1000 )
-       {
-         OURTIME shift = 0;
-         bool sync = p_sat->GetTimeData(shift);
-         if ( sync )
-            {
-              CRTC::SetShift(shift);
-            }
+    UpdateSync(last_update_sync);
+    UpdateLatLon(last_update_latlon);
+    UpdateGSMStatuses(last_update_gsm,true); // WARNING!!! Здесь может быть ситуация когда долго-выполняемая команда типа USSD/SMS/TCP/UDP висит на выполнении и мы вызываем периодически этот Update(true), то фактически только добавляем новые AT-команды в очередь и забиваем ее, что плохо. Решение: делать Update(false) пока выполняется какая-то долгая команда.
 
-         p_led_sync->SetState(sync);
-            
-         if ( sync != b_sync )
-            {
-              b_sync = sync;
-
-              ADD2LOG(("Sync: %s",sync?"YES":"no"));
-            }
-
-         last_update_sync = GetTickCount();
-       }
-
-    // gsm status
-    if ( GetTickCount() - last_update_gsm > 5000 )
-       {
-         p_mob->UpdateSIMStatus();
-         p_mob->UpdateNetStatus();
-
-         last_update_gsm = GetTickCount();
-       }
-
-    p_led_nosim->SetState(p_mob->GetSIMStatus()!=SIM_READY);
-    p_led_gsm->SetState(p_mob->GetNetStatus()==NET_REGISTERED_HOME);
 
 
     // poll devices
