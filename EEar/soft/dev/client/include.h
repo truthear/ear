@@ -9,9 +9,11 @@
 #include <stdlib.h>
 #include <alloca.h>
 #include <assert.h>
+#include <math.h>
 #include <string>
 #include <vector>
 #include <map>
+#include <complex>
 #include "stm32f4xx.h"
 #include "def.h"
 #include "tools.h"
@@ -34,6 +36,7 @@
 #include "crc32.h"
 #include "../server/cl_srv.h"
 #include "config.h"
+#include "fft.h"
 
 
 #endif
