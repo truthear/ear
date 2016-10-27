@@ -3,7 +3,7 @@
 
 
 
-CLED::CLED(GPIO_TypeDef *_port,uint16_t _pin,uint32_t _clk)
+COutputPin::COutputPin(GPIO_TypeDef *_port,uint16_t _pin,uint32_t _clk)
 {
   p_port = _port;
   m_pin = _pin;
@@ -20,30 +20,30 @@ CLED::CLED(GPIO_TypeDef *_port,uint16_t _pin,uint32_t _clk)
 }
 
 
-CLED::~CLED()
+COutputPin::~COutputPin()
 {
 }
 
 
-void CLED::On()
+void COutputPin::On()
 {
   GPIO_SetBits(p_port,m_pin);
 }
 
 
-void CLED::Off()
+void COutputPin::Off()
 {
   GPIO_ResetBits(p_port,m_pin);
 }
 
 
-void CLED::Toggle()
+void COutputPin::Toggle()
 {
   GPIO_ToggleBits(p_port,m_pin);
 }
 
 
-void CLED::SetState(bool state)
+void COutputPin::SetState(bool state)
 { 
   if ( state ) 
      {
@@ -59,7 +59,7 @@ void CLED::SetState(bool state)
 
 uint16_t CBoardLED::leds[4] = {GPIO_Pin_12,GPIO_Pin_13,GPIO_Pin_14,GPIO_Pin_15};
 
-CBoardLED::CBoardLED(EBoardLeds led,bool init_on) : CLED(GPIOD,leds[led],RCC_AHB1Periph_GPIOD)
+CBoardLED::CBoardLED(EBoardLeds led,bool init_on) : COutputPin(GPIOD,leds[led],RCC_AHB1Periph_GPIOD)
 {
   if ( init_on )
      {

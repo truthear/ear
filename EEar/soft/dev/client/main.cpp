@@ -12,15 +12,15 @@ class CEar
           static const short INVALID_GNSS = 0x3f3f;  // '??'
           
           
-          CLED* m_leds[4];   // base objects
-          CLED* p_led1;      // pointer alias
-          CLED* p_led2;      // pointer alias
-          CLED* p_led3;      // pointer alias
-          CLED* p_led4;      // pointer alias
-          CLED* p_led_mic;   // pointer alias
-          CLED* p_led_gsm;   // pointer alias
-          CLED* p_led_sync;  // pointer alias
-          CLED* p_led_nosim; // pointer alias
+          CBoardLED* m_leds[4];   // base objects
+          CBoardLED* p_led1;      // pointer alias
+          CBoardLED* p_led2;      // pointer alias
+          CBoardLED* p_led3;      // pointer alias
+          CBoardLED* p_led4;      // pointer alias
+          CBoardLED* p_led_mic;   // pointer alias
+          CBoardLED* p_led_gsm;   // pointer alias
+          CBoardLED* p_led_sync;  // pointer alias
+          CBoardLED* p_led_nosim; // pointer alias
 
           FATFS m_ffs;
 

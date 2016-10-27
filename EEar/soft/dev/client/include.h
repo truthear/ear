@@ -9,15 +9,14 @@
 #include <stdlib.h>
 #include <alloca.h>
 #include <assert.h>
-#include <math.h>
 #include <string>
 #include <vector>
 #include <map>
-#include <complex>
 #include "stm32f4xx.h"
 #include "def.h"
 #include "tools.h"
 #include "led.h"
+#include "buzzer.h"
 #include "button.h"
 #include "ticks.h"
 #include "uart.h"
@@ -36,7 +35,7 @@
 #include "crc32.h"
 #include "../server/cl_srv.h"
 #include "config.h"
-#include "fft.h"
+#include "fdetector.h"
 
 
 #endif
