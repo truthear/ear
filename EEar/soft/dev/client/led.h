@@ -4,14 +4,14 @@
 
 
 
-class CLED
+class COutputPin
 {
           GPIO_TypeDef *p_port;
           uint16_t m_pin;
 
   public:
-          CLED(GPIO_TypeDef *_port,uint16_t _pin,uint32_t _clk);
-          virtual ~CLED();
+          COutputPin(GPIO_TypeDef *_port,uint16_t _pin,uint32_t _clk);
+          virtual ~COutputPin();
 
           void On();
           void Off();
@@ -31,7 +31,7 @@ BOARD_LED_BLUE    = BOARD_LED3,
 BOARD_LED_RED     = BOARD_LED4,
 };
 
-class CBoardLED : public CLED
+class CBoardLED : public COutputPin
 {
           static uint16_t leds[4];
   public:
