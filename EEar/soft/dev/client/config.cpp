@@ -3,7 +3,7 @@
 
 
 
-static bool BuildMap(const char *filename,std::map<std::string,std::string>& map)
+bool CConfig::BuildMap(const char *filename,std::map<std::string,std::string>& map)
 {
   bool rc = false;
   
@@ -74,37 +74,37 @@ static bool BuildMap(const char *filename,std::map<std::string,std::string>& map
 }
 
 
-static void Get(unsigned char &_rc,const std::string& s)
+void CConfig::Get(unsigned char &_rc,const std::string& s)
 {
   _rc = atoi(s.c_str());
 }
 
 
-static void Get(unsigned short &_rc,const std::string& s)
+void CConfig::Get(unsigned short &_rc,const std::string& s)
 {
   _rc = atoi(s.c_str());
 }
 
 
-static void Get(int &_rc,const std::string& s)
+void CConfig::Get(int &_rc,const std::string& s)
 {
   _rc = atoi(s.c_str());
 }
 
 
-static void Get(bool &_rc,const std::string& s)
+void CConfig::Get(bool &_rc,const std::string& s)
 {
   _rc = (atoi(s.c_str())!=0);
 }
 
 
-static void Get(std::string &_rc,const std::string& s)
+void CConfig::Get(std::string &_rc,const std::string& s)
 {
   _rc = s;
 }
 
 
-bool ReadConfig(TCFG &cfg)
+bool CConfig::ReadConfig()
 {
   bool rc = false;
 
@@ -128,27 +128,27 @@ bool ReadConfig(TCFG &cfg)
 
   if ( BuildMap(CONFIG_FILENAME,map) )
      {
-       Get(cfg.device_id    , map["device_id"]    );
-       Get(cfg.sector       , map["sector"]       );
-       Get(cfg.port_tcp     , map["port_tcp"]     );
-       Get(cfg.port_udp     , map["port_udp"]     );
-       Get(cfg.server       , map["server"]       );
-       Get(cfg.ussd_balance , map["ussd_balance"] );
-       Get(cfg.sms_number   , map["sms_number"]   );
-       Get(cfg.sms_prefix   , map["sms_prefix"]   );
-       Get(cfg.gps_baud     , map["gps_baud"]     );
-       Get(cfg.use_gps      , map["use_gps"]      );
-       Get(cfg.use_glonass  , map["use_glonass"]  );
-       Get(cfg.use_galileo  , map["use_galileo"]  );
-       Get(cfg.use_beidou   , map["use_beidou"]   );
-       Get(cfg.debug_mode   , map["debug_mode"]   );
+       Get(device_id    , map["device_id"]    );
+       Get(sector       , map["sector"]       );
+       Get(port_tcp     , map["port_tcp"]     );
+       Get(port_udp     , map["port_udp"]     );
+       Get(server       , map["server"]       );
+       Get(ussd_balance , map["ussd_balance"] );
+       Get(sms_number   , map["sms_number"]   );
+       Get(sms_prefix   , map["sms_prefix"]   );
+       Get(gps_baud     , map["gps_baud"]     );
+       Get(use_gps      , map["use_gps"]      );
+       Get(use_glonass  , map["use_glonass"]  );
+       Get(use_galileo  , map["use_galileo"]  );
+       Get(use_beidou   , map["use_beidou"]   );
+       Get(debug_mode   , map["debug_mode"]   );
 
        // check for critical values
-       if ( cfg.device_id != 0xFFFF && cfg.sector != 0xFF && cfg.gps_baud != 0 )
+       if ( device_id != 0xFFFF && sector != 0xFF && gps_baud != 0 )
           {
-            cfg.port_tcp = cfg.port_tcp ? cfg.port_tcp : DEFAULT_TCP_PORT;
-            cfg.port_udp = cfg.port_udp ? cfg.port_udp : DEFAULT_UDP_PORT;
-            cfg.server = cfg.server.empty() ? DEFAULT_SERVER : cfg.server;
+            port_tcp = port_tcp ? port_tcp : DEFAULT_TCP_PORT;
+            port_udp = port_udp ? port_udp : DEFAULT_UDP_PORT;
+            server = server.empty() ? DEFAULT_SERVER : server;
             
             rc = true;
           }

@@ -24,7 +24,7 @@ class CEar
 
           FATFS m_ffs;
 
-          TCFG m_cfg;  // do not zeromemory it!
+          CConfig m_cfg;
 
           CSatellite *p_sat;
           CTelitMobile *p_mob;
@@ -131,7 +131,7 @@ CEar::CEar()
   f_mount(&m_ffs,"0:",1);  // should always succeed in our case
   // start from this point we can use file i/o f_XXXX
 
-  if ( !ReadConfig(m_cfg) )
+  if ( !m_cfg.ReadConfig() )
      {
        printf("Read config failed\n");
        FatalError();
