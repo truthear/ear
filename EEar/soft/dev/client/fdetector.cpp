@@ -7,7 +7,7 @@
 
 
 
-CFDetector::CFDetector(int sample_rate,int min_fight_len_ms,int max_fight_len_ms,float db_fight_leap)
+CFDetector::CFDetector(int sample_rate,int min_fight_len_ms,int max_fight_len_ms,float db_fight_leap,float db_indefinite_leap)
 {
   assert(sample_rate>0);
   assert((sample_rate%1000)==0);
@@ -24,6 +24,7 @@ CFDetector::CFDetector(int sample_rate,int min_fight_len_ms,int max_fight_len_ms
      }
   
   m_db_fight_leap = MAX(0.0001,db_fight_leap);
+  m_db_indefinite_leap = MAX(0.0001,db_indefinite_leap);
 
   for ( unsigned n = 0; n < BUFF_CHUNKS; n++ )
       {
@@ -36,10 +37,10 @@ CFDetector::CFDetector(int sample_rate,int min_fight_len_ms,int max_fight_len_ms
 
   for ( unsigned n = 0; n < FFT_SPECTRUM; n++ )
       {
-        m_prev[n] = 0.0;
+        m_ambient[n] = 0.0;
       }
 
-  b_firsttime = true;
+  m_stage = STAGE_FIRSTTIME;
 
   m_fight.ts = 0;
   m_fight.iters = 0;
@@ -71,7 +72,7 @@ void CFDetector::Push1ms(const short *samples)
 {
   if ( samples )
      {
-       unsigned idx = m_buff.wrpos;
+       volatile unsigned idx = m_buff.wrpos;
 
        m_buff.ar[idx].ts = CSysTicks::GetCounter();
 
@@ -93,7 +94,8 @@ bool CFDetector::PopResult(unsigned& _ts,unsigned& _length_ms,float& _db_amp)
 {
   bool rc = false;
 
-  unsigned widx = m_buff.wrpos;  // volatile!
+  // determine if data ready
+  volatile unsigned widx = m_buff.wrpos;  // volatile!
   unsigned ridx = m_buff.rdpos;
 
   if ( widx < ridx )
@@ -125,7 +127,7 @@ bool CFDetector::PopResult(unsigned& _ts,unsigned& _length_ms,float& _db_amp)
              m_buff.rdpos = ((m_buff.rdpos == BUFF_CHUNKS) ? 0 : m_buff.rdpos);
            }
 
-       // make spectrum and analyze
+       // make spectrum
        p_fft->Perform(cpar,false);
 
        SPECTRUM spc;
@@ -134,59 +136,117 @@ bool CFDetector::PopResult(unsigned& _ts,unsigned& _length_ms,float& _db_amp)
              spc[n] = std::norm(cpar[n]);  // sqr value, faster than std::abs()
            }
 
-       // compare
-       fp_type db_avg = 0;
-       fp_type min_spc_sqr_value = sqr((fp_type)(FFT_SPECTRUM*0.0001));
-       unsigned num_positives = 0;
-       for ( unsigned n = 0; n < FFT_SPECTRUM; n++ )
-           {
-             fp_type db = (fp_type)0.5*dB(spc[n],m_prev[n],min_spc_sqr_value); // 0.5 because of we use norm(), but not abs()
-             db_avg += db;
-             num_positives += db > (fp_type)0 ? 1 : 0;
-           }
-
-       db_avg /= (fp_type)FFT_SPECTRUM;
-
-       bool is_detected = (num_positives >= EXPLOSION_AFFECTED_FREQUENCES && db_avg > m_db_fight_leap);
-
-       if ( b_firsttime )
+       // analyze
+       if ( m_stage == STAGE_FIRSTTIME )
           {
-            b_firsttime = false;
-            is_detected = false;
+            m_stage = STAGE_AMBIENT;
+            m_ambient = spc;
           }
-       
-       if ( is_detected )
+       else
           {
-            if ( m_fight.iters == 0 )  // first time?
+            // calc dB of current data
+            fp_type db_avg = 0;
+            fp_type min_spc_sqr_value = sqr((fp_type)(FFT_SPECTRUM*0.0001));
+            unsigned num_positives = 0;
+            for ( unsigned n = 0; n < FFT_SPECTRUM; n++ )
+                {
+                  fp_type db = (fp_type)0.5*dB(spc[n],m_ambient[n],min_spc_sqr_value); // 0.5 because of we use norm(), but not abs()
+                  db_avg += db;
+                  num_positives += (db >= (fp_type)0 ? 1 : 0);
+                }
+            db_avg /= (fp_type)FFT_SPECTRUM;
+
+            bool is_fight_detected = (num_positives >= EXPLOSION_AFFECTED_FREQUENCES && db_avg > m_db_fight_leap);
+            bool is_indefinite_detected = (!is_fight_detected && db_avg > m_db_indefinite_leap);
+
+            bool add_fight = false;     // is need to add fight data?
+            bool finish_fight = false;  // is fight finished
+            
+            if ( m_stage == STAGE_AMBIENT )
                {
-                 m_fight.ts = ts;
+                 if ( is_indefinite_detected )
+                    {
+                      m_stage = STAGE_INDEFINITE;
+                    }
+                 else
+                 if ( is_fight_detected )
+                    {
+                      m_stage = STAGE_FIGHT;
+                      add_fight = true;
+                    }
+                 else
+                    {
+                      m_ambient = spc;
+                    }
+               }
+            else
+            if ( m_stage == STAGE_INDEFINITE )
+               {
+                 if ( is_fight_detected )
+                    {
+                      m_stage = STAGE_FIGHT;
+                      add_fight = true;
+                    }
+                 else
+                    {
+                      m_stage = STAGE_AMBIENT;
+                      m_ambient = spc;
+                    }
+               }
+            else
+            if ( m_stage == STAGE_FIGHT )
+               {
+                 if ( is_fight_detected )
+                    {
+                      add_fight = true;
+                    }
+                 else
+                    {
+                      m_stage = STAGE_AMBIENT;
+                      m_ambient = spc;
+                      finish_fight = true;
+                    }
+               }
+            
+            if ( add_fight )
+               {
+                 if ( m_fight.iters == 0 )  // first time?
+                    {
+                      m_fight.ts = ts;
+                    }
+
+                 m_fight.iters++;
+                 m_fight.avg_db += db_avg;
                }
 
-            m_fight.iters++;
-            m_fight.avg_db += db_avg;
-          }
+            unsigned length_ms = m_fight.iters * (FFT_SAMPLES/m_1ms_samples);
 
-       unsigned length_ms = m_fight.iters * (FFT_SAMPLES/m_1ms_samples);
-       
-       if ( m_fight.iters > 0 )
-          {
-            if ( (is_detected && length_ms >= m_max_fight_len_ms) || (!is_detected && length_ms >= m_min_fight_len_ms) )
+            if ( length_ms >= m_max_fight_len_ms )
                {
-                 _ts = m_fight.ts;
-                 _length_ms = length_ms;
-                 _db_amp = m_fight.avg_db/m_fight.iters;
-                 
-                 rc = true;
+                 finish_fight = true;
                }
-          }
-       
-       if ( rc || !is_detected )
-          {
-            m_fight.ts = 0;
-            m_fight.iters = 0;
-            m_fight.avg_db = 0;
 
-            memcpy(m_prev,spc,sizeof(SPECTRUM));
+            if ( finish_fight )
+               {
+                 if ( length_ms >= m_min_fight_len_ms )
+                    {
+                      // got result!
+                      assert(m_fight.iters>0);
+                      _ts = m_fight.ts;
+                      _length_ms = length_ms;
+                      _db_amp = m_fight.avg_db/m_fight.iters;
+                      
+                      rc = true;
+                    }
+
+                 // reset
+                 m_fight.ts = 0;
+                 m_fight.iters = 0;
+                 m_fight.avg_db = 0;
+
+                 m_stage = STAGE_AMBIENT;
+                 m_ambient = spc;
+               }
           }
      }
 
@@ -216,10 +276,6 @@ CFDetector::fp_type CFDetector::dB(fp_type curr,fp_type base,fp_type min_value)
 }
 
 
-CFDetector::fp_type CFDetector::sqr(fp_type x)
-{
-  return x*x;
-}
 
 
 

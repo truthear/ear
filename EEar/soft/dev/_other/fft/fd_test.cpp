@@ -4,9 +4,10 @@
 
 const int SAMPLE_RATE = 16000;
 const int MS1_SAMPLES = SAMPLE_RATE/1000;
-const int MIN_FIGHT_LEN_MS = 90;
+const int MIN_FIGHT_LEN_MS = 40;
 const int MAX_FIGHT_LEN_MS = 2000;
-const float FIGHT_LEAP_DB = 10.0;
+const float FIGHT_LEAP_DB = 9.0;
+const float INDEFINITE_LEAP_DB = 5.0;
 
 
 unsigned g_time = 0;
@@ -16,12 +17,14 @@ unsigned g_time = 0;
 void main(int argc,char **argv)
 {
   const char *filename = argc==2?argv[1]:"1.raw";
+
+  printf("%s:\n",filename);
   
   FILE *f = fopen(filename,"rb");
   if ( f )
      {
        {
-         CFDetector fd(SAMPLE_RATE,MIN_FIGHT_LEN_MS,MAX_FIGHT_LEN_MS,FIGHT_LEAP_DB);
+         CFDetector fd(SAMPLE_RATE,MIN_FIGHT_LEN_MS,MAX_FIGHT_LEN_MS,FIGHT_LEAP_DB,INDEFINITE_LEAP_DB);
 
          while (1)
          {
@@ -46,4 +49,6 @@ void main(int argc,char **argv)
      
        fclose(f);
      }
+
+  printf("\n");
 }
