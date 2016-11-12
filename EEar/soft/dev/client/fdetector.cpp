@@ -7,33 +7,23 @@
 
 
 
-CFDetector::CFDetector(int sample_rate,int min_fight_len_ms,int max_fight_len_ms,float db_fight_leap,float db_indefinite_leap)
+CFDetector::CFDetector(int sample_rate,unsigned buffer_msec)
 {
+  assert(MIN_FIGHT_LEN_MS>0);
+  assert(MAX_FIGHT_LEN_MS>0);
+  assert(MIN_FIGHT_LEN_MS<=MAX_FIGHT_LEN_MS);
+
   assert(sample_rate>0);
   assert((sample_rate%1000)==0);
   
   m_1ms_samples = sample_rate/1000;
 
+  assert(FFT_SAMPLES>=m_1ms_samples);
   assert((FFT_SAMPLES%m_1ms_samples)==0);
 
-  m_min_fight_len_ms = MAX(1,min_fight_len_ms);
-  m_max_fight_len_ms = MAX(1,max_fight_len_ms);
-  if ( m_max_fight_len_ms < m_min_fight_len_ms )
-     {
-       std::swap(m_max_fight_len_ms,m_min_fight_len_ms);
-     }
-  
-  m_db_fight_leap = MAX(0.0001,db_fight_leap);
-  m_db_indefinite_leap = MAX(0.0001,db_indefinite_leap);
+  buffer_msec = MAX(buffer_msec,FFT_SAMPLES/m_1ms_samples+1);
 
-  for ( unsigned n = 0; n < BUFF_CHUNKS; n++ )
-      {
-        m_buff.ar[n].ts = 0;
-        m_buff.ar[n].pcm = (short*)calloc(m_1ms_samples,sizeof(short));  // zero clears
-      }
-
-  m_buff.rdpos = 0;
-  m_buff.wrpos = 0;
+  p_buff = new CBuff(buffer_msec,m_1ms_samples);
 
   for ( unsigned n = 0; n < FFT_SPECTRUM; n++ )
       {
@@ -59,33 +49,18 @@ CFDetector::CFDetector(int sample_rate,int min_fight_len_ms,int max_fight_len_ms
 CFDetector::~CFDetector()
 {
   SAFEDELETE(p_fft);
-
-  for ( unsigned n = 0; n < BUFF_CHUNKS; n++ )
-      {
-        free(m_buff.ar[n].pcm);
-      }
+  SAFEDELETE(p_buff);
 }
 
 
 // should be IRQ safe!
-void CFDetector::Push1ms(const short *samples)
+void CFDetector::Push1ms(unsigned ts,const short *samples)
 {
   if ( samples )
      {
-       volatile unsigned idx = m_buff.wrpos;
-
-       m_buff.ar[idx].ts = CSysTicks::GetCounter();
-
-       short *dst = m_buff.ar[idx].pcm;
-       for ( unsigned n = 0; n < m_1ms_samples; n++ )
-           {
-             dst[n] = samples[n];
-           }
-
-       idx++;
-       idx = ((idx == BUFF_CHUNKS) ? 0 : idx);
-
-       m_buff.wrpos = idx;
+       p_buff->SetTS(ts);
+       p_buff->SetPCM(samples);
+       p_buff->IncWrPos();
      }
 }
 
@@ -95,36 +70,27 @@ bool CFDetector::PopResult(unsigned& _ts,unsigned& _length_ms,float& _db_amp)
   bool rc = false;
 
   // determine if data ready
-  volatile unsigned widx = m_buff.wrpos;  // volatile!
-  unsigned ridx = m_buff.rdpos;
-
-  if ( widx < ridx )
-     {
-       widx += BUFF_CHUNKS;
-     }
-
-  unsigned ms_ready = widx - ridx;
+  unsigned ms_ready = p_buff->GetReadyToReadCount();
   unsigned ms_needed_min = FFT_SAMPLES/m_1ms_samples;
 
   if ( ms_ready >= ms_needed_min )
      {
        // save ts
-       unsigned ts = m_buff.ar[m_buff.rdpos].ts; 
+       unsigned ts = p_buff->GetTS(); 
 
        // fill samples ar
        FFT::cplx_type cpar[FFT_SAMPLES];
        unsigned cpar_idx = 0;
        for ( unsigned n = 0; n < ms_needed_min; n++ )
            {
-             const short *src = m_buff.ar[m_buff.rdpos].pcm;
+             const short *src = p_buff->GetPCM();
              for ( unsigned m = 0; m < m_1ms_samples; m++ )
                  {
                    cpar[cpar_idx] = FFT::cplx_type((fp_type)src[m]*m_window[cpar_idx]);
                    cpar_idx++;
                  }
 
-             m_buff.rdpos++;
-             m_buff.rdpos = ((m_buff.rdpos == BUFF_CHUNKS) ? 0 : m_buff.rdpos);
+             p_buff->IncRdPos();
            }
 
        // make spectrum
@@ -156,8 +122,8 @@ bool CFDetector::PopResult(unsigned& _ts,unsigned& _length_ms,float& _db_amp)
                 }
             db_avg /= (fp_type)FFT_SPECTRUM;
 
-            bool is_fight_detected = (num_positives >= EXPLOSION_AFFECTED_FREQUENCES && db_avg > m_db_fight_leap);
-            bool is_indefinite_detected = (!is_fight_detected && db_avg > m_db_indefinite_leap);
+            bool is_fight_detected = (num_positives >= FIGHT_AFFECTED_FREQUENCES && db_avg > DB_FIGHT_LEAP);
+            bool is_indefinite_detected = (!is_fight_detected && db_avg > DB_INDEFINITE_LEAP);
 
             bool add_fight = false;     // is need to add fight data?
             bool finish_fight = false;  // is fight finished
@@ -221,14 +187,14 @@ bool CFDetector::PopResult(unsigned& _ts,unsigned& _length_ms,float& _db_amp)
 
             unsigned length_ms = m_fight.iters * (FFT_SAMPLES/m_1ms_samples);
 
-            if ( length_ms >= m_max_fight_len_ms )
+            if ( length_ms >= MAX_FIGHT_LEN_MS )
                {
                  finish_fight = true;
                }
 
             if ( finish_fight )
                {
-                 if ( length_ms >= m_min_fight_len_ms )
+                 if ( length_ms >= MIN_FIGHT_LEN_MS )
                     {
                       // got result!
                       assert(m_fight.iters>0);
