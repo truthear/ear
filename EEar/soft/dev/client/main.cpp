@@ -5,10 +5,14 @@
 
 class CEar
 {
+          static const unsigned FDETECT_AUDIO_BUFFER_MSEC = 500;
           static const int GSM_MODEM_BAUDRATE = 115200;
           static const unsigned MOBILE_TERMINAL_MAX_QUEUE_COMMANDS = 25;
           static const bool MOBILE_TERMINAL_AUTO_ANSWER_MODE = true;
           static const bool LOG_STDOUT_ECHO = true;
+          static const unsigned DBG_AUDIO_FILE_LEN_IN_SEC = 60*5;  // 5 min
+          static const bool CLEAR_DBG_AUDIO_FILE = true;  // slowdown at startup if true!
+          
           static const short INVALID_GNSS = 0x3f3f;  // '??'
           
           
@@ -26,8 +30,12 @@ class CEar
 
           CConfig m_cfg;
 
+          CDebugAudio *p_debug_audio;
+
           CSatellite *p_sat;
           CTelitMobile *p_mob;
+
+          CFDetector *p_fdetect;
 
           CLog *p_log;
 
@@ -39,6 +47,8 @@ class CEar
           double m_lat;   // initially set to 0
           double m_lon;   // initially set to 0
           short m_gnss;   // initially set to INVALID_GNSS
+
+          bool is_stop_processing;
 
   public:
           CEar();
@@ -84,8 +94,10 @@ CEar::CEar()
   p_led_gsm = NULL;
   p_led_sync = NULL;
   p_led_nosim = NULL;
+  p_debug_audio = NULL;
   p_sat = NULL;
   p_mob = NULL;
+  p_fdetect = NULL;
   p_log = NULL;
   p_btn1 = NULL;
   p_btn2 = NULL;
@@ -94,6 +106,7 @@ CEar::CEar()
   m_lat = 0.0;
   m_lon = 0.0;
   m_gnss = INVALID_GNSS;
+  is_stop_processing = false;
 
 
   // system init
@@ -138,6 +151,10 @@ CEar::CEar()
      }
   // start from this point we can use m_cfg.XXX
 
+  p_led3->On();
+  p_debug_audio = m_cfg.debug_mode ? new CDebugAudio(CMic::SAMPLE_RATE,DBG_AUDIO_FILENAME,DBG_AUDIO_FILE_LEN_IN_SEC,CLEAR_DBG_AUDIO_FILE) : NULL;
+  p_led3->Off();
+
   p_sat = new CSatellite(m_cfg.gps_baud,m_cfg.use_gps,m_cfg.use_glonass,m_cfg.use_galileo,m_cfg.use_beidou);
 
   if ( !CRTC::Init(5,5,5,RTC_Weekday_Thursday,0,0,0,IRQ_OnTimeStamp,p_sat) )
@@ -154,8 +171,10 @@ CEar::CEar()
        FatalError();
      }
 
-  CMic::Init(IRQ_OnMicWrapper,this);
+  p_fdetect = new CFDetector(CMic::SAMPLE_RATE,FDETECT_AUDIO_BUFFER_MSEC);
 
+  CMic::Init(IRQ_OnMicWrapper,this);  // after creating p_fdetect!
+  
   p_log = new CLog(LOG_FILENAME,LOG_STDOUT_ECHO);
   // start from this point we can use ADD2LOG()
 
@@ -173,10 +192,13 @@ CEar::~CEar()
 
 void CEar::FatalError()
 {
+  __disable_irq();
+  
   p_led1->On();
   p_led2->On();
   p_led3->On();
   p_led4->On();
+
   CTicksCommon::DelayInfinite();
 }
 
@@ -205,6 +227,7 @@ void CEar::IRQ_OnButton3Wrapper(void *parm)
 // WARNING!!! This is an IRQ handler!
 void CEar::IRQ_OnButton1()
 {
+  is_stop_processing = true;
 }
 
 
@@ -237,8 +260,8 @@ void CEar::IRQ_OnMicWrapper(void *parm,const int16_t* pcm_buff,int num_samples)
 // WARNING!!! This is an IRQ handler!
 void CEar::IRQ_OnMic(const int16_t* pcm_buff,int num_samples)
 {
+  // LED
   int sum = 0;
-
   for ( int n = 0; n < num_samples; n++ )
       {
         short s = pcm_buff[n];
@@ -246,10 +269,18 @@ void CEar::IRQ_OnMic(const int16_t* pcm_buff,int num_samples)
          s = -s;
         sum += s;
       }
-
   sum /= num_samples;
-
   p_led_mic->SetState(sum>2000);
+
+  // Fight detect
+  assert(num_samples==CMic::SAMPLE_RATE/1000);
+  p_fdetect->Push1ms(GetTickCount(),pcm_buff);
+
+  // debug audio
+  if ( p_debug_audio )
+     {
+       p_debug_audio->Push1ms(pcm_buff);
+     }
 }
 
 
@@ -297,7 +328,7 @@ std::string CEar::PreparePingPacket()
   i.header.sector = m_cfg.sector;
   i.header.device_id = m_cfg.device_id;
   i.header.client_ver = CLIENT_VER;
-  i.header.fdetect_ver = FDETECT_VER;
+  i.header.fdetect_ver = CFDetector::VERSION;
   i.time_utc = CRTC::GetTime();
   i.geo.lat = GEO2INT(m_lat);
   i.geo.lon = GEO2INT(m_lon);
@@ -319,7 +350,7 @@ std::string CEar::PrepareUSSDPacket(const char *text)
   i->header.sector = m_cfg.sector;
   i->header.device_id = m_cfg.device_id;
   i->header.client_ver = CLIENT_VER;
-  i->header.fdetect_ver = FDETECT_VER;
+  i->header.fdetect_ver = CFDetector::VERSION;
   strcpy(i->text,text);
 
   return EncodePacket(i,size);
@@ -334,7 +365,7 @@ std::string CEar::PrepareFDetectPacket(OURTIME event_time)
   i.header.sector = m_cfg.sector;
   i.header.device_id = m_cfg.device_id;
   i.header.client_ver = CLIENT_VER;
-  i.header.fdetect_ver = FDETECT_VER;
+  i.header.fdetect_ver = CFDetector::VERSION;
   i.time_utc = event_time;
   i.geo.lat = GEO2INT(m_lat);
   i.geo.lon = GEO2INT(m_lon);
@@ -419,13 +450,61 @@ void CEar::MainLoop()
   unsigned last_update_latlon = GetTickCount();
   unsigned last_update_gsm = GetTickCount()-5000;
 
+
+
   while ( 1 )
   {
     UpdateSync(last_update_sync);
     UpdateLatLon(last_update_latlon);
-    UpdateGSMStatuses(last_update_gsm,true); // WARNING!!! Здесь может быть ситуация когда долго-выполняемая команда типа USSD/SMS/TCP/UDP висит на выполнении и мы вызываем периодически этот Update(true), то фактически только добавляем новые AT-команды в очередь и забиваем ее, что плохо. Решение: делать Update(false) пока выполняется какая-то долгая команда.
+    UpdateGSMStatuses(last_update_gsm,true); // WARNING!!! Здесь может быть ситуация когда долго-выполняемая 
+                                             //            команда типа USSD/SMS/TCP/UDP висит на выполнении и 
+                                             //            мы вызываем периодически этот Update(true), 
+                                             //            то фактически только добавляем новые AT-команды в очередь 
+                                             //            и забиваем ее, что плохо. Решение: делать Update(false) 
+                                             //            пока выполняется какая-то долгая команда.
+
+    {
+      unsigned ts,length_ms;
+      float db_amp;
+      bool is_detected = p_fdetect->PopResult(ts,length_ms,db_amp);
+      if ( is_detected )
+         {
+           OURTIME ftime = CRTC::GetTime() - (OURTIME)(GetTickCount()-ts);
+           
+           ADD2LOG(("FDetect!!! %s, %d msec, %.1f dB",COurTime(ftime).AsString().c_str(),length_ms,db_amp));
+
+           p_led1->On();
+           p_led2->On();
+           p_led3->On();
+           p_led4->On();
+
+           CSysTicks::Delay(100);
+
+           p_led1->Off();
+           p_led2->Off();
+           p_led3->Off();
+           p_led4->Off();
+         }
+    }
 
 
+    if ( p_debug_audio )
+       {
+         p_debug_audio->Poll();
+       }
+
+    if ( is_stop_processing )
+       {
+         if ( p_debug_audio )
+            {
+              p_debug_audio->Stop();
+            }
+
+         ADD2LOG(("Stopped by user!"));
+         ADD2LOG(("----------------------"));
+
+         FatalError();
+       }
 
     // poll devices
     p_sat->Poll();
