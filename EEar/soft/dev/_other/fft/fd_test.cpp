@@ -3,14 +3,6 @@
 
 
 const int SAMPLE_RATE = 16000;
-const int MS1_SAMPLES = SAMPLE_RATE/1000;
-const int MIN_FIGHT_LEN_MS = 40;
-const int MAX_FIGHT_LEN_MS = 2000;
-const float FIGHT_LEAP_DB = 9.0;
-const float INDEFINITE_LEAP_DB = 5.0;
-
-
-unsigned g_time = 0;
 
 
 
@@ -23,17 +15,20 @@ void main(int argc,char **argv)
   FILE *f = fopen(filename,"rb");
   if ( f )
      {
+       unsigned g_time = 0;
+
        {
-         CFDetector fd(SAMPLE_RATE,MIN_FIGHT_LEN_MS,MAX_FIGHT_LEN_MS,FIGHT_LEAP_DB,INDEFINITE_LEAP_DB);
+         CFDetector fd(SAMPLE_RATE,200);
 
          while (1)
          {
+           const int MS1_SAMPLES = SAMPLE_RATE/1000;
            short pcm[MS1_SAMPLES];
 
            if ( fread(pcm,sizeof(short),MS1_SAMPLES,f) != MS1_SAMPLES )
             break;
 
-           fd.Push1ms(pcm);
+           fd.Push1ms(g_time,pcm);
 
            unsigned fts;
            unsigned flength;
