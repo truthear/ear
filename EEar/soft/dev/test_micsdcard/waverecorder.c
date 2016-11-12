@@ -45,8 +45,6 @@ static void WaveRecorder_SPI_Init(uint32_t Freq);
 void DMA1_Stream3_IRQHandler(void)
 {
   static uint16_t Mic_PDM_Buffer[PDM_BUFF_SIZE];//tmp buffer for HTONS
-  uint8_t *dest;
-  const uint8_t *src;
   uint32_t i;
   uint16_t* write_buf;//pointer for RAW data which must be filtered
   uint16_t* decode_buf;//pointer for filtered PCM data
@@ -73,16 +71,7 @@ void DMA1_Stream3_IRQHandler(void)
 
 
 
-    //for (i=0;i<PDM_BUFF_SIZE;i++){Mic_PDM_Buffer[i] = HTONS(write_buf[i]);}//swap bytes for filter
-    dest = (uint8_t*)Mic_PDM_Buffer;
-    src = (uint8_t*)write_buf;
-    i = PDM_BUFF_SIZE;
-    do {
-      uint8_t c1 = *src++;
-      uint8_t c2 = *src++;
-      *dest++ = c2;
-      *dest++ = c1;
-    } while ( --i );
+    for (i=0;i<PDM_BUFF_SIZE;i++){Mic_PDM_Buffer[i] = HTONS(write_buf[i]);}//swap bytes for filter
     
     PDM_Filter_64_LSB((uint8_t*)Mic_PDM_Buffer, decode_buf, MicGain , (PDMFilter_InitStruct *)&Filter);//filter RAW data
     
@@ -311,7 +300,7 @@ uint32_t WaveRecorderStop(void)
   if (AudioRecInited)
   {
     I2S_Cmd(SPI2, DISABLE); 
-    TIM_Cmd(TIM6, DISABLE);
+//    TIM_Cmd(TIM6, DISABLE);
     return 0;
   }
   else
