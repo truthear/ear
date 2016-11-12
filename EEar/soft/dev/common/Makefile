@@ -67,7 +67,7 @@ ifneq ($(CXXSOURCES),)
 else
 	$(CC) $(LDFLAGS) -o $(PROJ_NAME).elf $(OBJS) $(LIBS)
 endif
-#	$(OBJSIZE) $(PROJ_NAME).elf
+	$(OBJSIZE) $(PROJ_NAME).elf
 	$(OBJCOPY) -O binary $(PROJ_NAME).elf $(PROJ_NAME).bin
 
 cleanup:
