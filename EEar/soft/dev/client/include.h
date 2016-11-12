@@ -36,6 +36,7 @@
 #include "../server/cl_srv.h"
 #include "config.h"
 #include "fdetector.h"
+#include "debug_audio.h"
 
 
 #endif
