@@ -16,13 +16,3 @@
 
 #define SAFEDELETE(obj)   { if ( obj ) delete obj; obj = NULL; }
 
-
-extern unsigned g_time;
-
-
-class CSysTicks
-{
-  public:
-          static unsigned GetCounter() { return g_time; }
-
-};
