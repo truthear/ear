@@ -111,37 +111,41 @@ bool CConfig::ReadConfig()
   std::map<std::string,std::string> map;
 
   // must set ALL default values:
-  map["device_id"]     = "65535";
-  map["sector"]        = "255";
-  map["port_tcp"]      = "0";
-  map["port_udp"]      = "0";
-  map["server"]        = "";
-  map["ussd_balance"]  = "";
-  map["sms_number"]    = "";
-  map["sms_prefix"]    = "";
-  map["gps_baud"]      = "0";
-  map["use_gps"]       = "0";
-  map["use_glonass"]   = "0";
-  map["use_galileo"]   = "0";
-  map["use_beidou"]    = "0";
-  map["debug_mode"]    = "0";
+  map["device_id"]          = "65535";
+  map["sector"]             = "255";
+  map["port_tcp"]           = "0";
+  map["port_udp"]           = "0";
+  map["server"]             = "";
+  map["ussd_balance"]       = "";
+  map["sms_number"]         = "";
+  map["sms_prefix"]         = "";
+  map["apn"]                = "";
+  map["gps_baud"]           = "0";
+  map["modem_old_firmware"] = "0";
+  map["use_gps"]            = "0";
+  map["use_glonass"]        = "0";
+  map["use_galileo"]        = "0";
+  map["use_beidou"]         = "0";
+  map["debug_mode"]         = "0";
 
   if ( BuildMap(CONFIG_FILENAME,map) )
      {
-       Get(device_id    , map["device_id"]    );
-       Get(sector       , map["sector"]       );
-       Get(port_tcp     , map["port_tcp"]     );
-       Get(port_udp     , map["port_udp"]     );
-       Get(server       , map["server"]       );
-       Get(ussd_balance , map["ussd_balance"] );
-       Get(sms_number   , map["sms_number"]   );
-       Get(sms_prefix   , map["sms_prefix"]   );
-       Get(gps_baud     , map["gps_baud"]     );
-       Get(use_gps      , map["use_gps"]      );
-       Get(use_glonass  , map["use_glonass"]  );
-       Get(use_galileo  , map["use_galileo"]  );
-       Get(use_beidou   , map["use_beidou"]   );
-       Get(debug_mode   , map["debug_mode"]   );
+       Get(device_id          , map["device_id"]           );
+       Get(sector             , map["sector"]              );
+       Get(port_tcp           , map["port_tcp"]            );
+       Get(port_udp           , map["port_udp"]            );
+       Get(server             , map["server"]              );
+       Get(ussd_balance       , map["ussd_balance"]        );
+       Get(sms_number         , map["sms_number"]          );
+       Get(sms_prefix         , map["sms_prefix"]          );
+       Get(apn                , map["apn"]                 );
+       Get(gps_baud           , map["gps_baud"]            );
+       Get(modem_old_firmware , map["modem_old_firmware"]  );
+       Get(use_gps            , map["use_gps"]             );
+       Get(use_glonass        , map["use_glonass"]         );
+       Get(use_galileo        , map["use_galileo"]         );
+       Get(use_beidou         , map["use_beidou"]          );
+       Get(debug_mode         , map["debug_mode"]          );
 
        // check for critical values
        if ( device_id != 0xFFFF && sector != 0xFF && gps_baud != 0 )
