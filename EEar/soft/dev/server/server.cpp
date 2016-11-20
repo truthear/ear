@@ -389,10 +389,10 @@ void CServer::SaveFDetectInfo2DB(const TCmdFDetect& cmd,BOOL is_from_sms)
 {
   CLocalDB sql;
 
-  sql.Exec(L"CREATE TABLE IF NOT EXISTS TFDetect(dev_id INT,sector INT,cl_ver INT,fd_ver INT,event_time_utc INT,srv_time_lcl INT,lat REAL,lon REAL,is_from_sms INT)");
+  sql.Exec(L"CREATE TABLE IF NOT EXISTS TFDetect(dev_id INT,sector INT,cl_ver INT,fd_ver INT,event_time_utc INT,srv_time_lcl INT,lat REAL,lon REAL,len_ms INT,db_amp REAL,is_from_sms INT)");
   sql.Exec(L"CREATE INDEX IF NOT EXISTS IFDetect1 ON TFDetect(srv_time_lcl)");
 
-  CSQLiteQuery *q = sql.CreateQuery(L"INSERT INTO TFDetect VALUES(?,?,?,?,?,?,?,?,?)");
+  CSQLiteQuery *q = sql.CreateQuery(L"INSERT INTO TFDetect VALUES(?,?,?,?,?,?,?,?,?,?,?)");
   q->BindAsInt(cmd.header.device_id);
   q->BindAsInt(cmd.header.sector);
   q->BindAsInt(cmd.header.client_ver);
@@ -401,6 +401,8 @@ void CServer::SaveFDetectInfo2DB(const TCmdFDetect& cmd,BOOL is_from_sms)
   q->BindAsInt64(GetNowOurTime());
   q->BindAsDouble(INT2GEO(cmd.geo.lat));
   q->BindAsDouble(INT2GEO(cmd.geo.lon));
+  q->BindAsInt(cmd.fight_len_ms);
+  q->BindAsDouble(cmd.fight_db_amp);
   q->BindAsInt(is_from_sms);
   q->Step();
   q->Destroy();

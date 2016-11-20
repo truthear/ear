@@ -49,6 +49,8 @@ typedef struct {
 TCmdHeader header;
 OURTIME time_utc;   // event time
 TGeo geo;
+unsigned fight_len_ms;
+float fight_db_amp;
 } TCmdFDetect;
 
 
