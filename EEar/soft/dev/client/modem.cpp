@@ -35,8 +35,6 @@ void CModem::SendATCmd(const char *cmd)
 
          p_uart->SendByte(c);
        }
-
-       p_uart->SendByte('\r');
      }
 }
 

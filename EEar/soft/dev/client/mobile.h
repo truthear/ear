@@ -80,6 +80,11 @@ class CTelitMobile
           int SendStringUDP(const char *server,int port,const char *str,CTerminal::TCALLBACK cb,void *cbparm=NULL,
                             unsigned total_timeout=8000);
 
+          // use it for old firmware only!
+          // function can take a little time, not 100% async!
+          int SendStringUDP_OldFW(const char *server,int port,const char *str,CTerminal::TCALLBACK cb,void *cbparm=NULL,
+                                  unsigned total_timeout=8000);
+
   private:
           static void GeneralStatusCBWrapper(void *parm,int id,const char *cmd,const char *answer,bool is_timeout,bool is_answered_ok);
           void GeneralStatusCB(int id,const char *cmd,const char *answer,bool is_timeout,bool is_answered_ok);
