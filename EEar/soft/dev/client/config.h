@@ -14,7 +14,9 @@ class CConfig
           std::string ussd_balance;
           std::string sms_number;
           std::string sms_prefix;
+          std::string apn;
           int gps_baud;
+          bool modem_old_firmware;
           bool use_gps;
           bool use_glonass;
           bool use_galileo;
