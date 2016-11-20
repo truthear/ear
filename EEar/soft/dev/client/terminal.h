@@ -22,7 +22,7 @@ class CTerminal
 
           typedef struct {
            int id;              // cmd unique id
-           std::string cmd;     // AT command (no '\r' at end!)
+           std::string cmd;     // AT command (with '\r' or CTRL_Z at end!)
            TCALLBACK cb;
            void *cbparm;
            unsigned min_wait;   // in ms, this time not includes time spending in queue
@@ -56,6 +56,7 @@ class CTerminal
           void ResetModem();
 
   private:
+          static unsigned GetPrevBuffIdx(unsigned curr,unsigned buffsize) { return curr ? curr-1 : buffsize-1; }
           void DisposeWorkCmd(const char *answer,bool is_timeout,bool is_answered_ok);
           static void InternalSyncCB(void *parm,int id,const char *cmd,const char *answer,bool is_timeout,bool is_answered_ok);
           static void UnrollString(char *dst,const char *src,unsigned srcsize,unsigned start,unsigned end);

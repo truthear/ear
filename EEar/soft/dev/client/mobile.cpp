@@ -280,5 +280,24 @@ int CTelitMobile::SendStringUDP(const char *server,int port,const char *str,CTer
 }
 
 
+int CTelitMobile::SendStringUDP_OldFW(const char *server,int port,const char *str,CTerminal::TCALLBACK cb,void *cbparm,
+                                      unsigned total_timeout)
+{
+  p_trm->Push("AT#SCFG=1,1,0,0,50,50");
+
+  p_trm->Push("AT#SH=1");
+  p_trm->Push(CFormat("AT#SD=1,1,%d,\"%s\",0,%d,1",port,NNS(server),port),NULL,NULL,5000);  // only DNS lookup can take a time
+
+  if ( !p_trm->SyncProcessCmdSimple("AT#SSEND=1") )
+     {
+       return p_trm->Push("AT#MYERRORCOMMAND",cb,cbparm);  // issue async error
+     }
+  else
+     {
+       std::string data = NNS(str);
+       data += CModem::CTRL_Z;
+       return p_trm->Push(data.c_str(),cb,cbparm,total_timeout);
+     }
+}
 
 

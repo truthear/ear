@@ -49,6 +49,7 @@ class CEar
           short m_gnss;   // initially set to INVALID_GNSS
 
           bool is_stop_processing;
+          bool btn2_pressed;
 
   public:
           CEar();
@@ -73,7 +74,7 @@ class CEar
           std::string EncodePacket(const void *sbuff,unsigned ssize);
           std::string PreparePingPacket();
           std::string PrepareUSSDPacket(const char *text);
-          std::string PrepareFDetectPacket(OURTIME event_time);
+          std::string PrepareFDetectPacket(OURTIME event_time,unsigned len_ms,float db_amp);
           void UpdateSync(unsigned& last_update_time);
           void UpdateLatLon(unsigned& last_update_time);
           void UpdateGSMStatuses(unsigned& last_update_time,bool actual_update);
@@ -107,6 +108,7 @@ CEar::CEar()
   m_lon = 0.0;
   m_gnss = INVALID_GNSS;
   is_stop_processing = false;
+  btn2_pressed = false;
 
 
   // system init
@@ -131,7 +133,7 @@ CEar::CEar()
   p_led_nosim = p_led4;
   // start from this point we can use FatalError()
 
-  CSysTicks::Delay(100);  // paranoja
+  Beep(1000,100);  //CSysTicks::Delay(100);  // paranoja
 
   if ( !CSDCard::InitCard() )
      {
@@ -234,6 +236,7 @@ void CEar::IRQ_OnButton1()
 // WARNING!!! This is an IRQ handler!
 void CEar::IRQ_OnButton2()
 {
+  btn2_pressed = true;
 }
 
 
@@ -357,7 +360,7 @@ std::string CEar::PrepareUSSDPacket(const char *text)
 }
 
 
-std::string CEar::PrepareFDetectPacket(OURTIME event_time)
+std::string CEar::PrepareFDetectPacket(OURTIME event_time,unsigned len_ms,float db_amp)
 {
   TCmdFDetect i;
 
@@ -369,6 +372,8 @@ std::string CEar::PrepareFDetectPacket(OURTIME event_time)
   i.time_utc = event_time;
   i.geo.lat = GEO2INT(m_lat);
   i.geo.lon = GEO2INT(m_lon);
+  i.fight_len_ms = len_ms;
+  i.fight_db_amp = db_amp;
 
   return EncodePacket(&i,sizeof(i));
 }
@@ -444,6 +449,7 @@ void CEar::MainLoop()
   ADD2LOG(("--- System started ---"));
   ADD2LOG(("device_id: %d, sector: %d",m_cfg.device_id,m_cfg.sector));
   ADD2LOG(("GPS:%d, Glonass:%d, Galileo:%d, Beidou:%d",m_cfg.use_gps,m_cfg.use_glonass,m_cfg.use_galileo,m_cfg.use_beidou));
+  ADD2LOG(("Debug mode: %s",m_cfg.debug_mode?"YES":"no"));
 
 
   unsigned last_update_sync = GetTickCount();
@@ -487,10 +493,18 @@ void CEar::MainLoop()
          }
     }
 
-
-    if ( p_debug_audio )
+    if ( btn2_pressed )
        {
-         p_debug_audio->Poll();
+         CSysTicks::Delay(200);
+         btn2_pressed = false;
+
+         std::string pkt = PrepareFDetectPacket(CRTC::GetTime(),321,15.1);
+
+         p_mob->InitiateInternetConnection(m_cfg.apn.c_str());
+         if ( m_cfg.modem_old_firmware )
+            p_mob->SendStringUDP_OldFW(m_cfg.server.c_str(),m_cfg.port_udp,pkt.c_str(),NULL,NULL);
+         else
+            p_mob->SendStringUDP(m_cfg.server.c_str(),m_cfg.port_udp,pkt.c_str(),NULL,NULL);
        }
 
     if ( is_stop_processing )
@@ -509,6 +523,11 @@ void CEar::MainLoop()
     // poll devices
     p_sat->Poll();
     p_mob->Poll();
+
+    if ( p_debug_audio )
+       {
+         p_debug_audio->Poll();
+       }
   }
 }
 

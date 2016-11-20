@@ -61,6 +61,10 @@ int CTerminal::Push(const char *atcmd,TCALLBACK cb,void *cbparm,unsigned max_wai
 
        pcmd->id = m_next_id;
        pcmd->cmd = atcmd;
+       if ( pcmd->cmd[pcmd->cmd.size()-1] != CModem::CTRL_Z )
+          {
+            pcmd->cmd += '\r';
+          }
        pcmd->cb = cb;
        pcmd->cbparm = cbparm;
        pcmd->min_wait = min_wait;
@@ -159,22 +163,26 @@ void CTerminal::Poll()
 
                  if ( widx != m_wbuff_idx )  // something recv?
                     {
-                      if ( buff[widx?widx-1:buffsize-1] == '\n' )  // optimization, check if last symbol \n
+                      unsigned idx_prev1 = GetPrevBuffIdx(widx,buffsize);
+                      unsigned idx_prev2 = GetPrevBuffIdx(idx_prev1,buffsize);
+                      unsigned idx_prev3 = GetPrevBuffIdx(idx_prev2,buffsize);
+                      
+                      if ( buff[idx_prev1] == '\n' || (buff[idx_prev1] == ' ' && buff[idx_prev2] == '>' && buff[idx_prev3] == '\n') )
                          {
                            char *s = (char*)alloca(buffsize+1);  // no free needed
                            UnrollString(s,buff,buffsize,m_wbuff_idx,widx);
 
-                           const std::string& atcmd = p_work_cmd->cmd;
+                           const std::string& atcmd = p_work_cmd->cmd;  // with \r or CTRL_Z at end!
 
                            const char *atstart = strstr(s,atcmd.c_str());
-                           if ( !atstart || *(atstart+atcmd.size()) != '\r' )
+                           if ( !atstart )
                               {
                                 DisposeWorkCmd("Buffer error",true/*inform as timeout*/,false);
                               }
                            else
                               {
-                                const char *answer = atstart + atcmd.size() + 1;
-                                bool is_answer_ok = (strstr(answer,"\r\nOK\r\n") != NULL);
+                                const char *answer = atstart + atcmd.size();
+                                bool is_answer_ok = (strstr(answer,"\r\nOK\r\n") != NULL || strstr(answer,"\r\n> ") != NULL);
                                 bool is_answer_err = (strstr(answer,"\r\nERROR\r\n") != NULL || 
                                                       strstr(answer,"\r\n+CME ERROR:") != NULL || 
                                                       strstr(answer,"\r\n+CMS ERROR:") != NULL );
@@ -232,7 +240,13 @@ void CTerminal::DisposeWorkCmd(const char *answer,bool is_timeout,bool is_answer
 
        if ( t->cb )
           {
-            t->cb(t->cbparm,t->id,t->cmd.c_str(),answer,is_timeout,is_answered_ok);
+            std::string cmd = t->cmd;
+            if ( !cmd.empty() && cmd[cmd.size()-1] == '\r' )
+               {
+                 cmd.resize(cmd.size()-1);  // remove \r at end
+               }
+            
+            t->cb(t->cbparm,t->id,cmd.c_str(),answer,is_timeout,is_answered_ok);
           }
 
        delete t;
