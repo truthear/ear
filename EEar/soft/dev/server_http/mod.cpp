@@ -95,7 +95,7 @@ void ProcessBalance(TMODINTF *i)
 
 void ProcessFDetect(TMODINTF *i)
 {
-  CReadDBTable db(L"SELECT dev_id,sector,cl_ver,fd_ver,event_time_utc,srv_time_lcl,lat,lon,is_from_sms FROM TFDetect ORDER BY srv_time_lcl DESC LIMIT 5000");
+  CReadDBTable db(L"SELECT dev_id,sector,cl_ver,fd_ver,event_time_utc,srv_time_lcl,lat,lon,len_ms,db_amp,is_from_sms FROM TFDetect ORDER BY srv_time_lcl DESC LIMIT 5000");
 
   CHTML out(i,L"Single f-detect results");
 
@@ -109,6 +109,8 @@ void ProcessFDetect(TMODINTF *i)
     CHTMLTools::ProduceHeaderCell(i,out,"event time (UTC)");
     CHTMLTools::ProduceHeaderCell(i,out,"SERVER TIME (LOCAL)",TRUE);
     CHTMLTools::ProduceHeaderCell(i,out,"geo location");
+    CHTMLTools::ProduceHeaderCell(i,out,"length (ms)");
+    CHTMLTools::ProduceHeaderCell(i,out,"dB amp");
     CHTMLTools::ProduceHeaderCell(i,out,"from SMS?");
   }
 
@@ -122,6 +124,8 @@ void ProcessFDetect(TMODINTF *i)
     CHTMLTools::ProduceTimeCell(i,out,db,5);
     CHTMLTools::ProduceGeoCell(i,out,db,6,7);
     CHTMLTools::ProduceIntCell(i,out,db,8);
+    CHTMLTools::ProduceDoubleCell(i,out,db,9,1);
+    CHTMLTools::ProduceIntCell(i,out,db,10);
   }
 }
 

@@ -147,6 +147,7 @@ class CHTMLTools
           static void ProduceGeoCell(TMODINTF *i,CHTML& out,CReadDBTable& db,int lat,int lon);
           static void ProduceVerCell(TMODINTF *i,CHTML& out,CReadDBTable& db,int ver1,int ver2);
           static void ProduceIntCell(TMODINTF *i,CHTML& out,CReadDBTable& db,int col);
+          static void ProduceDoubleCell(TMODINTF *i,CHTML& out,CReadDBTable& db,int col,int digits);
           static void ProduceTextCell(TMODINTF *i,CHTML& out,CReadDBTable& db,int col);
           static void ProduceTimeCell(TMODINTF *i,CHTML& out,CReadDBTable& db,int col,const char *postfix=NULL);
 

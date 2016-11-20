@@ -195,6 +195,14 @@ void CHTMLTools::ProduceIntCell(TMODINTF *i,CHTML& out,CReadDBTable& db,int col)
 }
 
 
+void CHTMLTools::ProduceDoubleCell(TMODINTF *i,CHTML& out,CReadDBTable& db,int col,int digits)
+{
+  CTableCell c(i); 
+  std::string fmt = CFormat("%%.%df",digits);
+  out += Filter(CFormat(fmt.c_str(),db.GetAsDouble(col)));
+}
+
+
 void CHTMLTools::ProduceTextCell(TMODINTF *i,CHTML& out,CReadDBTable& db,int col)
 {
   CTableCell c(i); 
