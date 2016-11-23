@@ -3,6 +3,323 @@
 
 
 
+//////////////////////////////
+
+
+// class for sending packets via internet, sms, or file (offline)
+class CPacketSender
+{
+          static const unsigned MAX_QUEUED_PACKETS = 10;   // only for important packets
+          static const unsigned INET_ACTIVATION_KEEPED = 90*1000;  // how much internet activation keeped, msec
+          
+          const CConfig& m_cfg;
+          CTelitMobile *p_mob;
+          CLog *p_log;
+
+          enum {
+           STAGE_INET,
+           STAGE_SMS,
+          };
+
+          typedef struct {
+           std::string data;
+           int stage;
+           bool is_important;
+          } PACKET;
+
+          PACKET *p_curr;   // this packet is pushed to terminal and we are waiting for answer
+
+          typedef std::vector<PACKET*> TQueue;
+          TQueue m_queue;
+
+          unsigned last_time_inet_activated;
+
+  public:
+          CPacketSender(const CConfig& cfg,CTelitMobile *mob,CLog *_log);
+          ~CPacketSender();
+
+          void PushImportant(const std::string& pkt);
+          void PushUnimportant(const std::string& pkt);
+          bool IsBusy() const { return p_curr || !m_queue.empty(); }
+          void Poll();
+
+  private:
+          void Push(const std::string& pkt,bool is_important);
+          void SaveOffline(const std::string& pkt);
+          bool SendByInternet(const std::string& pkt);
+          bool SendBySMS(const std::string& pkt);
+          static void CallbackWrapper(void *parm,int id,const char *cmd,const char *answer,bool is_timeout,bool is_answered_ok);
+          void Callback(int id,const char *cmd,const char *answer,bool is_timeout,bool is_answered_ok);
+};
+
+
+
+CPacketSender::CPacketSender(const CConfig& cfg,CTelitMobile *mob,CLog *_log)
+  : m_cfg(cfg), p_mob(mob), p_log(_log)
+{
+  p_curr = NULL;
+
+  m_queue.reserve(MAX_QUEUED_PACKETS+1);  // +1 needed in case SMS-sending
+
+  last_time_inet_activated = GetTickCount() - INET_ACTIVATION_KEEPED - 1;
+}
+
+
+CPacketSender::~CPacketSender()
+{
+  SAFEDELETE(p_curr);
+
+  for ( unsigned n = 0; n < m_queue.size(); n++ )
+      {
+        SAFEDELETE(m_queue[n]);
+      }
+  m_queue.clear();
+}
+
+
+void CPacketSender::Push(const std::string& pkt,bool is_important)
+{
+  if ( !pkt.empty() )
+     {
+       if ( !IsBusy() || is_important )
+          {
+            if ( m_queue.size() < MAX_QUEUED_PACKETS )
+               {
+                 PACKET *p = new PACKET;
+
+                 p->data = pkt;
+                 p->stage = STAGE_INET;
+                 p->is_important = is_important;
+                 
+                 m_queue.push_back(p);
+               }
+            else
+               {
+                 ADD2LOG(("PacketSender queue is full, save packet offline"));
+                 SaveOffline(pkt);
+               }
+          }
+     }
+}
+
+
+void CPacketSender::PushImportant(const std::string& pkt)
+{
+  Push(pkt,true);
+}
+
+
+void CPacketSender::PushUnimportant(const std::string& pkt)
+{
+  Push(pkt,false);
+}
+
+
+void CPacketSender::SaveOffline(const std::string& pkt)
+{
+  FIL f;
+  if ( f_open(&f,OFFLINE_FILENAME,FA_WRITE|FA_OPEN_APPEND) == FR_OK )
+     {
+       UINT wb = 0;
+       f_write(&f,pkt.data(),pkt.size(),&wb);
+       f_write(&f,"\r\n",2,&wb);
+       f_close(&f);
+     }
+}
+
+
+// returns false in case terminal queue is full
+bool CPacketSender::SendByInternet(const std::string& pkt)
+{
+  if ( GetTickCount() - last_time_inet_activated > INET_ACTIVATION_KEEPED )
+     {
+       if ( p_mob->InitiateInternetConnection(m_cfg.apn.c_str()) < 0 )
+          {
+            return false;
+          }
+       else
+          {
+            last_time_inet_activated = GetTickCount();
+          }
+     }
+  
+  
+  int id;
+  
+  if ( m_cfg.modem_old_firmware )
+     {
+       id = p_mob->SendStringUDP_OldFW(m_cfg.server.c_str(),m_cfg.port_udp,pkt.c_str(),CallbackWrapper,this);
+     }
+  else
+     {
+       id = p_mob->SendStringUDP(m_cfg.server.c_str(),m_cfg.port_udp,pkt.c_str(),CallbackWrapper,this);
+     }
+
+  return id >= 0;
+}
+
+
+// returns false in case terminal queue is full
+bool CPacketSender::SendBySMS(const std::string& pkt)
+{
+  int id = p_mob->SendSMS(m_cfg.sms_number.c_str(),(m_cfg.sms_prefix+pkt).c_str(),CallbackWrapper,this);
+  return id >= 0;
+}
+
+
+void CPacketSender::CallbackWrapper(void *parm,int id,const char *cmd,const char *answer,bool is_timeout,bool is_answered_ok)
+{
+  reinterpret_cast<CPacketSender*>(parm)->Callback(id,cmd,answer,is_timeout,is_answered_ok);
+}
+
+
+void CPacketSender::Callback(int id,const char *cmd,const char *answer,bool is_timeout,bool is_answered_ok)
+{
+  if ( p_curr )  // paranoja
+     {
+       if ( is_timeout || !is_answered_ok )  //error?
+          {
+            if ( p_curr->is_important )
+               {
+                 if ( p_curr->stage == STAGE_INET )
+                    {
+                      ADD2LOG(("Error sending packet via Internet: %s",NNS(answer)));
+                      if ( !m_cfg.sms_number.empty() )  // allow SMS?
+                         {
+                           p_curr->stage = STAGE_SMS;
+                           m_queue.insert(m_queue.begin(),p_curr);
+                           p_curr = NULL;
+                         }
+                      else
+                         {
+                           SaveOffline(p_curr->data);
+                         }
+                    }
+                 else
+                    {
+                      ADD2LOG(("Error sending packet via SMS: %s",NNS(answer)));
+                      SaveOffline(p_curr->data);
+                    }
+               }
+          }
+     
+       SAFEDELETE(p_curr);
+     }
+}
+
+
+void CPacketSender::Poll()
+{
+  if ( !p_curr && !m_queue.empty() )
+     {
+       p_curr = m_queue[0];  // we must support syncronous callbacks from SendBy... also!
+       m_queue.erase(m_queue.begin());
+
+       bool is_ok = (p_curr->stage == STAGE_INET ? SendByInternet(p_curr->data) : SendBySMS(p_curr->data));
+
+       if ( !is_ok )
+          {
+            // terminal queue is full, nothing is pushed, no callbacks executed
+            // restore back p_curr pointer
+            assert(p_curr);
+            m_queue.insert(m_queue.begin(),p_curr);
+            p_curr = NULL;
+          }
+     }
+}
+
+
+///////////////////////////
+
+
+class CBalanceReq
+{
+          static const unsigned REQ_PERIOD = 60*60*1000;  // 1 hour, USSD request period
+          
+          const CConfig& m_cfg;
+          CTelitMobile *p_mob;
+          CLog *p_log;
+
+          std::string m_answer;
+          bool is_busy;
+
+          unsigned last_req_time;
+
+  public:
+          CBalanceReq(const CConfig& cfg,CTelitMobile *mob,CLog *_log);
+          ~CBalanceReq();
+
+          std::string GetResult() const { return m_answer; }
+          bool IsBusy() const { return is_busy; }
+          void Poll();
+
+  private:
+          static void CallbackWrapper(void *parm,int id,const char *cmd,const char *answer,bool is_timeout,bool is_answered_ok);
+          void Callback(int id,const char *cmd,const char *answer,bool is_timeout,bool is_answered_ok);
+
+};
+
+
+CBalanceReq::CBalanceReq(const CConfig& cfg,CTelitMobile *mob,CLog *_log)
+  : m_cfg(cfg), p_mob(mob), p_log(_log)
+{
+  m_answer = "";
+  is_busy = false;
+  last_req_time = GetTickCount();
+}
+
+
+CBalanceReq::~CBalanceReq()
+{
+}
+
+
+void CBalanceReq::Poll()
+{
+  if ( !is_busy )
+     {
+       if ( GetTickCount() - last_req_time > REQ_PERIOD )
+          {
+            if ( !m_cfg.ussd_balance.empty() )
+               {
+                 if ( p_mob->InitUSSDRequest(m_cfg.ussd_balance.c_str(),CallbackWrapper,this) >= 0 )
+                    {
+                      is_busy = true;
+                      last_req_time = GetTickCount();
+                    }
+               }
+            else
+               {
+                 last_req_time = GetTickCount();
+               }
+          }
+     }
+}
+
+
+void CBalanceReq::CallbackWrapper(void *parm,int id,const char *cmd,const char *answer,bool is_timeout,bool is_answered_ok)
+{
+  reinterpret_cast<CBalanceReq*>(parm)->Callback(id,cmd,answer,is_timeout,is_answered_ok);
+}
+
+
+void CBalanceReq::Callback(int id,const char *cmd,const char *answer,bool is_timeout,bool is_answered_ok)
+{
+  if ( is_busy )  // paranoja
+     {
+       if ( !is_timeout && is_answered_ok )
+          {
+            m_answer = CTelitMobile::DecodeUSSDAnswer(answer);
+          }
+       
+       is_busy = false;
+     }
+}
+
+
+///////////////////////////
+
+
 class CEar
 {
           static const unsigned FDETECT_AUDIO_BUFFER_MSEC = 500;
@@ -39,6 +356,9 @@ class CEar
 
           CLog *p_log;
 
+          CPacketSender *p_sender;
+          CBalanceReq *p_balance;
+
           CButton *p_btn1;
           CButton *p_btn2;
           CButton *p_btn3;
@@ -48,8 +368,9 @@ class CEar
           double m_lon;   // initially set to 0
           short m_gnss;   // initially set to INVALID_GNSS
 
-          bool is_stop_processing;
-          bool btn2_pressed;
+          bool is_btn1_pressed;
+          bool is_btn2_pressed;
+          bool is_btn3_pressed;
 
   public:
           CEar();
@@ -77,7 +398,12 @@ class CEar
           std::string PrepareFDetectPacket(OURTIME event_time,unsigned len_ms,float db_amp);
           void UpdateSync(unsigned& last_update_time);
           void UpdateLatLon(unsigned& last_update_time);
-          void UpdateGSMStatuses(unsigned& last_update_time,bool actual_update);
+          void UpdateGSMStatuses(unsigned& last_update_time);
+          void CheckButtonsPressed();
+          void OnButton1();
+          void OnButton2();
+          void OnButton3();
+          void CheckFDetect();
 
 };
 
@@ -100,6 +426,8 @@ CEar::CEar()
   p_mob = NULL;
   p_fdetect = NULL;
   p_log = NULL;
+  p_sender = NULL;
+  p_balance = NULL;
   p_btn1 = NULL;
   p_btn2 = NULL;
   p_btn3 = NULL;
@@ -107,8 +435,9 @@ CEar::CEar()
   m_lat = 0.0;
   m_lon = 0.0;
   m_gnss = INVALID_GNSS;
-  is_stop_processing = false;
-  btn2_pressed = false;
+  is_btn1_pressed = false;
+  is_btn2_pressed = false;
+  is_btn3_pressed = false;
 
 
   // system init
@@ -133,7 +462,7 @@ CEar::CEar()
   p_led_nosim = p_led4;
   // start from this point we can use FatalError()
 
-  Beep(1000,100);  //CSysTicks::Delay(100);  // paranoja
+  Beep(1000,100);  //Sleep(100);  // paranoja
 
   if ( !CSDCard::InitCard() )
      {
@@ -179,6 +508,9 @@ CEar::CEar()
   
   p_log = new CLog(LOG_FILENAME,LOG_STDOUT_ECHO);
   // start from this point we can use ADD2LOG()
+
+  p_sender = new CPacketSender(m_cfg,p_mob,p_log);
+  p_balance = new CBalanceReq(m_cfg,p_mob,p_log);
 
   p_btn1 = new CBoardButton(BOARD_BUTTON1,IRQ_OnButton1Wrapper,this);
   p_btn2 = new CBoardButton(BOARD_BUTTON2,IRQ_OnButton2Wrapper,this);
@@ -229,20 +561,21 @@ void CEar::IRQ_OnButton3Wrapper(void *parm)
 // WARNING!!! This is an IRQ handler!
 void CEar::IRQ_OnButton1()
 {
-  is_stop_processing = true;
+  is_btn1_pressed = true;
 }
 
 
 // WARNING!!! This is an IRQ handler!
 void CEar::IRQ_OnButton2()
 {
-  btn2_pressed = true;
+  is_btn2_pressed = true;
 }
 
 
 // WARNING!!! This is an IRQ handler!
 void CEar::IRQ_OnButton3()
 {
+  is_btn3_pressed = true;
 }
 
 
@@ -422,11 +755,11 @@ void CEar::UpdateLatLon(unsigned& last_update_time)
 }
 
 
-void CEar::UpdateGSMStatuses(unsigned& last_update_time,bool actual_update)
+void CEar::UpdateGSMStatuses(unsigned& last_update_time)
 {
   if ( GetTickCount() - last_update_time > 5000 )
      {
-       if ( actual_update )
+       if ( !p_sender->IsBusy() && !p_balance->IsBusy() )  // to not fill terminal's queue if busy
           {
             p_mob->UpdateSIMStatus();
             p_mob->UpdateNetStatus();
@@ -443,6 +776,95 @@ void CEar::UpdateGSMStatuses(unsigned& last_update_time,bool actual_update)
 }
 
 
+void CEar::CheckButtonsPressed()
+{
+  if ( is_btn1_pressed || is_btn2_pressed || is_btn3_pressed )
+     {
+       Sleep(400);
+
+       if ( is_btn1_pressed )
+          {
+            OnButton1();
+          }
+       else
+       if ( is_btn2_pressed )
+          {
+            OnButton2();
+          }
+       else
+       if ( is_btn3_pressed )
+          {
+            OnButton3();
+          }
+
+       is_btn1_pressed = false;
+       is_btn2_pressed = false;
+       is_btn3_pressed = false;
+     }
+}
+
+
+// "stop processing" button
+void CEar::OnButton1()
+{
+  if ( p_debug_audio )
+     {
+       p_debug_audio->Stop();
+     }
+
+  ADD2LOG(("Stopped by user!"));
+  ADD2LOG(("----------------------"));
+
+  FatalError();
+}
+
+
+// "ping button"
+void CEar::OnButton2()
+{
+  p_sender->PushUnimportant(PreparePingPacket());
+}
+
+
+void CEar::OnButton3()
+{
+  std::string text = p_balance->GetResult();
+  
+  ADD2LOG(("Balance: %s",text.c_str()));
+
+  p_sender->PushUnimportant(PrepareUSSDPacket(text.c_str()));
+}
+
+
+void CEar::CheckFDetect()
+{
+  unsigned ts,length_ms;
+  float db_amp;
+  bool is_detected = p_fdetect->PopResult(ts,length_ms,db_amp);
+  if ( is_detected )
+     {
+       OURTIME ftime = CRTC::GetTime() - (OURTIME)(GetTickCount()-ts);
+
+       // todo: add no_sync check here!
+       
+       ADD2LOG(("FDetect!!! %s, %d msec, %.1f dB",COurTime(ftime).AsString().c_str(),length_ms,db_amp));
+
+       p_led1->On();
+       p_led2->On();
+       p_led3->On();
+       p_led4->On();
+
+       CSysTicks::Delay(100);
+
+       p_led1->Off();
+       p_led2->Off();
+       p_led3->Off();
+       p_led4->Off();
+
+       p_sender->PushImportant(PrepareFDetectPacket(ftime,length_ms,db_amp));
+     }
+}
+
 
 void CEar::MainLoop()
 {
@@ -451,79 +873,22 @@ void CEar::MainLoop()
   ADD2LOG(("GPS:%d, Glonass:%d, Galileo:%d, Beidou:%d",m_cfg.use_gps,m_cfg.use_glonass,m_cfg.use_galileo,m_cfg.use_beidou));
   ADD2LOG(("Debug mode: %s",m_cfg.debug_mode?"YES":"no"));
 
-
   unsigned last_update_sync = GetTickCount();
   unsigned last_update_latlon = GetTickCount();
   unsigned last_update_gsm = GetTickCount()-5000;
-
-
 
   while ( 1 )
   {
     UpdateSync(last_update_sync);
     UpdateLatLon(last_update_latlon);
-    UpdateGSMStatuses(last_update_gsm,true); // WARNING!!! Здесь может быть ситуация когда долго-выполняемая 
-                                             //            команда типа USSD/SMS/TCP/UDP висит на выполнении и 
-                                             //            мы вызываем периодически этот Update(true), 
-                                             //            то фактически только добавляем новые AT-команды в очередь 
-                                             //            и забиваем ее, что плохо. Решение: делать Update(false) 
-                                             //            пока выполняется какая-то долгая команда.
+    UpdateGSMStatuses(last_update_gsm); 
+    CheckFDetect();
+    CheckButtonsPressed();
 
-    {
-      unsigned ts,length_ms;
-      float db_amp;
-      bool is_detected = p_fdetect->PopResult(ts,length_ms,db_amp);
-      if ( is_detected )
-         {
-           OURTIME ftime = CRTC::GetTime() - (OURTIME)(GetTickCount()-ts);
-           
-           ADD2LOG(("FDetect!!! %s, %d msec, %.1f dB",COurTime(ftime).AsString().c_str(),length_ms,db_amp));
-
-           p_led1->On();
-           p_led2->On();
-           p_led3->On();
-           p_led4->On();
-
-           CSysTicks::Delay(100);
-
-           p_led1->Off();
-           p_led2->Off();
-           p_led3->Off();
-           p_led4->Off();
-         }
-    }
-
-    if ( btn2_pressed )
-       {
-         CSysTicks::Delay(200);
-         btn2_pressed = false;
-
-         std::string pkt = PrepareFDetectPacket(CRTC::GetTime(),321,15.1);
-
-         p_mob->InitiateInternetConnection(m_cfg.apn.c_str());
-         if ( m_cfg.modem_old_firmware )
-            p_mob->SendStringUDP_OldFW(m_cfg.server.c_str(),m_cfg.port_udp,pkt.c_str(),NULL,NULL);
-         else
-            p_mob->SendStringUDP(m_cfg.server.c_str(),m_cfg.port_udp,pkt.c_str(),NULL,NULL);
-       }
-
-    if ( is_stop_processing )
-       {
-         if ( p_debug_audio )
-            {
-              p_debug_audio->Stop();
-            }
-
-         ADD2LOG(("Stopped by user!"));
-         ADD2LOG(("----------------------"));
-
-         FatalError();
-       }
-
-    // poll devices
+    p_sender->Poll();
+    p_balance->Poll();
     p_sat->Poll();
     p_mob->Poll();
-
     if ( p_debug_audio )
        {
          p_debug_audio->Poll();
