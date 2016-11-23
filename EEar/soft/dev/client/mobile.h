@@ -71,8 +71,8 @@ class CTelitMobile
           static std::string DecodeUSSDAnswer(const char *answer);
           // Warning! Text conversion is not performed here!
           int SendSMS(const char *phone,const char *text,CTerminal::TCALLBACK cb,void *cbparm=NULL,unsigned timeout=15000);
-          void InitiateInternetConnection(const char *apn,const char *user=NULL,const char *pwd=NULL,unsigned timeout=15000);
-          void ShutdownInternetConnection(unsigned timeout=3000);
+          int InitiateInternetConnection(const char *apn,const char *user=NULL,const char *pwd=NULL,unsigned timeout=15000);
+          int ShutdownInternetConnection(unsigned timeout=3000);
           // Warning! Text conversion is not performed here!
           // Warning! InitiateInternetConnection() should be called first
           int SendStringTCP(const char *server,int port,const char *str,CTerminal::TCALLBACK cb,void *cbparm=NULL,

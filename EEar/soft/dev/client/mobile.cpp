@@ -221,6 +221,9 @@ std::string CTelitMobile::DecodeUSSDAnswer(const char *answer)
 
 int CTelitMobile::SendSMS(const char *phone,const char *text,CTerminal::TCALLBACK cb,void *cbparm,unsigned timeout)
 {
+  if ( p_trm->GetAvailQueueItemsCount() < 2 )  // queue optimization
+     return -1;
+  
   p_trm->Push("AT+CMGF=1");  // set text mode for SMS
 
   std::string s = "AT#CMGS=\"" + std::string(NNS(phone)) + "\",\"" + std::string(NNS(text)) + "\"";
@@ -228,8 +231,11 @@ int CTelitMobile::SendSMS(const char *phone,const char *text,CTerminal::TCALLBAC
 }
 
 
-void CTelitMobile::InitiateInternetConnection(const char *apn,const char *user,const char *pwd,unsigned timeout)
+int CTelitMobile::InitiateInternetConnection(const char *apn,const char *user,const char *pwd,unsigned timeout)
 {
+  if ( p_trm->GetAvailQueueItemsCount() < 3 )  // queue optimization
+     return -1;
+
   p_trm->Push(CFormat("AT+CGDCONT=1,\"IP\",\"%s\"",NNS(apn)));
   p_trm->Push("AT#SCFG=1,1,300,90,600,50");  // set default socket parameters (needed)
 
@@ -243,19 +249,22 @@ void CTelitMobile::InitiateInternetConnection(const char *apn,const char *user,c
        s += NNS(pwd);
        s += "\"";
      }
-  p_trm->Push(s.c_str(),NULL,NULL,timeout);  // error can be reported if context already activated!
+  return p_trm->Push(s.c_str(),NULL,NULL,timeout);  // error can be reported if context already activated!
 }
 
 
-void CTelitMobile::ShutdownInternetConnection(unsigned timeout)
+int CTelitMobile::ShutdownInternetConnection(unsigned timeout)
 {
-  p_trm->Push("AT#SGACT=1,0",NULL,NULL,timeout);
+  return p_trm->Push("AT#SGACT=1,0",NULL,NULL,timeout);
 }
 
 
 int CTelitMobile::SendStringTCP(const char *server,int port,const char *str,CTerminal::TCALLBACK cb,void *cbparm,
                                 unsigned conn_timeout,unsigned total_timeout)
 {
+  if ( p_trm->GetAvailQueueItemsCount() < 3 )  // queue optimization
+     return -1;
+
   conn_timeout /= 100;  // value in hundreds of msec
   conn_timeout = MAX(conn_timeout,10);
   conn_timeout = MIN(conn_timeout,1200);
@@ -271,6 +280,9 @@ int CTelitMobile::SendStringTCP(const char *server,int port,const char *str,CTer
 int CTelitMobile::SendStringUDP(const char *server,int port,const char *str,CTerminal::TCALLBACK cb,void *cbparm,
                                 unsigned total_timeout)
 {
+  if ( p_trm->GetAvailQueueItemsCount() < 3 )  // queue optimization
+     return -1;
+
   p_trm->Push("AT#SCFG=1,1,0,0,50,50");
 
   p_trm->Push(CFormat("AT#IPCONSUMECFG=1,1,\"%s\",%d",NNS(server),port));
@@ -283,6 +295,9 @@ int CTelitMobile::SendStringUDP(const char *server,int port,const char *str,CTer
 int CTelitMobile::SendStringUDP_OldFW(const char *server,int port,const char *str,CTerminal::TCALLBACK cb,void *cbparm,
                                       unsigned total_timeout)
 {
+  if ( p_trm->GetAvailQueueItemsCount() < 5 )  // queue optimization
+     return -1;
+
   p_trm->Push("AT#SCFG=1,1,0,0,50,50");
 
   p_trm->Push("AT#SH=1");
