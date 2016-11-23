@@ -177,7 +177,7 @@ void InitUART2()
   GPIO_PinAFConfig(GPIOD, GPIO_PinSource6, GPIO_AF_USART2);
   GPIO_PinAFConfig(GPIOD, GPIO_PinSource5, GPIO_AF_USART2);
   
-  usart.USART_BaudRate = 9600;
+  usart.USART_BaudRate = 115200;
   usart.USART_WordLength = USART_WordLength_8b;
   usart.USART_StopBits = USART_StopBits_1;
   usart.USART_Parity = USART_Parity_No ;
