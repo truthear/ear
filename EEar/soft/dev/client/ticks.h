@@ -46,6 +46,7 @@ class CCPUTicks : public CTicksCommon
 
 // like in windows:
 #define GetTickCount()   CSysTicks::GetCounter()
+#define Sleep(ms)        CSysTicks::Delay(ms)
 
 
 #endif
