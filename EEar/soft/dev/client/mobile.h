@@ -70,20 +70,27 @@ class CTelitMobile
           int InitUSSDRequest(const char *ussd,CTerminal::TCALLBACK cb,void *cbparm=NULL,unsigned max_time_to_wait_answer=10000);
           static std::string DecodeUSSDAnswer(const char *answer);
           // Warning! Text conversion is not performed here!
-          int SendSMS(const char *phone,const char *text,CTerminal::TCALLBACK cb,void *cbparm=NULL,unsigned timeout=15000);
-          int InitiateInternetConnection(const char *apn,const char *user=NULL,const char *pwd=NULL,unsigned timeout=15000);
-          int ShutdownInternetConnection(unsigned timeout=3000);
+          int SendSMS(const char *phone,const char *text,CTerminal::TCALLBACK cb,void *cbparm=NULL,unsigned timeout=60000);
+          int InitiateInternetConnection(const char *apn,const char *user=NULL,const char *pwd=NULL,unsigned timeout=60000);
+          int ShutdownInternetConnection(unsigned timeout=15000);
           // Warning! Text conversion is not performed here!
           // Warning! InitiateInternetConnection() should be called first
+          // WARNING!!! symbols \r,\n is not permitted inside str!
           int SendStringTCP(const char *server,int port,const char *str,CTerminal::TCALLBACK cb,void *cbparm=NULL,
-                            unsigned conn_timeout=10000,unsigned total_timeout=15000);
+                            unsigned conn_timeout=10000,unsigned total_timeout=35000);
           int SendStringUDP(const char *server,int port,const char *str,CTerminal::TCALLBACK cb,void *cbparm=NULL,
-                            unsigned total_timeout=8000);
+                            unsigned total_timeout=25000);
 
           // use it for old firmware only!
           // function can take a little time, not 100% async!
+          // WARNING!!! symbols \r,\n is not permitted inside str!
           int SendStringUDP_OldFW(const char *server,int port,const char *str,CTerminal::TCALLBACK cb,void *cbparm=NULL,
-                                  unsigned total_timeout=8000);
+                                  unsigned total_timeout=25000);
+
+          // high level function with default timeouts:
+          int InitiateInternetConnectionAndSendStringUDP(bool use_old_fw,const char *apn,const char *user,const char *pwd,
+                                                         const char *server,int port,const char *str,
+                                                         CTerminal::TCALLBACK cb,void *cbparm);
 
   private:
           static void GeneralStatusCBWrapper(void *parm,int id,const char *cmd,const char *answer,bool is_timeout,bool is_answered_ok);
