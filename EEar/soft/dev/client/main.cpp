@@ -10,7 +10,6 @@
 class CPacketSender
 {
           static const unsigned MAX_QUEUED_PACKETS = 10;   // only for important packets
-          static const unsigned INET_ACTIVATION_KEEPED = 90*1000;  // how much internet activation keeped, msec
           
           const CConfig& m_cfg;
           CTelitMobile *p_mob;
@@ -31,8 +30,6 @@ class CPacketSender
 
           typedef std::vector<PACKET*> TQueue;
           TQueue m_queue;
-
-          unsigned last_time_inet_activated;
 
   public:
           CPacketSender(const CConfig& cfg,CTelitMobile *mob,CLog *_log);
@@ -60,8 +57,6 @@ CPacketSender::CPacketSender(const CConfig& cfg,CTelitMobile *mob,CLog *_log)
   p_curr = NULL;
 
   m_queue.reserve(MAX_QUEUED_PACKETS+1);  // +1 needed in case SMS-sending
-
-  last_time_inet_activated = GetTickCount() - INET_ACTIVATION_KEEPED - 1;
 }
 
 
@@ -131,30 +126,8 @@ void CPacketSender::SaveOffline(const std::string& pkt)
 // returns false in case terminal queue is full
 bool CPacketSender::SendByInternet(const std::string& pkt)
 {
-  if ( GetTickCount() - last_time_inet_activated > INET_ACTIVATION_KEEPED )
-     {
-       if ( p_mob->InitiateInternetConnection(m_cfg.apn.c_str()) < 0 )
-          {
-            return false;
-          }
-       else
-          {
-            last_time_inet_activated = GetTickCount();
-          }
-     }
-  
-  
-  int id;
-  
-  if ( m_cfg.modem_old_firmware )
-     {
-       id = p_mob->SendStringUDP_OldFW(m_cfg.server.c_str(),m_cfg.port_udp,pkt.c_str(),CallbackWrapper,this);
-     }
-  else
-     {
-       id = p_mob->SendStringUDP(m_cfg.server.c_str(),m_cfg.port_udp,pkt.c_str(),CallbackWrapper,this);
-     }
-
+  int id = p_mob->InitiateInternetConnectionAndSendStringUDP(m_cfg.modem_old_firmware,m_cfg.apn.c_str(),NULL,NULL,
+                                          m_cfg.server.c_str(),m_cfg.port_udp,pkt.c_str(),CallbackWrapper,this);
   return id >= 0;
 }
 
@@ -311,6 +284,11 @@ void CBalanceReq::Callback(int id,const char *cmd,const char *answer,bool is_tim
           {
             m_answer = CTelitMobile::DecodeUSSDAnswer(answer);
           }
+       else
+          {
+            // for debug only:
+            //ADD2LOG(("USSD Callback error (timeout=%s): %s",is_timeout?"YES":"no",answer));
+          }
        
        is_busy = false;
      }
@@ -323,7 +301,7 @@ void CBalanceReq::Callback(int id,const char *cmd,const char *answer,bool is_tim
 class CEar
 {
           static const unsigned FDETECT_AUDIO_BUFFER_MSEC = 500;
-          static const int GSM_MODEM_BAUDRATE = 115200;
+          static const int GSM_MODEM_BAUDRATE = 57600; // on 115200 we can got some issues!
           static const unsigned MOBILE_TERMINAL_MAX_QUEUE_COMMANDS = 25;
           static const bool MOBILE_TERMINAL_AUTO_ANSWER_MODE = true;
           static const bool LOG_STDOUT_ECHO = true;
@@ -822,7 +800,11 @@ void CEar::OnButton1()
 // "ping button"
 void CEar::OnButton2()
 {
-  p_sender->PushUnimportant(PreparePingPacket());
+//  p_sender->PushUnimportant(PreparePingPacket());
+
+  p_sender->PushImportant(PrepareFDetectPacket(CRTC::GetTime(),100,15.33));
+  ADD2LOG(("Pushed"));
+
 }
 
 

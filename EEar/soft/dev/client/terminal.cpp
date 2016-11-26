@@ -41,7 +41,7 @@ CTerminal::~CTerminal()
 }
 
 
-int CTerminal::Push(const char *atcmd,TCALLBACK cb,void *cbparm,unsigned max_wait,unsigned min_wait)
+int CTerminal::Push(const char *atcmd,TCALLBACK cb,void *cbparm,unsigned max_wait,unsigned min_wait,bool add_cr_at_end)
 {
   int rc = -1;
 
@@ -61,7 +61,7 @@ int CTerminal::Push(const char *atcmd,TCALLBACK cb,void *cbparm,unsigned max_wai
 
        pcmd->id = m_next_id;
        pcmd->cmd = atcmd;
-       if ( pcmd->cmd[pcmd->cmd.size()-1] != CModem::CTRL_Z )
+       if ( add_cr_at_end )
           {
             pcmd->cmd += '\r';
           }
@@ -105,12 +105,12 @@ void CTerminal::InternalSyncCB(void *parm,int id,const char *cmd,const char *ans
 
 
 void CTerminal::SyncProcessCmd(const char *atcmd,std::string& _answer,bool& _is_timeout,bool& _is_answered_ok,
-                               unsigned command_max_wait,unsigned command_min_wait)
+                               unsigned command_max_wait,unsigned command_min_wait,bool add_cr_at_end)
 {
   TINTERNALSYNCCB i;
   i.complete = false;
 
-  while ( Push(atcmd,InternalSyncCB,&i,command_max_wait,command_min_wait) < 0 )
+  while ( Push(atcmd,InternalSyncCB,&i,command_max_wait,command_min_wait,add_cr_at_end) < 0 )
   {
     Poll();
   }
@@ -126,13 +126,13 @@ void CTerminal::SyncProcessCmd(const char *atcmd,std::string& _answer,bool& _is_
 }
 
 
-bool CTerminal::SyncProcessCmdSimple(const char *atcmd,unsigned command_max_wait)
+bool CTerminal::SyncProcessCmdSimple(const char *atcmd,unsigned command_max_wait,bool add_cr_at_end)
 {
   std::string answer;
   bool is_timeout = true;
   bool is_answered_ok = false;
   
-  SyncProcessCmd(atcmd,answer,is_timeout,is_answered_ok,command_max_wait,0);
+  SyncProcessCmd(atcmd,answer,is_timeout,is_answered_ok,command_max_wait,0,add_cr_at_end);
 
   return !is_timeout && is_answered_ok;
 }
@@ -172,7 +172,7 @@ void CTerminal::Poll()
                            char *s = (char*)alloca(buffsize+1);  // no free needed
                            UnrollString(s,buff,buffsize,m_wbuff_idx,widx);
 
-                           const std::string& atcmd = p_work_cmd->cmd;  // with \r or CTRL_Z at end!
+                           const std::string& atcmd = p_work_cmd->cmd;  // with or without \r at end!
 
                            const char *atstart = strstr(s,atcmd.c_str());
                            if ( !atstart )
@@ -199,7 +199,7 @@ void CTerminal::Poll()
                     {
                       if ( CSysTicks::GetCounter() - m_work_cmd_starttime > p_work_cmd->max_wait )
                          {
-                           DisposeWorkCmd("Timeout",true,false);
+                           DisposeWorkCmd("Timeout",true,false);  // bad situation for AT-sequence
                          }
                     }
                }

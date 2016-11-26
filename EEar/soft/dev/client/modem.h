@@ -9,10 +9,6 @@ class CUART;
 // this class uses CSysTicks, which should be initialized before!
 class CModem
 {
-  public:
-          static const char CTRL_Z = 26;
-
-  private:        
           unsigned char *p_recv_buff;  // circular recv buffer, should include AT-cmd length itself because of echo
           unsigned m_recv_buff_size;
           volatile unsigned m_recv_buff_idx;  // next write idx, updated from IRQ only
@@ -24,7 +20,7 @@ class CModem
           CModem(EBoardUarts uart,int rate,unsigned recv_buff_size,int irq_priority);
           ~CModem();
 
-          void SendATCmd(const char *cmd);  // should be \r or CTRL_Z at end!
+          void SendATCmd(const char *cmd);  // no \r added inside function!
           const unsigned char* RecvBuffAccess(unsigned& _wpos,unsigned& _size) const;
           unsigned GetLastRXTime() const { return m_last_rx_time; }
 
@@ -50,7 +46,7 @@ class CTelitModem
 
           void ResetModem();  // takes about ~2.3 sec!
 
-          void SendATCmd(const char *cmd);  // should be \r or CTRL_Z at end!
+          void SendATCmd(const char *cmd);  // no \r added inside function!
           const unsigned char* RecvBuffAccess(unsigned& _wpos,unsigned& _size) const;
           unsigned GetLastRXTime() const;
 };
@@ -68,7 +64,7 @@ class CBoardModem
 
           void ResetModem();  // takes about ~2.3 sec!
 
-          void SendATCmd(const char *cmd);  // should be \r or CTRL_Z at end!
+          void SendATCmd(const char *cmd);  // no \r added inside function!
           const unsigned char* RecvBuffAccess(unsigned& _wpos,unsigned& _size) const;
           unsigned GetLastRXTime() const;
 };

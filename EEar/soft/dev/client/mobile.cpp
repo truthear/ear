@@ -60,25 +60,25 @@ void CTelitMobile::UpdateSIMStatus()
 
 void CTelitMobile::UpdateNetStatus()
 {
-  p_trm->Push("AT+CREG?",GeneralStatusCBWrapper,this,2000);
+  p_trm->Push("AT+CREG?",GeneralStatusCBWrapper,this,3000);
 }
 
 
 void CTelitMobile::UpdateGPRSStatus()
 {
-  p_trm->Push("AT+CGREG?",GeneralStatusCBWrapper,this,2000);
+  p_trm->Push("AT+CGREG?",GeneralStatusCBWrapper,this,3000);
 }
 
 
 void CTelitMobile::UpdateSignalQuality()
 {
-  p_trm->Push("AT+CSQ",GeneralStatusCBWrapper,this,2000);
+  p_trm->Push("AT+CSQ",GeneralStatusCBWrapper,this,3000);
 }
 
 
 void CTelitMobile::UpdateInternetConnectionStatus()
 {
-  p_trm->Push("AT#SGACT?",GeneralStatusCBWrapper,this,2000);
+  p_trm->Push("AT#SGACT?",GeneralStatusCBWrapper,this,3000);
 }
 
 
@@ -298,21 +298,35 @@ int CTelitMobile::SendStringUDP_OldFW(const char *server,int port,const char *st
   if ( p_trm->GetAvailQueueItemsCount() < 5 )  // queue optimization
      return -1;
 
+  p_trm->Push("AT#SH=1",NULL,NULL,3100);
   p_trm->Push("AT#SCFG=1,1,0,0,50,50");
+  p_trm->Push(CFormat("AT#SD=1,1,%d,\"%s\",0,%d,1",port,NNS(server),port),NULL,NULL,20100);  // only DNS lookup can take a time
 
-  p_trm->Push("AT#SH=1");
-  p_trm->Push(CFormat("AT#SD=1,1,%d,\"%s\",0,%d,1",port,NNS(server),port),NULL,NULL,5000);  // only DNS lookup can take a time
+  str = str ? str : "";
 
-  if ( !p_trm->SyncProcessCmdSimple("AT#SSEND=1") )
+  if ( !p_trm->SyncProcessCmdSimple(CFormat("AT#SSENDEXT=1,%d",strlen(str))) )
      {
        return p_trm->Push("AT#MYERRORCOMMAND",cb,cbparm);  // issue async error
      }
   else
      {
-       std::string data = NNS(str);
-       data += CModem::CTRL_Z;
-       return p_trm->Push(data.c_str(),cb,cbparm,total_timeout);
+       return p_trm->Push(str,cb,cbparm,total_timeout,0,false/*no CR at end!*/);
      }
 }
+
+
+int CTelitMobile::InitiateInternetConnectionAndSendStringUDP(bool use_old_fw,const char *apn,const char *user,const char *pwd,
+                                                             const char *server,int port,const char *str,
+                                                             CTerminal::TCALLBACK cb,void *cbparm)
+{
+  if ( p_trm->GetAvailQueueItemsCount() < 8 )  // queue optimization
+     return -1;
+
+  InitiateInternetConnection(apn,user,pwd);
+
+  return use_old_fw ? SendStringUDP_OldFW(server,port,str,cb,cbparm) : SendStringUDP(server,port,str,cb,cbparm);
+}
+
+
 
 
