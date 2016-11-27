@@ -42,7 +42,7 @@ class CTerminal
           CBoardModem *p_modem;
 
   public:
-          CTerminal(CBoardModem *_modem,unsigned max_queue_cmds,unsigned warming_up_time=2000,unsigned min_at_cmd_interval=25);
+          CTerminal(CBoardModem *_modem,unsigned max_queue_cmds,unsigned warming_up_time=1000,unsigned min_at_cmd_interval=25);
           ~CTerminal();
 
           int GetAvailQueueItemsCount() const { return (int)m_max_queue_cmds-(int)m_cmds.size(); }

@@ -42,8 +42,14 @@ void CTelitMobile::ResetModem()
 bool CTelitMobile::Startup(bool use_auto_answer_mode)
 {
   bool rc = true;
+
+  for ( int n = 0; n < 4; n++ )
+      {
+        rc = p_trm->SyncProcessCmdSimple("AT");
+        if ( rc )
+          break;
+      }
   
-  rc = (p_trm->SyncProcessCmdSimple("AT") && rc);
   rc = (p_trm->SyncProcessCmdSimple(CFormat("AT+IPR=%d",m_baudrate)) && rc);
   rc = (p_trm->SyncProcessCmdSimple("AT+CMEE=2") && rc);
   rc = (p_trm->SyncProcessCmdSimple(use_auto_answer_mode?"ATS0=1":"ATS0=0") && rc);
