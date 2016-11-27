@@ -207,7 +207,7 @@ void CPacketSender::Poll()
 
 class CBalanceReq
 {
-          static const unsigned REQ_PERIOD = 60*60*1000;  // 1 hour, USSD request period
+          static const unsigned REQ_PERIOD = 1*60*60*1000;  // 1 hour, USSD request period
           
           const CConfig& m_cfg;
           CTelitMobile *p_mob;
@@ -238,7 +238,7 @@ CBalanceReq::CBalanceReq(const CConfig& cfg,CTelitMobile *mob,CLog *_log)
 {
   m_answer = "";
   is_busy = false;
-  last_req_time = GetTickCount();
+  last_req_time = GetTickCount()-REQ_PERIOD+60000;
 }
 
 
@@ -307,6 +307,8 @@ class CEar
           static const bool LOG_STDOUT_ECHO = true;
           static const unsigned DBG_AUDIO_FILE_LEN_IN_SEC = 60*5;  // 5 min
           static const bool CLEAR_DBG_AUDIO_FILE = true;  // slowdown at startup if true!
+          static const unsigned GSM_STATUS_UPDATE_INTERVAL = 5000;
+          static const unsigned PING_INTERVAL = 6*60*60*1000;  // 6 hours
           
           static const short INVALID_GNSS = 0x3f3f;  // '??'
           
@@ -377,12 +379,14 @@ class CEar
           void UpdateSync(unsigned& last_update_time);
           void UpdateLatLon(unsigned& last_update_time);
           void UpdateGSMStatuses(unsigned& last_update_time);
+          void UpdatePing(unsigned& last_update_time);
+          void UpdateBalance(unsigned& last_update_time);
           void CheckButtonsPressed();
           void OnButton1();
           void OnButton2();
           void OnButton3();
           void CheckFDetect();
-
+          void PollObjects();
 };
 
 
@@ -578,7 +582,7 @@ void CEar::IRQ_OnMic(const int16_t* pcm_buff,int num_samples)
   int sum = 0;
   for ( int n = 0; n < num_samples; n++ )
       {
-        short s = pcm_buff[n];
+        int s = pcm_buff[n];
         if ( s < 0 )
          s = -s;
         sum += s;
@@ -735,7 +739,7 @@ void CEar::UpdateLatLon(unsigned& last_update_time)
 
 void CEar::UpdateGSMStatuses(unsigned& last_update_time)
 {
-  if ( GetTickCount() - last_update_time > 5000 )
+  if ( GetTickCount() - last_update_time > GSM_STATUS_UPDATE_INTERVAL )
      {
        if ( !p_sender->IsBusy() && !p_balance->IsBusy() )  // to not fill terminal's queue if busy
           {
@@ -750,7 +754,34 @@ void CEar::UpdateGSMStatuses(unsigned& last_update_time)
      }
 
   p_led_nosim->SetState(p_mob->GetSIMStatus()!=SIM_READY);
-  p_led_gsm->SetState(p_mob->GetNetStatus()==NET_REGISTERED_HOME);
+  p_led_gsm->SetState(p_mob->GetNetStatus()==NET_REGISTERED_HOME||p_mob->GetNetStatus()==NET_REGISTERED_ROAMING);
+}
+
+
+void CEar::UpdatePing(unsigned& last_update_time)
+{
+  if ( GetTickCount() - last_update_time > PING_INTERVAL )
+     {
+       ADD2LOG(("Ping..."));
+
+       p_sender->PushUnimportant(PreparePingPacket());
+
+       last_update_time = GetTickCount();
+     }
+}
+
+
+void CEar::UpdateBalance(unsigned& last_update_time)
+{
+  if ( GetTickCount() - last_update_time > PING_INTERVAL )
+     {
+       ADD2LOG(("Balance..."));
+
+       std::string text = p_balance->GetResult();  // can return empty string
+       p_sender->PushUnimportant(PrepareUSSDPacket(text.c_str()));
+
+       last_update_time = GetTickCount();
+     }
 }
 
 
@@ -797,20 +828,17 @@ void CEar::OnButton1()
 }
 
 
-// "ping button"
+// "ping" button
 void CEar::OnButton2()
 {
-//  p_sender->PushUnimportant(PreparePingPacket());
-
-  p_sender->PushImportant(PrepareFDetectPacket(CRTC::GetTime(),100,15.33));
-  ADD2LOG(("Pushed"));
-
+  p_sender->PushUnimportant(PreparePingPacket());
 }
 
 
+// "balance" button
 void CEar::OnButton3()
 {
-  std::string text = p_balance->GetResult();
+  std::string text = p_balance->GetResult();  // can return empty string
   
   ADD2LOG(("Balance: %s",text.c_str()));
 
@@ -825,25 +853,41 @@ void CEar::CheckFDetect()
   bool is_detected = p_fdetect->PopResult(ts,length_ms,db_amp);
   if ( is_detected )
      {
-       OURTIME ftime = CRTC::GetTime() - (OURTIME)(GetTickCount()-ts);
-
-       // todo: add no_sync check here!
-       
-       ADD2LOG(("FDetect!!! %s, %d msec, %.1f dB",COurTime(ftime).AsString().c_str(),length_ms,db_amp));
-
        p_led1->On();
        p_led2->On();
        p_led3->On();
        p_led4->On();
-
-       CSysTicks::Delay(100);
-
+       Sleep(100);
        p_led1->Off();
        p_led2->Off();
        p_led3->Off();
        p_led4->Off();
 
-       p_sender->PushImportant(PrepareFDetectPacket(ftime,length_ms,db_amp));
+       if ( !IsSynced() )
+          {
+            ADD2LOG(("FDetect WITHOUT time sync: %d msec, %.1f dB",length_ms,db_amp));
+          }
+       else
+          {
+            OURTIME ftime = CRTC::GetTime() - (OURTIME)(GetTickCount()-ts);
+
+            ADD2LOG(("FDetect: %s, %d msec, %.1f dB",COurTime(ftime).AsString().c_str(),length_ms,db_amp));
+
+            p_sender->PushImportant(PrepareFDetectPacket(ftime,length_ms,db_amp));  // not always 100% async!
+          }
+     }
+}
+
+
+void CEar::PollObjects()
+{
+  p_sender->Poll();
+  p_balance->Poll();
+  p_sat->Poll();
+  p_mob->Poll();
+  if ( p_debug_audio )
+     {
+       p_debug_audio->Poll();
      }
 }
 
@@ -857,24 +901,20 @@ void CEar::MainLoop()
 
   unsigned last_update_sync = GetTickCount();
   unsigned last_update_latlon = GetTickCount();
-  unsigned last_update_gsm = GetTickCount()-5000;
+  unsigned last_update_gsm = GetTickCount()-GSM_STATUS_UPDATE_INTERVAL;
+  unsigned last_update_ping = GetTickCount()-PING_INTERVAL+120000;
+  unsigned last_update_balance = last_update_ping+30000;
 
   while ( 1 )
   {
     UpdateSync(last_update_sync);
     UpdateLatLon(last_update_latlon);
     UpdateGSMStatuses(last_update_gsm); 
+    UpdatePing(last_update_ping);
+    UpdateBalance(last_update_balance);
     CheckFDetect();
     CheckButtonsPressed();
-
-    p_sender->Poll();
-    p_balance->Poll();
-    p_sat->Poll();
-    p_mob->Poll();
-    if ( p_debug_audio )
-       {
-         p_debug_audio->Poll();
-       }
+    PollObjects();
   }
 }
 
