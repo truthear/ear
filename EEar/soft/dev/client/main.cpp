@@ -477,19 +477,19 @@ CEar::CEar()
      }
   // start from this point we can use CRTC::XXX
 
+  p_log = new CLog(LOG_FILENAME,LOG_STDOUT_ECHO);
+  // start from this point we can use ADD2LOG()
+
   p_mob = new CTelitMobile(GSM_MODEM_BAUDRATE,MOBILE_TERMINAL_MAX_QUEUE_COMMANDS);
   if ( !p_mob->Startup(MOBILE_TERMINAL_AUTO_ANSWER_MODE) )
      {
-       printf("Mobile init failed\n");
+       ADD2LOG(("Mobile init failed"));
        FatalError();
      }
 
   p_fdetect = new CFDetector(CMic::SAMPLE_RATE,FDETECT_AUDIO_BUFFER_MSEC);
 
   CMic::Init(IRQ_OnMicWrapper,this);  // after creating p_fdetect!
-  
-  p_log = new CLog(LOG_FILENAME,LOG_STDOUT_ECHO);
-  // start from this point we can use ADD2LOG()
 
   p_sender = new CPacketSender(m_cfg,p_mob,p_log);
   p_balance = new CBalanceReq(m_cfg,p_mob,p_log);
