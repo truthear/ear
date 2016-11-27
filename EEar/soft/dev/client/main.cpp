@@ -484,7 +484,7 @@ CEar::CEar()
   if ( !p_mob->Startup(MOBILE_TERMINAL_AUTO_ANSWER_MODE) )
      {
        ADD2LOG(("Mobile init failed"));
-       FatalError();
+       //FatalError();  - not critical
      }
 
   p_fdetect = new CFDetector(CMic::SAMPLE_RATE,FDETECT_AUDIO_BUFFER_MSEC);
