@@ -1,3 +1,0 @@
-mingw/st_util-mingw.o: mingw/mingw.c /usr/include/stdc-predef.h
-
-/usr/include/stdc-predef.h:
