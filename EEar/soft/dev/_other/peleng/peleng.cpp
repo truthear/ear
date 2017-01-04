@@ -230,9 +230,9 @@ static const int SCALE = 10;    // RADIUS*SCALE=real meters
 CPeleng<RADIUS,SCALE> plg;
 
 unsigned g_seed = 11111;
-int g_numsensors = 4;
-int g_max_deviation_delta_ms = 160;
-float g_barrier_ms = 200;
+int g_numsensors = 5;
+int g_max_deviation_delta_ms = 1;
+float g_barrier_ms = 100;
 
 
 

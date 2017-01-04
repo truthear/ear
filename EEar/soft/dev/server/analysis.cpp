@@ -53,7 +53,10 @@ class CLLXYDeg : public CLLXYRad
 
 double CLLXYRad::mdist(double s1,double d1,double s2,double d2)
 {
-  return EARTH_RADIUS_METERS*acos(sin(s1)*sin(s2)+cos(s1)*cos(s2)*cos(d2-d1));
+  double t = sin(s1)*sin(s2)+cos(s1)*cos(s2)*cos(d2-d1);
+  t = MIN(t,+1);
+  t = MAX(t,-1);
+  return EARTH_RADIUS_METERS*acos(t);
 }
 
 
@@ -74,11 +77,31 @@ void CLLXYRad::GetLL(double x,double y,double& _lat,double& _lon) const
 
   double angL = sqrt(sqr(x)+sqr(y))/EARTH_RADIUS_METERS;
   double sign = x < 0 ? -1 : +1;
-  _lon = sign*acos((cos(angL)-sin(m_lat0)*sin(_lat))/(cos(m_lat0)*cos(_lat)))+m_lon0;
+
+  double t = (cos(angL)-sin(m_lat0)*sin(_lat))/(cos(m_lat0)*cos(_lat));
+  t = MIN(t,+1);
+  t = MAX(t,-1);
+  
+  _lon = sign*acos(t)+m_lon0;
 }
 
 
 ////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
