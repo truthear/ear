@@ -2,7 +2,7 @@
 #include "include.h"
 
 
-#define M_PI 3.14159265358979323846
+
 
 #define EARTH_RADIUS_METERS  6371000.0
 #define SOUND_SPEED          331.0  // m/s
@@ -108,7 +108,7 @@ class CDeviation
           void AddSensor(double x,double y,double ts_msec);
 
           void Analyze(double center_x,double center_y,double radius,double step,double barrier_msec,
-                       double& _best_x,double& _best_y,double& _best_dev_msec,double& _barrier_radius) const;
+                       double& _best_x,double& _best_y,double& _avg_ts,double& _best_dev_msec,double& _barrier_radius) const;
 
   private:
           static double sqr(double x) { return x*x; }
@@ -140,10 +140,11 @@ void CDeviation::AddSensor(double x,double y,double ts_msec)
 
 
 void CDeviation::Analyze(double center_x,double center_y,double radius,double step,double barrier_msec,
-                         double& _best_x,double& _best_y,double& _best_dev_msec,double& _barrier_radius) const
+                         double& _best_x,double& _best_y,double& _avg_ts,double& _best_dev_msec,double& _barrier_radius) const
 {
   _best_x = center_x;
   _best_y = center_y;
+  _avg_ts = 0;
   _best_dev_msec = +100000;
   _barrier_radius = +100000;
 
@@ -190,6 +191,7 @@ void CDeviation::Analyze(double center_x,double center_y,double radius,double st
                   deviation_min = t_sigma;
                   _best_x = x;
                   _best_y = y;
+                  _avg_ts = t_avg;
                   _best_dev_msec = t_sigma;
                 }
 
@@ -211,17 +213,91 @@ void CDeviation::Analyze(double center_x,double center_y,double radius,double st
 
 
 
+CSensorAnalyzer::CSensorAnalyzer()
+{
+}
 
 
+CSensorAnalyzer::~CSensorAnalyzer()
+{
+}
 
 
+void CSensorAnalyzer::AddSensor(double lat,double lon,double ts_msec)
+{
+  TSOURCE e;
+
+  e.lat = lat;
+  e.lon = lon;
+  e.ts_msec = ts_msec;
+
+  m_sns.push_back(e);
+}
 
 
+BOOL CSensorAnalyzer::Calculate(double& _lat,double& _lon,double& _ts_msec,double& _deviation_msec) const
+{
+  BOOL rc = FALSE;
 
+  if ( m_sns.size() > 2 )
+     {
+       // calc center point
+       double lat_min = +1000;
+       double lat_max = -1000;
+       double lon_min = +1000;
+       double lon_max = -1000;
 
+       for ( unsigned n = 0; n < m_sns.size(); n++ )
+           {
+             lat_min = MIN(lat_min,m_sns[n].lat);
+             lon_min = MIN(lon_min,m_sns[n].lon);
+             lat_max = MAX(lat_max,m_sns[n].lat);
+             lon_max = MAX(lon_max,m_sns[n].lon);
+           }
 
+       double lat_center = (lat_min + lat_max) / 2;
+       double lon_center = (lon_min + lon_max) / 2;
 
+       // convert to flat XY coords
+       CLLXYDeg cnv(lat_center,lon_center);
+       CDeviation dev;
 
+       for ( unsigned n = 0; n < m_sns.size(); n++ )
+           {
+             double x,y;
+             cnv.GetXY(m_sns[n].lat,m_sns[n].lon,x,y);
+             dev.AddSensor(x,y,m_sns[n].ts_msec);
+           }
+
+       // step 1: inaccurate processing
+       const double inaccurate_step = 10;
+       const double accurate_step = 1;
+       const double barrier_msec = 60;            // try another
+       const double fatal_barrier_radius = 700;   // try another
+
+       double best_x,best_y,avg_ts,best_dev_msec,barrier_radius;
+
+       dev.Analyze(0,0,PROCESSING_RADIUS_METERS,inaccurate_step,barrier_msec,best_x,best_y,avg_ts,best_dev_msec,barrier_radius);
+
+       if ( barrier_radius < fatal_barrier_radius )
+          {
+            // step 2: accurate processing
+            dev.Analyze(best_x,best_y,inaccurate_step,accurate_step,0,best_x,best_y,avg_ts,best_dev_msec,barrier_radius);
+
+            double lat,lon;
+            cnv.GetLL(best_x,best_y,lat,lon);
+            
+            _lat = lat;
+            _lon = lon;
+            _ts_msec = avg_ts;
+            _deviation_msec = best_dev_msec;
+
+            rc = TRUE;
+          }
+     }
+
+  return rc;
+}
 
 
 

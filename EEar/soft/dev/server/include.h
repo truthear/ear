@@ -13,6 +13,7 @@
 #include <assert.h>
 #include <string.h>
 #include <malloc.h>
+#define _USE_MATH_DEFINES
 #include <math.h>
 #include <string>
 #include <vector>
@@ -29,6 +30,7 @@
 #include "server.h"
 #include "../client/aes.h"
 #include "../client/crc32.h"
+#include "analysis.h"
 
 
 #endif
