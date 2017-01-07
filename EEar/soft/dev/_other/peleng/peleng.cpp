@@ -164,7 +164,7 @@ class CPeleng
             DrawPoint(best_x,best_y,RGB(255,255,0));
 
             {
-              int radius_m = dist(barrier_min_x,barrier_min_y,barrier_max_x,barrier_max_y)*scale;
+              int radius_m = dist(barrier_min_x,barrier_min_y,barrier_max_x,barrier_max_y)*scale/2;
               int error_m = dist(best_x,best_y,m_fx,m_fy)*scale;
               char s[200];
               sprintf(s,"error: %d m, radius: %d m, dev_fxfy: %.1f msec, dev_best: %.1f msec, time: %d msec",error_m,radius_m,m_zone[(int)m_fx][(int)m_fy],m_zone[best_x][best_y],m_calc_time_spent);
@@ -229,10 +229,10 @@ static const int SCALE = 10;    // RADIUS*SCALE=real meters
 
 CPeleng<RADIUS,SCALE> plg;
 
-unsigned g_seed = 11111;
+unsigned g_seed = 1;
 int g_numsensors = 5;
-int g_max_deviation_delta_ms = 1;
-float g_barrier_ms = 100;
+int g_max_deviation_delta_ms = 16;
+float g_barrier_ms = 60;
 
 
 
