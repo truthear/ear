@@ -17,6 +17,7 @@
 #include <math.h>
 #include <string>
 #include <vector>
+#include <map>
 
 #include "sqlite/sqlite.h"
 #include "def.h"

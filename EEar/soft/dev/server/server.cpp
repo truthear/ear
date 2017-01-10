@@ -14,6 +14,8 @@ CServer::CServer()
 
   ReadConfig(m_cfg);
 
+  p_analyzer = NULL;
+
   h_stop_event = CreateEvent(NULL,FALSE,FALSE,NULL);
   h_thread = CreateThread(NULL,0,ThreadProcWrapper,this,0,NULL);
 }
@@ -86,6 +88,8 @@ void CServer::ThreadProc()
 
   typedef std::vector<CTCPClient*> TTCPClients;
   TTCPClients clients;  // TCP only
+
+  p_analyzer = new CHighLevelSectorsAnalyzer;
   
   // main loop
   do {
@@ -173,12 +177,16 @@ void CServer::ThreadProc()
       } while ( b_deleted );
     }
 
+    // poll other
+    PollResult();
+
     // wait
     if ( WaitForSingleObject(h_stop_event,50) == WAIT_OBJECT_0 )
        break;
 
   } while (1);
 
+  SAFEDELETE(p_analyzer);
 
   // cleanup rest TCP clients
   for ( unsigned n = 0; n < clients.size(); n++ )
@@ -374,14 +382,9 @@ void CServer::OnFDetect(const TCmdFDetect& cmd,BOOL is_from_sms)
 {
   SaveFDetectInfo2DB(cmd,is_from_sms);
 
-  // ....
-  int sector = cmd.header.sector;
-  double lat = INT2GEO(cmd.geo.lat);
-  double lon = INT2GEO(cmd.geo.lon);
-  OURTIME time_utc = cmd.time_utc;
-  int numsources = 5;
-  SaveCalculationResult2DB(sector,time_utc,lat,lon,numsources);
-  ADD2LOG(("Got FDetect result! %.7f,%.7f [%s UTC] from %d sources",lat,lon,OurTimeToString(time_utc).c_str(),numsources));
+  p_analyzer->PushSensorDetection(cmd.header.sector,cmd.header.device_id,cmd.header.fdetect_ver,
+                                  cmd.fight_len_ms,cmd.fight_db_amp,
+                                  INT2GEO(cmd.geo.lat),INT2GEO(cmd.geo.lon),cmd.time_utc);
 }
 
 
@@ -424,6 +427,19 @@ void CServer::SaveCalculationResult2DB(int sector,OURTIME time_utc,double lat,do
   q->BindAsInt(numsources);
   q->Step();
   q->Destroy();
+}
+
+
+void CServer::PollResult()
+{
+  int numsensors,sector,fdetect_ver;
+  double lat,lon;
+  OURTIME ts;
+  
+  while ( p_analyzer->PopResult(numsensors,sector,fdetect_ver,lat,lon,ts) )
+  {
+    SaveCalculationResult2DB(sector,ts,lat,lon,numsensors);
+  }
 }
 
 

@@ -3,6 +3,9 @@
 #define __SERVER_H__
 
 
+class CHighLevelSectorsAnalyzer;
+
+
 class CServer
 {
           static const unsigned MAX_TCP_CONNECTIONS = 300;
@@ -12,6 +15,8 @@ class CServer
 
           HANDLE h_stop_event;
           HANDLE h_thread;
+
+          CHighLevelSectorsAnalyzer *p_analyzer;
 
   public:
           CServer();
@@ -28,6 +33,7 @@ class CServer
           void OnFDetect(const TCmdFDetect& cmd,BOOL is_from_sms);
           void SaveFDetectInfo2DB(const TCmdFDetect& cmd,BOOL is_from_sms);
           void SaveCalculationResult2DB(int sector,OURTIME time_utc,double lat,double lon,int numsources);
+          void PollResult();
 };
 
 

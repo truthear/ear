@@ -213,7 +213,29 @@ void CDeviation::Analyze(double center_x,double center_y,double radius,double st
 
 
 
-CSensorAnalyzer::CSensorAnalyzer()
+// lat, lon in degrees!
+class CSensorAnalyzer
+{
+          int m_processing_radius_meters;
+
+          typedef struct {
+           double lat,lon;
+           double ts_msec;
+          } TSOURCE;
+
+          std::vector<TSOURCE> m_sns;
+
+  public:
+          CSensorAnalyzer(int processing_radius_meters);
+          ~CSensorAnalyzer();
+
+          void AddSensor(double lat,double lon,double ts_msec);
+          BOOL Calculate(double& _lat,double& _lon,double& _ts_msec,double& _deviation_msec) const;
+};
+
+
+CSensorAnalyzer::CSensorAnalyzer(int processing_radius_meters)
+  : m_processing_radius_meters(processing_radius_meters)
 {
 }
 
@@ -277,7 +299,7 @@ BOOL CSensorAnalyzer::Calculate(double& _lat,double& _lon,double& _ts_msec,doubl
 
        double best_x,best_y,avg_ts,best_dev_msec,barrier_radius;
 
-       dev.Analyze(0,0,PROCESSING_RADIUS_METERS,inaccurate_step,barrier_msec,best_x,best_y,avg_ts,best_dev_msec,barrier_radius);
+       dev.Analyze(0,0,m_processing_radius_meters,inaccurate_step,barrier_msec,best_x,best_y,avg_ts,best_dev_msec,barrier_radius);
 
        if ( barrier_radius < fatal_barrier_radius )
           {
@@ -300,6 +322,135 @@ BOOL CSensorAnalyzer::Calculate(double& _lat,double& _lon,double& _ts_msec,doubl
 }
 
 
+/////////////////////////
 
+
+
+CHighLevelSectorsAnalyzer::CHighLevelSectorsAnalyzer()
+{
+}
+
+
+CHighLevelSectorsAnalyzer::~CHighLevelSectorsAnalyzer()
+{
+}
+
+
+void CHighLevelSectorsAnalyzer::PushSensorDetection(int sector,int device,int fdetect_ver,int fight_len_ms,float fight_db_amp,double lat,double lon,OURTIME ts)
+{
+  TSECTORVER sv;
+  sv.sector = sector;
+  sv.ver = fdetect_ver;
+
+  TSENSORDATA sens;
+  sens.len_ms = fight_len_ms;
+  sens.db_amp = fight_db_amp;
+  sens.lat = lat;
+  sens.lon = lon;
+  sens.ts = ts;
+
+  TMap::iterator it = m_map.find(sv);
+  if ( it == m_map.end() )
+     {
+       // first sensor in sector
+       
+       TSECTORDATA sd;
+       sd.starttime = GetTickCount();
+       sd.sensors[device] = sens;
+
+       m_map[sv] = sd;
+     }
+  else
+     {
+       TSensorsMap& smap = it->second.sensors;
+
+       if ( smap.find(device) == smap.end() )
+          {
+            smap[device] = sens;
+          }
+       else
+          {
+            ADD2LOG(("PushSensorDetection failed - already in queue, sector %d, device %d",sector,device));
+          }
+     }
+}
+
+
+BOOL CHighLevelSectorsAnalyzer::PopResult(int& _numsensors,int& _sector,int& _fdetect_ver,double& _lat,double& _lon,OURTIME& _ts)
+{
+  BOOL rc = FALSE;
+
+  do {
+  
+   BOOL b_continue_loop = FALSE;
+
+   for ( TMap::iterator it = m_map.begin(); it != m_map.end(); ++it )
+       {
+         const TSECTORDATA& sd = it->second;
+
+         if ( GetTickCount() - sd.starttime > SECTOR_WAIT_TIME )
+            {
+              // process and then destroy this sector:
+              
+              const TSensorsMap& sensors = sd.sensors;  
+              if ( sensors.size() > 2 )
+                 {
+                   // todo: check here if ts is very differs from average deviation of other ts's
+                   //       also for db_amp, len_ms...
+
+                   CSensorAnalyzer an(PROCESSING_RADIUS_METERS);
+
+                   for ( TSensorsMap::const_iterator it2 = sensors.begin(); it2 != sensors.end(); ++it2 )
+                       {
+                         const TSENSORDATA& sd = it2->second;
+                         an.AddSensor(sd.lat,sd.lon,(double)sd.ts);
+                       }
+                   
+                   double lat,lon,ts_msec,deviation_msec;
+                   if ( an.Calculate(lat,lon,ts_msec,deviation_msec) )
+                      {
+                        if ( deviation_msec > MAX_DEVIATION_MSEC )
+                           {
+                             ADD2LOG(("Deviation is too big %.0f, sector: %d, numsources: %d",deviation_msec,it->first.sector,sensors.size()));
+                             b_continue_loop = TRUE;
+                           }
+                        else
+                           {
+                             _numsensors = sensors.size();
+                             _sector = it->first.sector;
+                             _fdetect_ver = it->first.ver;
+                             _lat = lat;
+                             _lon = lon;
+                             _ts = (OURTIME)ts_msec;
+
+                             ADD2LOG(("Calculation succedeed! sector: %d, numsources: %d, lat: %.6f, lon: %.6f, ts: %s UTC, dev: %.1f msec",it->first.sector,sensors.size(),lat,lon,OurTimeToString((OURTIME)ts_msec).c_str(),deviation_msec));
+
+                             rc = TRUE;
+                           }
+                      }
+                   else
+                      {
+                        ADD2LOG(("cannot Calculate() result, Sector: %d, numsources: %d",it->first.sector,sensors.size()));
+                        b_continue_loop = TRUE;
+                      }
+                 }
+              else
+                 {
+                   ADD2LOG(("cannot Calculate() result, Sector: %d, numsources: %d",it->first.sector,sensors.size()));
+                   b_continue_loop = TRUE;
+                 }
+
+              m_map.erase(it);
+              break;
+            }
+       }
+
+   if ( !b_continue_loop )
+      break;
+
+  } while ( 1 );
+
+  return rc;
+}
 
 
