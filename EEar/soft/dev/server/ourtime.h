@@ -10,8 +10,8 @@ static const OURTIME OURTIME_1_DAY = 86400000;
 
 
 
-void OurTimeToSystemTime(OURTIME d,SYSTEMTIME *st);
-OURTIME SystemTimeToOurTime(const SYSTEMTIME *st);
+void OurTimeToSystemTime(OURTIME d,SYSTEMTIME& st);
+OURTIME SystemTimeToOurTime(const SYSTEMTIME& st);
 OURTIME GetNowOurTime();
 OURTIME GetNowOurTimeUTC0();
 void OurTimeToString(char *s,OURTIME t);
