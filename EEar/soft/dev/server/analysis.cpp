@@ -294,14 +294,14 @@ BOOL CSensorAnalyzer::Calculate(double& _lat,double& _lon,double& _ts_msec,doubl
        // step 1: inaccurate processing
        const double inaccurate_step = 10;
        const double accurate_step = 1;
-       const double barrier_msec = 60;            // try another
-       const double fatal_barrier_radius = 700;   // try another
+       const double barrier_msec = 60;  // not used
+       //const double fatal_barrier_radius = 700;   // not used
 
        double best_x,best_y,avg_ts,best_dev_msec,barrier_radius;
 
        dev.Analyze(0,0,m_processing_radius_meters,inaccurate_step,barrier_msec,best_x,best_y,avg_ts,best_dev_msec,barrier_radius);
 
-       if ( barrier_radius < fatal_barrier_radius )
+       if ( 1 /*barrier_radius < fatal_barrier_radius*/ )
           {
             // step 2: accurate processing
             dev.Analyze(best_x,best_y,inaccurate_step,accurate_step,0,best_x,best_y,avg_ts,best_dev_msec,barrier_radius);

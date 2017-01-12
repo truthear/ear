@@ -7,7 +7,7 @@
 class CHighLevelSectorsAnalyzer
 {
           static const int PROCESSING_RADIUS_METERS = 8000;  // 16x16 km zone
-          static const int MAX_DEVIATION_MSEC = 150;         // if median deviation from sensors more than this value, result will be ignored
+          static const int MAX_DEVIATION_MSEC = 100;         // if "avg median deviation from sensors" more than this value, result will be ignored
           static const unsigned SECTOR_WAIT_TIME = 60000;    // wait time for sensors in sector
 
 
