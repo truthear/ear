@@ -68,8 +68,8 @@ class CPeleng
 
             for ( unsigned n = 0; n < m_numsensors; n++ )
                 {
-                  m_sensors[n].x = GetRandomCoordinate();
-                  m_sensors[n].y = GetRandomCoordinate();
+                  m_sensors[n].x = GetRandomCoordinate() / 2;
+                  m_sensors[n].y = GetRandomCoordinate() / 4;
                   m_sensors[n].t = m_ft+(dist(m_fx,m_fy,m_sensors[n].x,m_sensors[n].y)*scale/SOUND_SPEED)*1000+((rand()%max_random_delta_ms)-max_random_delta_ms/2);
                 }
           }
@@ -230,7 +230,7 @@ static const int SCALE = 10;    // RADIUS*SCALE=real meters
 CPeleng<RADIUS,SCALE> plg;
 
 unsigned g_seed = 1;
-int g_numsensors = 5;
+int g_numsensors = 7;
 int g_max_deviation_delta_ms = 16;
 float g_barrier_ms = 60;
 
