@@ -9,6 +9,8 @@ CDebugAudio::CDebugAudio(int sample_rate,const char *filename,unsigned file_size
   assert(sample_rate>0);
   assert((sample_rate%1000)==0);
   
+  m_filename = NNS(filename);
+  
   m_1ms_samples = sample_rate/1000;
 
   assert((BLOCK_SIZE%(m_1ms_samples*sizeof(short)))==0);
@@ -116,18 +118,25 @@ void CDebugAudio::Poll()
             memcpy(temp,&m_buff.ar[safe_read_part*BLOCK_SIZE],BLOCK_SIZE);
             
             UINT wb = 0;
-            if ( f_write(&m_file.handle,temp,BLOCK_SIZE,&wb) == FR_OK && wb == BLOCK_SIZE )
+            bool wr_ok = (f_write(&m_file.handle,temp,BLOCK_SIZE,&wb) == FR_OK && wb == BLOCK_SIZE);
+            
+            m_file.curr_block++;
+            if ( m_file.curr_block == m_file.total_blocks )
                {
-                 m_file.curr_block++;
-                 if ( m_file.curr_block == m_file.total_blocks )
-                    {
-                      m_file.curr_block = 0;
-                      f_lseek(&m_file.handle,0);
-                    }
+                 m_file.curr_block = 0;
+                 f_lseek(&m_file.handle,0);
                }
-            else
+
+            if ( !wr_ok )
                {
-                 f_lseek(&m_file.handle,m_file.curr_block*BLOCK_SIZE);
+                 f_close(&m_file.handle);
+                 init_ok = false;
+
+                 if ( f_open(&m_file.handle,m_filename.c_str(),FA_WRITE|FA_OPEN_EXISTING) == FR_OK )
+                    {
+                      f_lseek(&m_file.handle,m_file.curr_block*BLOCK_SIZE);
+                      init_ok = true;
+                    }
                }
           }
      }

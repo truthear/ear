@@ -8,6 +8,8 @@
 class CDebugAudio
 {
           static const unsigned BLOCK_SIZE = 4096;  // in bytes, heap allocated BLOCK_SIZE*2, max stack - BLOCK_SIZE
+
+          std::string m_filename;
           
           unsigned m_1ms_samples;  // how much samples in 1 msec
 

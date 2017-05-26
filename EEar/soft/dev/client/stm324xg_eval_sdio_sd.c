@@ -306,7 +306,7 @@
 #define SD_CARD_LOCKED                  ((uint32_t)0x02000000)
 
 #define SD_DATATIMEOUT4STRUCT           ((uint32_t)0xFFFFFFFF)
-#define SD_DATATIMEOUT4WAIT             ((uint32_t)10000000)
+#define SD_DATATIMEOUT4WAIT             ((uint32_t)20000000)
 
 #define SD_0TO7BITS                     ((uint32_t)0x000000FF)
 #define SD_8TO15BITS                    ((uint32_t)0x0000FF00)

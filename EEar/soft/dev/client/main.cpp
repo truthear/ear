@@ -305,8 +305,8 @@ class CEar
           static const unsigned MOBILE_TERMINAL_MAX_QUEUE_COMMANDS = 25;
           static const bool MOBILE_TERMINAL_AUTO_ANSWER_MODE = true;
           static const bool LOG_STDOUT_ECHO = true;
-          static const unsigned DBG_AUDIO_FILE_LEN_IN_SEC = 60*5;  // 5 min
-          static const bool CLEAR_DBG_AUDIO_FILE = true;  // slowdown at startup if true!
+          static const unsigned DBG_AUDIO_FILE_LEN_IN_SEC = 3*60*60;  // 3 hours
+          static const bool CLEAR_DBG_AUDIO_FILE = false;  // slowdown at startup if true!
           static const unsigned GSM_STATUS_UPDATE_INTERVAL = 5000;
           static const unsigned PING_INTERVAL = 6*60*60*1000;  // 6 hours
           

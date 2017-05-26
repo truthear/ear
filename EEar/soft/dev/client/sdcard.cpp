@@ -53,12 +53,8 @@ bool CSDCard::Read(void *buff,unsigned start_sector,unsigned num_sectors)
                {
                  if ( SD_ReadMultiBlocks((uint8_t*)buff,(uint64_t)start_sector*SECTOR_SIZE,SECTOR_SIZE,num_sectors) == SD_OK )
                     {
-                      if ( SD_WaitReadOperation() == SD_OK )
-                         {
-                           while ( SD_GetStatus() != SD_TRANSFER_OK ) {}
-
-                           rc = true;
-                         }
+                      rc = (SD_WaitReadOperation() == SD_OK);
+                      while ( SD_GetStatus() != SD_TRANSFER_OK ) {}
                     }
                }
           }
@@ -84,12 +80,8 @@ bool CSDCard::Write(const void *buff,unsigned start_sector,unsigned num_sectors)
                {
                  if ( SD_WriteMultiBlocks((uint8_t*)buff,(uint64_t)start_sector*SECTOR_SIZE,SECTOR_SIZE,num_sectors) == SD_OK )
                     {
-                      if ( SD_WaitWriteOperation() == SD_OK )
-                         {
-                           while ( SD_GetStatus() != SD_TRANSFER_OK ) {}
-
-                           rc = true;
-                         }
+                      rc = (SD_WaitWriteOperation() == SD_OK);
+                      while ( SD_GetStatus() != SD_TRANSFER_OK ) {}
                     }
                }
           }
