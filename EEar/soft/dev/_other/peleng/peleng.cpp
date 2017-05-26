@@ -63,12 +63,12 @@ class CPeleng
             m_numsensors = sensors_cnt;
 
             m_fx = GetRandomCoordinate();
-            m_fy = GetRandomCoordinate();
+            m_fy = GetRandomCoordinate()/4+RADIUS/4*3;
             m_ft = 100.0;  // any value
 
             for ( unsigned n = 0; n < m_numsensors; n++ )
                 {
-                  m_sensors[n].x = GetRandomCoordinate() / 2;
+                  m_sensors[n].x = GetRandomCoordinate();
                   m_sensors[n].y = GetRandomCoordinate() / 4;
                   m_sensors[n].t = m_ft+(dist(m_fx,m_fy,m_sensors[n].x,m_sensors[n].y)*scale/SOUND_SPEED)*1000+((rand()%max_random_delta_ms)-max_random_delta_ms/2);
                 }
@@ -164,10 +164,18 @@ class CPeleng
             DrawPoint(best_x,best_y,RGB(255,255,0));
 
             {
+              double t_avg = 0;
+              for ( unsigned n = 0; n < m_numsensors; n++ )
+                  {
+                    t_avg += m_sensors[n].t-(dist(best_x,best_y,m_sensors[n].x,m_sensors[n].y)*scale/SOUND_SPEED)*1000;
+                  }
+              t_avg /= m_numsensors;
+              
+              
               int radius_m = dist(barrier_min_x,barrier_min_y,barrier_max_x,barrier_max_y)*scale/2;
               int error_m = dist(best_x,best_y,m_fx,m_fy)*scale;
               char s[200];
-              sprintf(s,"error: %d m, radius: %d m, dev_fxfy: %.1f msec, dev_best: %.1f msec, time: %d msec",error_m,radius_m,m_zone[(int)m_fx][(int)m_fy],m_zone[best_x][best_y],m_calc_time_spent);
+              sprintf(s,"error: %d m (%d msec), radius: %d m, dev_fxfy: %.1f msec, dev_best: %.1f msec, time: %d msec",error_m,(int)(t_avg-m_ft),radius_m,m_zone[(int)m_fx][(int)m_fy],m_zone[best_x][best_y],m_calc_time_spent);
               
               RECT r = {0,0,1500,50};
               
@@ -224,13 +232,13 @@ class CPeleng
 };
 
 
-static const int RADIUS = 740;  // pixels (discrete units)
-static const int SCALE = 10;    // RADIUS*SCALE=real meters
+static const int RADIUS = 1000;  // pixels (discrete units)
+static const int SCALE = 1;    // RADIUS*SCALE=real meters
 
 CPeleng<RADIUS,SCALE> plg;
 
 unsigned g_seed = 1;
-int g_numsensors = 7;
+int g_numsensors = 5;
 int g_max_deviation_delta_ms = 16;
 float g_barrier_ms = 60;
 
