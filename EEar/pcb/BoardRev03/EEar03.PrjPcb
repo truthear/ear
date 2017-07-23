@@ -375,6 +375,10 @@ Variation6=Designator=XS2|UniqueId=\SBYQOPVN\OJGNSGIA|Kind=1|AlternatePart=
 Variation7=Designator=U8|UniqueId=\FXHLQWHP\UVJYMQOQ|Kind=1|AlternatePart= 
 ParamVariationCount=0
 
+[GeneratedDocument1]
+DocumentPath=Project Outputs for EEar03\Design Rule Check - EEar03.html
+DItemRevisionGUID=
+
 [Configuration1]
 Name=Default Configuration
 ParameterCount=0
