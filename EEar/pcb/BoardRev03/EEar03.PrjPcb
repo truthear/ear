@@ -365,18 +365,111 @@ DocumentUniqueId=WNPXJUUB
 Description=BASECONFIG
 AllowFabrication=0
 ParameterCount=0
-VariationCount=7
-Variation1=Designator=R3|UniqueId=\KYHGIUFN\QQEPXEWV|Kind=1|AlternatePart= 
-Variation2=Designator=R1|UniqueId=\KYHGIUFN\JOGCFHWF|Kind=1|AlternatePart= 
-Variation3=Designator=X7|UniqueId=\BTCRDFXT\TXVNFKLB|Kind=1|AlternatePart= 
-Variation4=Designator=X5|UniqueId=\BTCRDFXT\PMWQOPFQ|Kind=1|AlternatePart= 
-Variation5=Designator=X20|UniqueId=\SBYQOPVN\VVFLNOKX|Kind=1|AlternatePart= 
-Variation6=Designator=XS2|UniqueId=\SBYQOPVN\OJGNSGIA|Kind=1|AlternatePart= 
-Variation7=Designator=U8|UniqueId=\FXHLQWHP\UVJYMQOQ|Kind=1|AlternatePart= 
+VariationCount=12
+Variation1=Designator=R3|UniqueId=\KYHGIUFN\RAWWIJIA|Kind=1|AlternatePart= 
+Variation2=Designator=R1|UniqueId=\KYHGIUFN\RGVIJQGT|Kind=1|AlternatePart= 
+Variation3=Designator=X7|UniqueId=\SBEQEMRP\YLVQHJSL|Kind=1|AlternatePart= 
+Variation4=Designator=X5|UniqueId=\SBEQEMRP\DANMIGJD|Kind=1|AlternatePart= 
+Variation5=Designator=XS2|UniqueId=\SBYQOPVN\OJGNSGIA|Kind=1|AlternatePart= 
+Variation6=Designator=U8|UniqueId=\FXHLQWHP\UVJYMQOQ|Kind=1|AlternatePart= 
+Variation7=Designator=R22|UniqueId=\SBEQEMRP\GWSMOOYH|Kind=1|AlternatePart= 
+Variation8=Designator=U9|UniqueId=\FXHLQWHP\JQDPYRWH|Kind=1|AlternatePart= 
+Variation9=Designator=U18|UniqueId=\FXHLQWHP\NTTFQDQR|Kind=1|AlternatePart= 
+Variation10=Designator=U13|UniqueId=\SBEQEMRP\NONQJADV|Kind=1|AlternatePart= 
+Variation11=Designator=U7|UniqueId=\SBEQEMRP\OGXJWNND|Kind=1|AlternatePart= 
+Variation12=Designator=X17|UniqueId=\YUAQCYWL\OLQBKJVJ|Kind=1|AlternatePart= 
 ParamVariationCount=0
 
 [GeneratedDocument1]
 DocumentPath=Project Outputs for EEar03\Design Rule Check - EEar03.html
+DItemRevisionGUID=
+
+[GeneratedDocument2]
+DocumentPath=Project Outputs for EEar03\EEar03.1
+DItemRevisionGUID=
+
+[GeneratedDocument3]
+DocumentPath=Project Outputs for EEar03\EEar03.DRR
+DItemRevisionGUID=
+
+[GeneratedDocument4]
+DocumentPath=Project Outputs for EEar03\EEar03.EXTREP
+DItemRevisionGUID=
+
+[GeneratedDocument5]
+DocumentPath=Project Outputs for EEar03\EEar03.GBL
+DItemRevisionGUID=
+
+[GeneratedDocument6]
+DocumentPath=Project Outputs for EEar03\EEar03.GBO
+DItemRevisionGUID=
+
+[GeneratedDocument7]
+DocumentPath=Project Outputs for EEar03\EEar03.GBP
+DItemRevisionGUID=
+
+[GeneratedDocument8]
+DocumentPath=Project Outputs for EEar03\EEar03.GBS
+DItemRevisionGUID=
+
+[GeneratedDocument9]
+DocumentPath=Project Outputs for EEar03\EEar03.GKO
+DItemRevisionGUID=
+
+[GeneratedDocument10]
+DocumentPath=Project Outputs for EEar03\EEar03.GM1
+DItemRevisionGUID=
+
+[GeneratedDocument11]
+DocumentPath=Project Outputs for EEar03\EEar03.GM13
+DItemRevisionGUID=
+
+[GeneratedDocument12]
+DocumentPath=Project Outputs for EEar03\EEar03.GM15
+DItemRevisionGUID=
+
+[GeneratedDocument13]
+DocumentPath=Project Outputs for EEar03\EEar03.GM29
+DItemRevisionGUID=
+
+[GeneratedDocument14]
+DocumentPath=Project Outputs for EEar03\EEar03.GM30
+DItemRevisionGUID=
+
+[GeneratedDocument15]
+DocumentPath=Project Outputs for EEar03\EEar03.GML
+DItemRevisionGUID=
+
+[GeneratedDocument16]
+DocumentPath=Project Outputs for EEar03\EEar03.GTL
+DItemRevisionGUID=
+
+[GeneratedDocument17]
+DocumentPath=Project Outputs for EEar03\EEar03.GTO
+DItemRevisionGUID=
+
+[GeneratedDocument18]
+DocumentPath=Project Outputs for EEar03\EEar03.GTP
+DItemRevisionGUID=
+
+[GeneratedDocument19]
+DocumentPath=Project Outputs for EEar03\EEar03.GTS
+DItemRevisionGUID=
+
+[GeneratedDocument20]
+DocumentPath=Project Outputs for EEar03\EEar03.LDP
+DItemRevisionGUID=
+
+[GeneratedDocument21]
+DocumentPath=Project Outputs for EEar03\EEar03.REP
+DItemRevisionGUID=
+
+[GeneratedDocument22]
+DocumentPath=Project Outputs for EEar03\EEar03.RUL
+DItemRevisionGUID=
+
+[GeneratedDocument23]
+DocumentPath=Project Outputs for EEar03\EEar03.TXT
 DItemRevisionGUID=
 
 [Configuration1]
@@ -757,7 +850,7 @@ OutputDocumentPath12=
 OutputVariantName12=[No Variations]
 OutputDefault12=0
 Configuration12_Name1=OutputConfigurationParameter1
-Configuration12_Item1=AddToAllLayerClasses.Set= |AddToAllPlots.Set=SerializeLayerHash.Version~2,ClassName~TLayerToBoolean|CentrePlots=False|DrillDrawingSymbol=GraphicsSymbol|DrillDrawingSymbolSize=200000|EmbeddedApertures=True|FilmBorderSize=10000000|FilmXSize=200000000|FilmYSize=160000000|FlashAllFills=False|FlashPadShapes=True|G54OnApertureChange=False|GenerateDRCRulesFile=True|GenerateDRCRulesFile=True|GenerateReliefShapes=True|GerberUnit=Metric|GerberUnit=Metric|IncludeUnconnectedMidLayerPads=False|LayerClassesMirror.Set= |LayerClassesPlot.Set="All Layers"|LeadingAndTrailingZeroesMode=SuppressLeadingZeroes|MaxApertureSize=2500000|MinusApertureTolerance=39|MinusApertureTolerance=39|Mirror.Set=SerializeLayerHash.Version~2,ClassName~TLayerToBoolean|MirrorDrillDrawingPlots=False|MirrorDrillGuidePlots=False|NoRegularPolygons=False|NumberOfDecimals=4|NumberOfDecimals=4|OptimizeChangeLocationCommands=True|OptimizeChangeLocationCommands=True|OriginPosition=Absolute|Panelize=False|Plot.Set=SerializeLayerHash.Version~2,ClassName~TLayerToBoolean|PlotPositivePlaneLayers=False|PlotUsedDrillDrawingLayerPairs=False|PlotUsedDrillGuideLayerPairs=False|PlusApertureTolerance=39|PlusApertureTolerance=39|Record=GerberView|SoftwareArcs=False|Sorted=False|Sorted=False
+Configuration12_Item1=AddToAllLayerClasses.Set= |AddToAllPlots.Set=SerializeLayerHash.Version~2,ClassName~TLayerToBoolean,16908301~1|CentrePlots=False|DrillDrawingSymbol=GraphicsSymbol|DrillDrawingSymbolSize=200000|EmbeddedApertures=True|FilmBorderSize=10000000|FilmXSize=200000000|FilmYSize=160000000|FlashAllFills=False|FlashPadShapes=True|G54OnApertureChange=False|GenerateDRCRulesFile=True|GenerateDRCRulesFile=True|GenerateReliefShapes=True|GerberUnit=Metric|GerberUnit=Metric|IncludeUnconnectedMidLayerPads=False|LayerClassesMirror.Set= |LayerClassesPlot.Set="All Layers"|LeadingAndTrailingZeroesMode=SuppressLeadingZeroes|MaxApertureSize=2500000|MinusApertureTolerance=39|MinusApertureTolerance=39|Mirror.Set=SerializeLayerHash.Version~2,ClassName~TLayerToBoolean|MirrorDrillDrawingPlots=False|MirrorDrillGuidePlots=False|NoRegularPolygons=False|NumberOfDecimals=4|NumberOfDecimals=4|OptimizeChangeLocationCommands=True|OptimizeChangeLocationCommands=True|OriginPosition=Absolute|Panelize=False|Plot.Set=SerializeLayerHash.Version~2,ClassName~TLayerToBoolean|PlotPositivePlaneLayers=False|PlotUsedDrillDrawingLayerPairs=False|PlotUsedDrillGuideLayerPairs=False|PlusApertureTolerance=39|PlusApertureTolerance=39|Record=GerberView|SoftwareArcs=False|Sorted=False|Sorted=False
 
 [OutputGroup6]
 Name=Report Outputs
