@@ -868,13 +868,13 @@ Configuration1_Item1=CaptionAsName
 Configuration1_Name2=Filter
 Configuration1_Item2=545046300E5446696C74657257726170706572000D46696C7465722E416374697665090F46696C7465722E43726974657269610A04000000000000000000
 Configuration1_Name3=General
-Configuration1_Item3=OpenExported=False|AddToProject=False|ForceFit=False|NotFitted=True|Database=False|DatabasePriority=False|IncludePCBData=False|IncludeVaultData=False|IncludeAlternatives=False|ShowExportOptions=True|TemplateFilename=BOM Default Template 95.xlt|BatchMode=5|FormWidth=1292|FormHeight=658|SupplierProdQty=1|SupplierAutoQty=False|SupplierUseCachedPricing=False|SupplierCurrency=<none>
+Configuration1_Item3=OpenExported=True|AddToProject=False|ForceFit=False|NotFitted=True|Database=False|DatabasePriority=False|IncludePCBData=False|IncludeVaultData=False|IncludeAlternatives=False|ShowExportOptions=True|TemplateFilename=BOM Default Template 95.xlt|BatchMode=5|FormWidth=1292|FormHeight=658|SupplierProdQty=1|SupplierAutoQty=False|SupplierUseCachedPricing=False|SupplierCurrency=<none>
 Configuration1_Name4=GroupOrder
 Configuration1_Item4=Fitted=True|Comment=True|Footprint=True
 Configuration1_Name5=SortOrder
 Configuration1_Item5=Fitted=Up|Designator=Up|Comment=Up|Footprint=Up
 Configuration1_Name6=VisibleOrder
-Configuration1_Item6=Fitted=100|Comment=116|Description=159|Designator=44|Footprint=51|LibRef=53|Quantity=23
+Configuration1_Item6=Fitted=100|Comment=116|Description=80|Designator=64|Footprint=75|LibRef=77|Quantity=34|Supplier 1=146|Supplier Part Number 1=146
 OutputType2=ComponentCrossReference
 OutputName2=Component Cross Reference Report
 OutputDocumentPath2=
