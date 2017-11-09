@@ -1,9 +1,12 @@
-Output: Bill of Materials
-Type  : BOM
-From  : Variant [[No Variations]] of Project [EEar03.PrjPcb]
+Output: NC Drill Files
+Type  : NC Drill
+From  : Project [EEar03.PrjPcb]
+   Generated File[EEar03.TXT]
+   Generated File[EEar03.LDP]
+   Generated File[EEar03.DRR]
 
 
-Files Generated   : 0
+Files Generated   : 3
 Documents Printed : 0
 
-Finished Output Generation At 21:42:53 On 07.08.2017
+Finished Output Generation At 23:03:41 On 09.11.2017

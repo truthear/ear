@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------------------------------------------------------------------
-NCDrill File Report For: EEar03.PcbDoc   06.08.2017  23:11:45
+NCDrill File Report For: EEar03.PcbDoc   09.11.2017  23:03:41
 ----------------------------------------------------------------------------------------------------------------------------------
 
 Layer Pair : Top Layer to Bottom Layer
@@ -7,14 +7,14 @@ ASCII RoundHoles File : EEar03.TXT
 
 Tool       Hole Size               Hole Tolerance               Hole Type       Hole Count   Plated         Tool Travel
 ----------------------------------------------------------------------------------------------------------------------------------
-T1      0.5mm (20mil)                                             Round             336       PTH        2236.29mm (88.04inch)
-T2      0.9mm (35mil)                                             Round             68        PTH        590.66mm (23.25inch)
+T1      0.5mm (20mil)                                             Round             336       PTH        2351.65mm (92.58inch)
+T2      0.9mm (35mil)                                             Round             68        PTH        621.97mm (24.49inch)
 T3      1mm (39mil)                                               Round             112       PTH        527.81mm (20.78inch)
 T4      1.1mm (43mil)                                             Round             20        PTH        161.86mm (6.37inch)
 T5      1.3mm (51mil)                                             Round             4         PTH        149.79mm (5.90inch)
 T6      1.5mm (59mil)                                             Round             2         PTH        24.80mm (0.98inch)
 T7      1.7mm (67mil)                                             Round             4         PTH        297.63mm (11.72inch)
-T8      1.8mm (71mil)                                             Round             8         PTH        55.28mm (2.18inch)
+T8      1.8mm (71mil)                                             Round             8         PTH        49.73mm (1.96inch)
 T9      3.2mm (126mil)                                            Round             10        PTH        552.65mm (21.76inch)
 ----------------------------------------------------------------------------------------------------------------------------------
 Totals                                                                              564
