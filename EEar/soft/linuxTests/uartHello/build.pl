@@ -8,7 +8,7 @@ $curent_dir = cwd;
 $out_file        = "uartHello";
 
 $user_home       = $ENV{'HOME'};
-$stlink_path     = "$curent_dir/../../reference/3rdParty/stlink";
+$stlink_path     = "$curent_dir/../../reference/3rdParty/stlinkMacos/bin";
 $arm_path        = "$curent_dir/../../reference/3rdParty/arm/bin";
 
 

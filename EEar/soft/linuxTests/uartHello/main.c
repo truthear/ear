@@ -128,16 +128,19 @@ int main(void)
   GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_NOPULL;
   GPIO_Init(GPIOD, &GPIO_InitStructure);
 
-  printf("Hello world form EEar %d\n",1234);
+  printf("Hello world form EEar");
+
+  GPIOD->ODR ^=LED_2;
 
   while(1)
       {
         GPIOD->ODR ^=LED_1;
-          if(UsartTestData()){
-              uint8_t tmp=UsartGetData();
-              printf("Test:\"%c\"\n",tmp);
-              UsartSend();
-          }
+        Delay(1000000);
+          //if(UsartTestData()){
+          //    uint8_t tmp=UsartGetData();
+          //    printf("Test:\"%c\"\n",tmp);
+          //    UsartSend();
+          //}
 
       }
 

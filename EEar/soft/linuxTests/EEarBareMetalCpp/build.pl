@@ -3,11 +3,16 @@ use Cwd;
 use File::Path;
 use File::Copy;
 $curent_dir = cwd;
-
-
+$curentOS = $^O;
 
 $user_home       = $ENV{'HOME'};
-$stlink_path     = "$curent_dir/../../reference/3rdParty/stlink";
+
+if ($curentOS eq "darwin")
+{
+	$stlink_path     = "$curent_dir/../../reference/3rdParty/stlinkMacos/bin";
+}
+
+
 $arm_path        = "$curent_dir/../../reference/3rdParty/arm/bin";
 
 
@@ -25,7 +30,7 @@ if ($ARGV[0] eq "b")
 if ($ARGV[0] eq "r")
 {
 	system("make");
-	system("$stlink_path/st-flash write bin/outp.bin 0x8000000");
+	system("$stlink_path/st-flash write ./bin/outp.bin 0x8000000");
 	exit();
 }
 system("make");

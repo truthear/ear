@@ -4,6 +4,10 @@
 		"selected_items":
 		[
 			[
+				"cu",
+				"curentOS"
+			],
+			[
 				"fo",
 				"for\tLoop"
 			],
@@ -204,88 +208,96 @@
 	"buffers":
 	[
 		{
-			"file": "main.c",
+			"file": "build.pl",
 			"settings":
 			{
-				"buffer_size": 3917,
+				"buffer_size": 645,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "stm.sublime-project",
+			"file": "env.pl",
 			"settings":
 			{
-				"buffer_size": 205,
+				"buffer_size": 473,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "cmsis_boot/system_stm32f4xx.c",
+			"file": "src/main.cpp",
 			"settings":
 			{
-				"buffer_size": 20987,
-				"line_ending": "Windows"
+				"buffer_size": 2724,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
 			}
 		},
 		{
-			"contents": "Searching 83 files for \"HSE_VALUE\"\n\n/home/oserkin/zwork/timetrack/svn/EEarPcb/soft/linuxTests/uartHello/cmsis/src/stm32f4xx_rcc.c:\n  829    *         constant and the selected clock source:\n  830    * @note     If SYSCLK source is HSI, function returns values based on HSI_VALUE(*)\n  831:   * @note     If SYSCLK source is HSE, function returns values based on HSE_VALUE(**)\n  832:   * @note     If SYSCLK source is PLL, function returns values based on HSE_VALUE(**)\n  833    *           or HSI_VALUE(*) multiplied/divided by the PLL factors.\n  834    * @note     (*) HSI_VALUE is a constant defined in stm32f4xx.h file (default value\n  835    *               16 MHz) but the real value may vary depending on the variations\n  836    *               in voltage and temperature.\n  837:   * @note     (**) HSE_VALUE is a constant defined in stm32f4xx.h file (default value\n  838:   *                25 MHz), user has to ensure that HSE_VALUE is same as the real\n  839    *                frequency of the crystal used. Otherwise, this function may\n  840    *                have wrong result.\n  ...\n  867        break;\n  868      case 0x04:  /* HSE used as system clock  source */\n  869:       RCC_Clocks->SYSCLK_Frequency = HSE_VALUE;\n  870        break;\n  871      case 0x08:  /* PLL used as system clock  source */\n  872  \n  873:       /* PLL_VCO = (HSE_VALUE or HSI_VALUE / PLLM) * PLLN\n  874           SYSCLK = PLL_VCO / PLLP\n  875           */\n  ...\n  880        {\n  881          /* HSE used as PLL clock source */\n  882:         pllvco = (HSE_VALUE / pllm) * ((RCC->PLLCFGR & RCC_PLLCFGR_PLLN) >> 6);\n  883        }\n  884        else\n\n/home/oserkin/zwork/timetrack/svn/EEarPcb/soft/linuxTests/uartHello/cmsis/src/stm32f4xx_spi.c:\n  398      \n  399      /* Get the I2S source clock value */\n  400:     i2sclk = (uint32_t)(((HSE_VALUE / pllm) * plln) / pllr);\n  401    #endif /* I2S_EXTERNAL_CLOCK_VAL */\n  402      \n\n/home/oserkin/zwork/timetrack/svn/EEarPcb/soft/linuxTests/uartHello/cmsis_boot/stm32f4xx.h:\n   89    */\n   90  \n   91: #if !defined  (HSE_VALUE)\n   92:   #define HSE_VALUE    ((uint32_t)25000000) /*!< Value of the External oscillator in Hz */\n   93: #endif /* HSE_VALUE */\n   94  \n   95  /**\n\n/home/oserkin/zwork/timetrack/svn/EEarPcb/soft/linuxTests/uartHello/cmsis_boot/stm32f4xx_conf.h:\n   24  #define __STM32F4xx_CONF_H\n   25  \n   26: #if defined  (HSE_VALUE)\n   27  /* Redefine the HSE value; it's equal to 8 MHz on the STM32F4-DISCOVERY Kit */\n   28:  #undef HSE_VALUE\n   29:  #define HSE_VALUE    ((uint32_t)8000000)\n   30: #endif /* HSE_VALUE */\n   31  \n   32  /* Includes ------------------------------------------------------------------*/\n\n/home/oserkin/zwork/timetrack/svn/EEarPcb/soft/linuxTests/uartHello/cmsis_boot/system_stm32f4xx.c:\n   35    *    add some code to deal with this issue inside the SetSysClock() function.\n   36    *\n   37:   * 4. The default value of HSE crystal is set to 25MHz, refer to \"HSE_VALUE\" define\n   38    *    in \"stm32f4xx.h\" file. When HSE is used as system clock source, directly or\n   39    *    through PLL, and you are using different crystal you have to adapt the HSE\n   ..\n  146  \n  147  /************************* PLL Parameters *************************************/\n  148: /* PLL_VCO = (HSE_VALUE or HSI_VALUE / PLL_M) * PLL_N */\n  149  #define PLL_M      25\n  150  #define PLL_N      336\n  ...\n  263    *           - If SYSCLK source is HSI, SystemCoreClock will contain the HSI_VALUE(*)\n  264    *                                              \n  265:   *           - If SYSCLK source is HSE, SystemCoreClock will contain the HSE_VALUE(**)\n  266    *                          \n  267:   *           - If SYSCLK source is PLL, SystemCoreClock will contain the HSE_VALUE(**)\n  268    *             or HSI_VALUE(*) multiplied/divided by the PLL factors.\n  269    *\n  ...\n  272    *             in voltage and temperature.\n  273    *    \n  274:   *         (**) HSE_VALUE is a constant defined in stm32f4xx.h file (default value\n  275:   *              25 MHz), user has to ensure that HSE_VALUE is same as the real\n  276    *              frequency of the crystal used. Otherwise, this function may\n  277    *              have wrong result.\n  ...\n  296        break;\n  297      case 0x04:  /* HSE used as system clock source */\n  298:       SystemCoreClock = HSE_VALUE;\n  299        break;\n  300      case 0x08:  /* PLL used as system clock source */\n  301  \n  302:       /* PLL_VCO = (HSE_VALUE or HSI_VALUE / PLL_M) * PLL_N\n  303           SYSCLK = PLL_VCO / PLL_P\n  304           */    \n  ...\n  309        {\n  310          /* HSE used as PLL clock source */\n  311:         pllvco = (HSE_VALUE / pllm) * ((RCC->PLLCFGR & RCC_PLLCFGR_PLLN) >> 6);\n  312        }\n  313        else\n\n/home/oserkin/zwork/timetrack/svn/EEarPcb/soft/linuxTests/uartHello/src/stm32f4xx_conf.h:\n   24  #define __STM32F4xx_CONF_H\n   25  \n   26: #if defined  (HSE_VALUE)\n   27  /* Redefine the HSE value; it's equal to 8 MHz on the STM32F4-DISCOVERY Kit */\n   28:  #undef HSE_VALUE\n   29:  #define HSE_VALUE    ((uint32_t)8000000) \n   30: #endif /* HSE_VALUE */\n   31  \n   32  /* Includes ------------------------------------------------------------------*/\n\n/home/oserkin/zwork/timetrack/svn/EEarPcb/soft/linuxTests/uartHello/src/system_stm32f4xx.c:\n   35    *    add some code to deal with this issue inside the SetSysClock() function.\n   36    *\n   37:   * 4. The default value of HSE crystal is set to 25MHz, refer to \"HSE_VALUE\" define\n   38    *    in \"stm32f4xx.h\" file. When HSE is used as system clock source, directly or\n   39    *    through PLL, and you are using different crystal you have to adapt the HSE\n   ..\n  146  \n  147  /************************* PLL Parameters *************************************/\n  148: /* PLL_VCO = (HSE_VALUE or HSI_VALUE / PLL_M) * PLL_N */\n  149  #define PLL_M      25\n  150  #define PLL_N      336\n  ...\n  264    *           - If SYSCLK source is HSI, SystemCoreClock will contain the HSI_VALUE(*)\n  265    *                                              \n  266:   *           - If SYSCLK source is HSE, SystemCoreClock will contain the HSE_VALUE(**)\n  267    *                          \n  268:   *           - If SYSCLK source is PLL, SystemCoreClock will contain the HSE_VALUE(**) \n  269    *             or HSI_VALUE(*) multiplied/divided by the PLL factors.\n  270    *         \n  ...\n  273    *             in voltage and temperature.   \n  274    *    \n  275:   *         (**) HSE_VALUE is a constant defined in stm32f4xx.h file (default value\n  276:   *              25 MHz), user has to ensure that HSE_VALUE is same as the real\n  277    *              frequency of the crystal used. Otherwise, this function may\n  278    *              have wrong result.\n  ...\n  297        break;\n  298      case 0x04:  /* HSE used as system clock source */\n  299:       SystemCoreClock = HSE_VALUE;\n  300        break;\n  301      case 0x08:  /* PLL used as system clock source */\n  302  \n  303:       /* PLL_VCO = (HSE_VALUE or HSI_VALUE / PLL_M) * PLL_N\n  304           SYSCLK = PLL_VCO / PLL_P\n  305           */    \n  ...\n  310        {\n  311          /* HSE used as PLL clock source */\n  312:         pllvco = (HSE_VALUE / pllm) * ((RCC->PLLCFGR & RCC_PLLCFGR_PLLN) >> 6);\n  313        }\n  314        else\n\n37 matches across 7 files\n",
+			"file": "lib/mbed/api/DigitalIn.h",
 			"settings":
 			{
-				"buffer_size": 7324,
+				"buffer_size": 2208,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "lib/mbed/api/DigitalOut.h",
+			"settings":
+			{
+				"buffer_size": 2455,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "Searching 1 file for \"SM_PWR_OK\"\n\n/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/src/.h:\n    ERROR: Unable to open file\n\n0 matches\n\nSearching 139 files for \"SM_PWR_OK\"\n\n/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/lib/mbed/targets/hal/TARGET_STM/TARGET_STM32F407VG/TARGET_DISCO_F407VG/PinNames.h:\n  247      // Generic signals namings\n  248      GSM_RESET   = PB_0,\n  249:     GSM_PWR_OK  = PB_1,\n  250      LED1        = PD_12,\n  251      LED2        = PD_13,\n\n1 match in 1 file\n",
+			"settings":
+			{
+				"buffer_size": 534,
 				"line_ending": "Unix",
 				"name": "Find Results",
 				"scratch": true
 			}
 		},
 		{
-			"file": "cmsis_boot/stm32f4xx.h",
+			"file": "lib/mbed/targets/hal/TARGET_STM/TARGET_STM32F407VG/TARGET_DISCO_F407VG/PinNames.h",
 			"settings":
 			{
-				"buffer_size": 523246,
-				"encoding": "Western (Windows 1252)",
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "build.pl",
-			"settings":
-			{
-				"buffer_size": 2005,
+				"buffer_size": 6909,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "cmsis/inc/stm32f4xx_gpio.h",
+			"file": "lib/mbed/api/Serial.h",
 			"settings":
 			{
-				"buffer_size": 17163,
-				"line_ending": "Windows"
+				"buffer_size": 1637,
+				"line_ending": "Unix"
 			}
 		}
 	],
-	"build_system": "AlexBuldPl",
+	"build_system": "EEarBuild",
 	"build_system_choices":
 	[
 		[
 			[
 				[
-					"AlexBuldPl",
+					"EEarBuild",
 					""
 				],
 				[
-					"AlexBuldPl",
+					"EEarBuild",
 					"Run"
 				]
 			],
 			[
-				"AlexBuldPl",
-				"Run"
+				"EEarBuild",
+				""
 			]
 		]
 	],
-	"build_varint": "Run",
+	"build_varint": "",
 	"command_palette":
 	{
 		"height": 187.0,
@@ -294,7 +306,7 @@
 		[
 			[
 				"bu",
-				"Build With: AlexBuldPl - Run"
+				"Build With: EEarBuild"
 			],
 			[
 				"git check\t",
@@ -417,7 +429,7 @@
 				"Package Control: Install Package"
 			]
 		],
-		"width": 485.0
+		"width": 392.0
 	},
 	"console":
 	{
@@ -438,7 +450,10 @@
 	},
 	"expanded_folders":
 	[
-		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/uartHello"
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp",
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/lib/mbed",
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/lib/mbed/api",
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/src"
 	],
 	"file_history":
 	[
@@ -580,6 +595,8 @@
 		"height": 93.0,
 		"where_history":
 		[
+			"*.h",
+			".h",
 			"*",
 			"*.json",
 			"*.qml",
@@ -705,8 +722,6 @@
 			"*.qml",
 			"*.qlm",
 			"*.h",
-			"*.cpp",
-			"*.*",
 			"*.cpp"
 		]
 	},
@@ -715,6 +730,7 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"SM_PWR_OK",
 			"SystemCoreClock",
 			"HSE_VALUE",
 			"VECT_TAB_OFFSET",
@@ -841,8 +857,7 @@
 			"parkingSupportConfiguration",
 			"pTSVolume",
 			"ptsVolume",
-			"//% \"PTS Volume\"",
-			"PTSVolumeButton"
+			"//% \"PTS Volume\""
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -902,118 +917,29 @@
 	"groups":
 	[
 		{
-			"selected": 0,
+			"selected": 1,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "main.c",
+					"file": "build.pl",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 3917,
+						"buffer_size": 645,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2896,
-								2896
+								234,
+								128
 							]
 						],
 						"settings":
 						{
-							"BracketHighlighterBusy": false,
-							"bh_regions":
-							[
-								"bh_tag",
-								"bh_tag_center",
-								"bh_tag_open",
-								"bh_tag_close",
-								"bh_tag_content",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_default_content",
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_curly_content",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_double_quote_content",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_c_define_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content",
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_unmatched_content",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content"
-							],
-							"syntax": "Packages/C++/C++.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 1694.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 0,
-					"type": "text"
-				},
-				{
-					"buffer": 1,
-					"file": "stm.sublime-project",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 205,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								139,
-								139
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JSON.sublime-syntax"
+							"syntax": "Packages/Perl/Perl.sublime-syntax"
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
@@ -1023,30 +949,58 @@
 					"type": "text"
 				},
 				{
-					"buffer": 2,
-					"file": "cmsis_boot/system_stm32f4xx.c",
+					"buffer": 1,
+					"file": "env.pl",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 20987,
+						"buffer_size": 473,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								12805,
-								12805
+								269,
+								269
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/C++/C++.tmLanguage",
+							"syntax": "Packages/Perl/Perl.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "src/main.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2724,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1736,
+								1736
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
 							"tab_size": 2,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 4963.0,
+						"translation.y": 482.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 2,
@@ -1054,10 +1008,70 @@
 				},
 				{
 					"buffer": 3,
+					"file": "lib/mbed/api/DigitalIn.h",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 7324,
+						"buffer_size": 2208,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1111,
+								1111
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 427.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "lib/mbed/api/DigitalOut.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2455,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1017,
+								1017
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 691.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 6,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 534,
 						"regions":
 						{
 							"match":
@@ -1066,152 +1080,8 @@
 								"regions":
 								[
 									[
-										361,
-										370
-									],
-									[
-										454,
-										463
-									],
-									[
-										804,
-										813
-									],
-									[
-										930,
-										939
-									],
-									[
-										1223,
-										1232
-									],
-									[
-										1351,
-										1360
-									],
-									[
-										1544,
-										1553
-									],
-									[
-										1828,
-										1837
-									],
-									[
-										2055,
-										2064
-									],
-									[
-										2083,
-										2092
-									],
-									[
-										2181,
-										2190
-									],
-									[
-										2374,
-										2383
-									],
-									[
-										2486,
-										2495
-									],
-									[
-										2512,
-										2521
-									],
-									[
-										2562,
-										2571
-									],
-									[
-										2943,
-										2952
-									],
-									[
-										3263,
-										3272
-									],
-									[
-										3603,
-										3612
-									],
-									[
-										3735,
-										3744
-									],
-									[
-										3934,
-										3943
-									],
-									[
-										4058,
-										4067
-									],
-									[
-										4333,
-										4342
-									],
-									[
-										4460,
-										4469
-									],
-									[
-										4660,
-										4669
-									],
-									[
-										4909,
-										4918
-									],
-									[
-										5021,
-										5030
-									],
-									[
-										5047,
-										5056
-									],
-									[
-										5098,
-										5107
-									],
-									[
-										5472,
-										5481
-									],
-									[
-										5792,
-										5801
-									],
-									[
-										6132,
-										6141
-									],
-									[
-										6264,
-										6273
-									],
-									[
-										6476,
-										6485
-									],
-									[
-										6600,
-										6609
-									],
-									[
-										6875,
-										6884
-									],
-									[
-										7002,
-										7011
-									],
-									[
-										7202,
-										7211
+										432,
+										441
 									]
 								],
 								"scope": ""
@@ -1220,173 +1090,83 @@
 						"selection":
 						[
 							[
-								2089,
-								2089
+								439,
+								439
 							]
 						],
 						"settings":
 						{
-							"default_dir": "/home/oserkin/zwork/timetrack/svn/EEarPcb/soft/linuxTests/uartHello",
 							"detect_indentation": false,
 							"line_numbers": false,
-							"output_tag": 1,
+							"output_tag": 2,
 							"result_base_dir": "",
-							"result_file_regex": "^([A-Za-z\\\\/<].*):$",
+							"result_file_regex": "^([^ \t].*):$",
 							"result_line_regex": "^ +([0-9]+):",
 							"scroll_past_end": true,
 							"syntax": "Packages/Default/Find Results.hidden-tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 408.0,
+						"translation.y": 90.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 4,
+					"stack_index": 7,
 					"type": "text"
 				},
 				{
-					"buffer": 4,
-					"file": "cmsis_boot/stm32f4xx.h",
+					"buffer": 6,
+					"file": "lib/mbed/targets/hal/TARGET_STM/TARGET_STM32F407VG/TARGET_DISCO_F407VG/PinNames.h",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 523246,
+						"buffer_size": 6909,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								3395,
-								3395
+								6443,
+								6443
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/C++/C++.tmLanguage",
-							"tab_size": 2,
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"tab_size": 4,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 1070.0,
+						"translation.y": 3492.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 3,
 					"type": "text"
 				},
 				{
-					"buffer": 5,
-					"file": "build.pl",
+					"buffer": 7,
+					"file": "lib/mbed/api/Serial.h",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 2005,
+						"buffer_size": 1637,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								0,
-								0
+								1179,
+								1179
 							]
 						],
 						"settings":
 						{
-							"BracketHighlighterBusy": false,
-							"bh_regions":
-							[
-								"bh_tag",
-								"bh_tag_center",
-								"bh_tag_open",
-								"bh_tag_close",
-								"bh_tag_content",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_default_content",
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_curly_content",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_double_quote_content",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_c_define_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content",
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_unmatched_content",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content"
-							],
-							"syntax": "Packages/Perl/Perl.tmLanguage",
+							"syntax": "Packages/C++/C++.sublime-syntax",
 							"tab_size": 4,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 6,
-					"type": "text"
-				},
-				{
-					"buffer": 6,
-					"file": "cmsis/inc/stm32f4xx_gpio.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 17163,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								5933,
-								5933
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 453.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 5,
@@ -1428,14 +1208,14 @@
 	"menu_visible": true,
 	"output.exec":
 	{
-		"height": 171.0
+		"height": 316.0
 	},
 	"output.find_results":
 	{
 		"height": 0.0
 	},
-	"pinned_build_system": "AlexBuldPl",
-	"project": "stm.sublime-project",
+	"pinned_build_system": "EEarBuild",
+	"project": "EEar.sublime-project",
 	"replace":
 	{
 		"height": 42.0
@@ -1988,7 +1768,7 @@
 	"show_open_files": false,
 	"show_tabs": true,
 	"side_bar_visible": true,
-	"side_bar_width": 165.0,
+	"side_bar_width": 328.0,
 	"status_bar_visible": true,
 	"template_settings":
 	{

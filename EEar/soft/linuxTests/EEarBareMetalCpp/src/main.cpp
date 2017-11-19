@@ -25,6 +25,8 @@ DigitalOut myled2(LED2);
 DigitalOut myled3(LED3);
 DigitalOut myled4(LED4);
 DigitalOut gsmReset(GSM_RESET,0);
+DigitalOut loraReset(PE_2);
+DigitalOut rs485DE(PD_4,1);
 
 DigitalIn  gsmPowerOk(GSM_PWR_OK);
 DigitalIn  btn1(PD_9);
@@ -34,28 +36,57 @@ DigitalIn  pps(PC_13);
 
 Serial debug (PB_10, PB_11); // tx, rx
 Serial gps(PB_6, PB_7); // tx, rx
-Serial gsm(PD_5, PD_6); // tx, rx
- 
+Serial gsm(PC_6, PC_7); // tx, rx
+Serial rs485(PD_5, PD_6); // tx, rx 
+
+DigitalOut sd_CLK(PC_12,1);
+DigitalOut sd_CMD(PD_2,1);
+DigitalOut sd_DAT0(PC_8,1);
+DigitalOut sd_DAT1(PC_9,1);
+DigitalOut sd_DAT2(PC_10,1);
+DigitalOut sd_DAT3(PC_11,1);
+
 
 
 int main() {
 
-    gsm.baud(9600);
+    gsm.baud(57600);
     gps.baud(9600);
+    rs485.baud(115200);
     debug.baud(115200);
+    loraReset.write(0);
+    loraReset.write(1);
 
-    debug.printf("\n\rC++ Hello World1  %x",0xdeadbeef);
+    sd_CLK.write(0);
+    sd_CMD.write(0);
+    sd_DAT0.write(0);
+    sd_DAT1.write(0);
+    sd_DAT2.write(0);
+    sd_DAT3.write(1);
+
+
+    debug.printf("\n\rC++ Hello World1  %x %d",0xdeadbeef,1234);
 
     gsm.attach([](){
       debug.putc(gsm.getc());
     });
 
     gps.attach([](){
-      debug.putc(gps.getc());
+      //debug.putc(gps.getc());
     });
 
+    rs485.attach([](){
+      debug.putc(rs485.getc());
+    });
+
+
     debug.attach([](){
-      if (debug.getc() == 'a') gsm.printf("AT\r"); // test for modem OK
+      char ch = debug.getc();
+      debug.putc(ch);
+      if (ch == 'a') gsm.printf("sys get ver\r\n"); else
+      if (ch == '1') rs485.printf("test\n"); else  
+      gsm.putc(ch);
+       // test for modem OK
     });
 
     while(1) {
@@ -64,7 +95,6 @@ int main() {
         myled3   = !btn3;
         myled4   = pps;
         gsmReset = !btn1;
-
     }
 }
 

@@ -4,5 +4,16 @@
 		{
 			"path": "."
 		}
+	],
+	"build_systems":[
+		{
+			"name": "AlexBuldPl",
+			"cmd": ["./build.pl"],
+			"variants": [
+			{
+				"name": "Run",
+				"shell_cmd":"./build.pl b"
+			}]
+		}
 	]
 }

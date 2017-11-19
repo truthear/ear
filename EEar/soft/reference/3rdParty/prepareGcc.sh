@@ -1,2 +1,2 @@
-tar -xf ./gcc-arm-none-eabi-5_3-2016q1-20160330-linux.tar.bz2
-ln -s ./gcc-arm-none-eabi-5_3-2016q1 ./arm
+tar -xf ./gcc-arm-none-eabi-6-2017-q2-update-linux.tar.bz2
+ln -s ./gcc-arm-none-eabi-6-2017q2-update ./arm
