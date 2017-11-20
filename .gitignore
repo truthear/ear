@@ -34,6 +34,7 @@ Temporary Items
 .apdisk
 
 # ear spec
+notForGit
 *.obj
 *.o
 *.exp

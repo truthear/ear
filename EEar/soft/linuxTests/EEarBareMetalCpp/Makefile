@@ -30,8 +30,8 @@ CSOURCES+=$(shell find -L $(LIBDIR) -name '*.c')
 CXXSOURCES=$(shell find -L $(SRCDIR) -name '*.cpp')
 CXXSOURCES+=$(shell find -L $(LIBDIR) -name '*.cpp')
 # Find header directories
-INC=$(shell find -L $(INCDIR) -name '*.h' -exec dirname {} \; | uniq)
-INC+=$(shell find -L $(LIBDIR) -name '*.h' -exec dirname {} \; | uniq)
+INC=$(shell find -L $(INCDIR) -name *.h -exec dirname {} ; | uniq)
+INC+=$(shell find -L $(LIBDIR) -name *.h -exec dirname {} ; | uniq)
 INCLUDES=$(INC:%=-I%)
 # Find libraries
 INCLUDES_LIBS=

@@ -3,22 +3,30 @@ use Cwd;
 use File::Path;
 use File::Copy;
 $curent_dir = cwd;
+$curentOS = $^O;
+print $curentOS;
 
 
 $out_file        = "uartHello";
 
 $user_home       = $ENV{'HOME'};
 $stlink_path     = "$curent_dir/../../reference/3rdParty/stlinkMacos/bin";
-$arm_path        = "$curent_dir/../../reference/3rdParty/arm/bin";
+$arm_path        = "$curent_dir/../../reference/3rdParty/notForGit/arm/bin";
 
+$winExec = "";
 
 $ENV{'STLINK'}   = $stlink_path;
 
 $cpath = $ENV{'PATH'};
-$ENV{'PATH'}     = "$cpath:$stlink_path:$arm_path";
+if($curentOS eq "MSWin32"){
+    $winExec = ".exe";
+    $ENV{'PATH'}     = "$cpath;$stlink_path;$arm_path";
+} else {
+    $ENV{'PATH'}     = "$cpath:$stlink_path:$arm_path";
+}
 
-$CC         = "arm-none-eabi-gcc";
-$OBJCOPY    = "arm-none-eabi-objcopy";
+$CC         = "arm-none-eabi-gcc$winExec";
+$OBJCOPY    = "arm-none-eabi-objcopy$winExec";
 
 $SRCS       = "";
 $SRCS       =  $SRCS."main.c"." ";
