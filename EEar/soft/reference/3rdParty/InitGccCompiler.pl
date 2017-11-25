@@ -11,29 +11,28 @@ $fileName = "";
 print $curentOS;
 
 
-
+# 'https://developer.arm.com/-/media/Files/downloads/gnu-rm/6-2017q2/gcc-arm-none-eabi-6-2017-q2-update-mac.tar.bz2'
 if ($curentOS eq "darwin")
 {
     #system("wget https://developer.arm.com/-/media/Files/downloads/gnu-rm/6-2017q2/gcc-arm-none-eabi-6-2017-q2-update-mac.tar.bz2");
     #system("tar -xvf gcc-arm-none-eabi-6-2017-q2-update-mac.tar.bz2  -C ./arm");
     $fileName = "gcc-arm-none-eabi-6-2017-q2-update-mac.tar.bz2";
+   
     if ($ARGV[0] eq "clean")
     {
-        system("unlink ./$temporaryFolderName/$linkName");
-        system("rm -rf ./$temporaryFolderName");
-        exit(0);
+       system("rm -rf ./$temporaryFolderName");
+       exit(0);
     }
-    system("unlink ./$temporaryFolderName/$linkName");
     system("rm -rf ./$temporaryFolderName");
 
-    my $url = 'https://developer.arm.com/-/media/Files/downloads/gnu-rm/6-2017q2/$fileName';
-    my $ff = File::Fetch->new(uri => $url);
-    my $file = $ff->fetch() or die $ff->error;
+    my $url = "https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu-rm/6-2017q2/$fileName";
+    system("curl -# \"$url\" -o \"$fileName\"");
 
     system("mkdir ./$temporaryFolderName");
     system("tar -xvf ./$fileName  -C ./$temporaryFolderName");
-    system("ln -s ./$temporaryFolderName/gcc-arm-none-eabi-6-2017-q2-update ./$temporaryFolderName/$linkName");
-    system("rm -rf ./$fileName");
+    chdir("$temporaryFolderName");
+    system("ln -s gcc-arm-none-eabi-6-2017-q2-update $linkName");
+    system("rm -rf ../$fileName");
 }
 
 
@@ -42,11 +41,9 @@ if ($curentOS eq "linux")
     $fileName = "gcc-arm-none-eabi-6-2017-q2-update-linux.tar.bz2";
     if ($ARGV[0] eq "clean")
     {
-        #system("unlink ./$temporaryFolderName/$linkName");
         system("rm -rf ./$temporaryFolderName");
         exit(0);
     }
-    #system("unlink ./$temporaryFolderName/$linkName");
     system("rm -rf ./$temporaryFolderName");
     system("wget https://developer.arm.com/-/media/Files/downloads/gnu-rm/6-2017q2/$fileName");
     system("mkdir ./$temporaryFolderName");

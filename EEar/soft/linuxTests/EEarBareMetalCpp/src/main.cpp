@@ -71,8 +71,10 @@ int main() {
       debug.putc(gsm.getc());
     });
 
-    gps.attach([](){
-      //debug.putc(gps.getc());
+    gps.attach([btn2](){
+      if(!btn2) {
+        debug.putc(gps.getc());
+      }
     });
 
     rs485.attach([](){
@@ -83,8 +85,8 @@ int main() {
     debug.attach([](){
       char ch = debug.getc();
       debug.putc(ch);
-      if (ch == 'a') gsm.printf("sys get ver\r\n"); else
-      if (ch == '1') rs485.printf("test\n"); else  
+      if (ch == '#') gsm.printf("sys get ver\r\n"); else
+      if (ch == '!') rs485.printf("test\n"); else  
       gsm.putc(ch);
        // test for modem OK
     });
