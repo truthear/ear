@@ -1,3 +1,6 @@
+
+/** \addtogroup hal */
+/** @{*/
 /* mbed Microcontroller Library
  * Copyright (c) 2006-2013 ARM Limited
  *
@@ -26,12 +29,42 @@
 extern "C" {
 #endif
 
+/**
+ * \defgroup hal_rtc RTC hal functions
+ * @{
+ */
+
+/** Initialize the RTC peripheral
+ *
+ */
 void rtc_init(void);
+
+/** Deinitialize RTC
+ *
+ * TODO: The function is not used by rtc api in mbed-drivers.
+ */
 void rtc_free(void);
+
+/** Get the RTC enable status
+ *
+ * @retval 0 disabled
+ * @retval 1 enabled
+ */
 int rtc_isenabled(void);
 
+/** Get the current time from the RTC peripheral
+ *
+ * @return The current time
+ */
 time_t rtc_read(void);
+
+/** Set the current time to the RTC peripheral
+ *
+ * @param t The current time to be set
+ */
 void rtc_write(time_t t);
+
+/**@}*/
 
 #ifdef __cplusplus
 }
@@ -40,3 +73,5 @@ void rtc_write(time_t t);
 #endif
 
 #endif
+
+/** @}*/

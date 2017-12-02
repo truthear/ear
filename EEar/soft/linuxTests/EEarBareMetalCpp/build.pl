@@ -26,10 +26,7 @@ if($curentOS eq "MSWin32"){
     $ENV{'PATH'} = "$winUtils;$cpath;$arm_path";
 }
 
-#system("find  -L ./lib -name *.h -exec dirname {} \; | uniq");
-
-
-#exit(0);
+ 
 if ($ARGV[0] eq "b")
 {
     system("$stlink_path/st-flash write bin/outp.bin 0x8000000");

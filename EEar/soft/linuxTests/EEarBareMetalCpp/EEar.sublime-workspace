@@ -4,6 +4,10 @@
 		"selected_items":
 		[
 			[
+				"fil",
+				"fileName"
+			],
+			[
 				"cu",
 				"curentOS"
 			],
@@ -211,7 +215,7 @@
 			"file": "build.pl",
 			"settings":
 			{
-				"buffer_size": 1053,
+				"buffer_size": 979,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -220,50 +224,8 @@
 			"file": "src/main.cpp",
 			"settings":
 			{
-				"buffer_size": 2754,
+				"buffer_size": 1988,
 				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "Makefile",
-			"settings":
-			{
-				"buffer_size": 3841,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "env.pl",
-			"settings":
-			{
-				"buffer_size": 473,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "lib/mbed/api/DigitalIn.h",
-			"settings":
-			{
-				"buffer_size": 2208,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "lib/mbed/api/DigitalOut.h",
-			"settings":
-			{
-				"buffer_size": 2455,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "lib/mbed/api/Serial.h",
-			"settings":
-			{
-				"buffer_size": 1637,
 				"line_ending": "Unix"
 			}
 		}
@@ -288,7 +250,7 @@
 			]
 		]
 	],
-	"build_varint": "Run",
+	"build_varint": "",
 	"command_palette":
 	{
 		"height": 392.0,
@@ -300,8 +262,20 @@
 				"Build With: EEarBuild - Run"
 			],
 			[
+				"git log",
+				"Git: Log All"
+			],
+			[
 				"bu",
-				"Build With: EEarBuild"
+				"Build With: EEarBuild - Run"
+			],
+			[
+				"git che",
+				"Git: Checkout Current File"
+			],
+			[
+				"pa",
+				"Package Control: Install Package"
 			],
 			[
 				"git check\t",
@@ -318,10 +292,6 @@
 			[
 				"git blame",
 				"Git: Blame"
-			],
-			[
-				"git che",
-				"Git: Checkout Current File"
 			],
 			[
 				"git bla",
@@ -360,16 +330,8 @@
 				"Git: Checkout Current File"
 			],
 			[
-				"git log",
-				"Git: Log Current File"
-			],
-			[
 				"git blame ",
 				"Git: Blame"
-			],
-			[
-				"pa",
-				"Package Control: Install Package"
 			],
 			[
 				"git diff c",
@@ -420,7 +382,7 @@
 				"Package Control: Install Package"
 			]
 		],
-		"width": 404.0
+		"width": 470.0
 	},
 	"console":
 	{
@@ -442,11 +404,51 @@
 	"expanded_folders":
 	[
 		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp",
-		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/src"
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/inc",
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/lib",
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/lib/mbed"
 	],
 	"file_history":
 	[
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/Makefile",
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/lib/mbed/hal/flash_api.h",
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/lib/mbed/hal/serial_api.h",
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/lib/mbed/hal/gpio_irq_api.h",
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/stm32f407.ld",
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/lib/mbed/targets/cmsis/TARGET_STM/TARGET_STM32F407VG/stm32f4xx_hal_conf.h",
 		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/lib/mbed/targets/hal/TARGET_STM/TARGET_STM32F407VG/TARGET_DISCO_F407VG/PinNames.h",
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/lib/mbed/targets/cmsis/TARGET_STM/TARGET_STM32F407VG/TOOLCHAIN_GCC_ARM/startup_stm32f407xx.s",
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/lib/mbed/drivers/Serial.h",
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/lib/mbed/features/fakeInclude.h",
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/lib/mbed/defaults.h",
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/lib/mbed/drivers/Serial.cpp",
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/lib/mbed/drivers/SerialBase.cpp",
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/lib/mbed/target/TARGET_STM/serial_api.c",
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/lib/mbed/target/TARGET_STM/serial_api_hal.h",
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/lib/mbed/target/TARGET_STM/gpio_irq_api.c",
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/lib/mbed/target/TARGET_STM/TARGET_STM32F4/serial_device.c",
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/lib/mbed/target/TARGET_STM/TARGET_STM32F4/common_objects.h",
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/lib/mbed/drivers/RawSerial.h",
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/lib/mbed/drivers/UARTSerial.h",
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/lib/mbed/drivers/InterruptIn.h",
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/lib/mbed/drivers/InterruptIn.cpp",
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/lib/mbed/drivers/UARTSerial.cpp",
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/lib/mbed/drivers/SerialBase.h",
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/lib/mbed/mbed.h",
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/lib/mbed/drivers/RawSerial.cpp",
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/lib/mbed/api/DigitalIn.h",
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/env.pl",
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/lib/mbed/hal/TARGET_FLASH_CMSIS_ALGO/flash_data.h",
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/lib/mbed/api/DigitalOut.h",
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/lib/mbed/features/platform/mbed_toolchain.h",
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/lib/mbed/features/fake.h",
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/lib/mbed/fake1.h",
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/lib/mbed/features/filesystem/bd/MBRBlockDevice.cpp",
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/lib/mbed/features/filesystem/Dir.h",
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/lib/mbed/features/platform/mbed_application.h",
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/lib/mbed/hal/SDBlockDevice.h",
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/reference/3rdParty/1/InitGccCompiler.pl",
+		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/lib/mbed/api/Serial.h",
 		"/Users/aserkin/Documents/zwork/ear/EEar/soft/linuxTests/EEarBareMetalCpp/src/main.cpp",
 		"/Users/aserkin/Library/Application Support/Sublime Text 3/Packages/User/TestBulds.sublime-build",
 		"/Users/aserkin/Library/Application Support/Sublime Text 3/Packages/User/BuildPl.sublime-build",
@@ -535,45 +537,7 @@
 		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Car/AmbientLightPopup.qml",
 		"/home/bbl-pc-06/work/gerit/ntg6master/if1libs/src/client/if1_autogen/platform/diagnostics/ALColorProgram2Bit.h",
 		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Car/Clients/IlluminationQmlClient.qml",
-		"/home/bbl-pc-06/work/gerit/ntg6master/if1libs/src/client/if1_autogen/vehicle/vehicleFunctions/AmbientLightColorProgram.h",
-		"/home/bbl-pc-06/work/gerit/ntg6master/if1plugins/testui/apps/vehicleFunctions/GeneralVehicleFunctionsSettings.qml",
-		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Overlays/Home/DiagIF1HelperFavorites.qml",
-		"/home/bbl-pc-06/work/gerit/build/build.pl",
-		"/home/bbl-pc-06/work/gerit/ntg6master/if1plugins/testui/apps/climate/main.qml",
-		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Settings/Clients/DiagnosticsClient.qml",
-		"/home/bbl-pc-06/uisw/ntg6master/if1/src/IF1/platform/diagnostics/diagnostics.thrift",
-		"/home/bbl-pc-06/work/gerit/ntg6master/if1mockserver/IF1MockServerLib/mockservices/platform.diagnostics/GeneralDiagnosticsServer.cs",
-		"/home/bbl-pc-06/work/gerit/build/test00.log",
-		"/home/bbl-pc-06/work/gerit/testreport.txt",
-		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Settings/ntg6/src/NavigationAndTrafficAnnouncementSubMenu.qml",
-		"/home/bbl-pc-06/work/gerit/build/trargetE10.ini",
-		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Settings/ntg6/src/DrivingRecommendationsVolumeSlider.qml",
-		"/home/bbl-pc-06/work/gerit/ntg6master/ntgbase/components/ui_library/controls/CommonLists/FunctionListStackItem.qml",
-		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Settings/EmotionsMenu.qml",
-		"/home/bbl-pc-06/work/gerit/ntg6master/if1plugins/src/plugins/if1/platform/diagnostics/variantcoding.h",
-		"/home/bbl-pc-06/work/gerit/ntg6master/if1mockserver/IF1MockServerLib/mockservices/vehicle.specialPurposeVehicles/SPVControlServer.cs",
-		"/home/bbl-pc-06/zwork/svn/EEarPcb/soft/linuxTests/uartHello/main.c",
-		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/i18n/eng_Latn_GBR.ts",
-		"/home/bbl-pc-06/work/gerit/ntg6master/if1plugins/src/plugins/if1/platform/diagnostics/variantcoding.cpp",
-		"/home/bbl-pc-06/.config/sublime-text-3/Packages/Default/Preferences.sublime-settings",
-		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Settings/ntg6/imports/AssistanceModels.qml",
-		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Comfort/ntg6/AppViews/Seats/SeatsAppView.qml",
-		"/home/bbl-pc-06/.gitconfig",
-		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Settings/ntg6/AppViews/Assistance/AssistanceAppView.qml",
-		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Settings/DisplayBrightnessMenu.qml",
-		"/home/bbl-pc-06/work/gerit/ntg6master/if1plugins/tests/qml/tst_systemsettings.qml",
-		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/styles/ntg6/SubMenuListButtonStyle.qml",
-		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Settings/SettingsApp.qml",
-		"/home/bbl-pc-06/bin/br.sh",
-		"/home/bbl-pc-06/bin/pup.sh",
-		"/home/bbl-pc-06/work/gerit/ntg6master/if1plugins/src/plugins/if1/platform/diagnostics/qmlgeneraldiagnosticsclient.cpp",
-		"/home/bbl-pc-06/work/gerit/ntg6master/if1plugins/tests/qml/data/tst_diagnostics/generaldiagnosticsserver.json",
-		"/home/bbl-pc-06/work/gerit/ntg6master/if1mockserver/autoGeneratedServers/vehicle.specialPurposeVehicles/SPVControlService.cs",
-		"/home/bbl-pc-06/work/gerit/--/fix/diagnostics.thrift",
-		"/home/bbl-pc-06/work/gerit/ntg6master/if1libs/src/client/if1_autogen/platform/diagnostics/SpecialPurposeVehiclesConfiguration.h",
-		"/home/bbl-pc-06/work/gerit/ntg6master/ntg6ui/apps/Radio/ntg5_5/Sound/SoundMenu.qml",
-		"/home/bbl-pc-06/work/gerit/ntg6master/if1mockserver/autoGeneratedServers/vehicle.specialPurposeVehicles/GeneralSPVService.cs",
-		"/home/bbl-pc-06/work/gerit/ntg6master/3rdParty/EGLStreamQtPoC/EGLStreamProducer/producerthread.cpp"
+		"/home/bbl-pc-06/work/gerit/ntg6master/if1libs/src/client/if1_autogen/vehicle/vehicleFunctions/AmbientLightColorProgram.h"
 	],
 	"find":
 	{
@@ -581,9 +545,10 @@
 	},
 	"find_in_files":
 	{
-		"height": 93.0,
+		"height": 101.0,
 		"where_history":
 		[
+			"*.*",
 			"*.h",
 			".h",
 			"*",
@@ -710,8 +675,7 @@
 			"*.*",
 			"*.qml",
 			"*.qlm",
-			"*.h",
-			"*.cpp"
+			"*.h"
 		]
 	},
 	"find_state":
@@ -719,6 +683,15 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"LED3",
+			"MBED_CONF_PLATFORM_DEFAULT_SERIAL_BAUD_RATE",
+			"Reset_Handler",
+			"\"\n",
+			"DEVICE_SERIAL",
+			"DEVICE_INTERRUPTIN",
+			"DEVICE_SERIAL",
+			"DEVICE_SERIAL_ASYNCH",
+			"flash_t",
 			"SM_PWR_OK",
 			"SystemCoreClock",
 			"HSE_VALUE",
@@ -837,16 +810,7 @@
 			"PTSVolume",
 			"pTSVolume",
 			"ParkingSupportConfiguration",
-			"TSVolume",
-			"parking",
-			"parkingConfiguration",
-			"parkingSupportConfiguration",
-			"parking",
-			"park",
-			"parkingSupportConfiguration",
-			"pTSVolume",
-			"ptsVolume",
-			"//% \"PTS Volume\""
+			"TSVolume"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -854,6 +818,7 @@
 		"regex": false,
 		"replace_history":
 		[
+			"1",
 			" ",
 			"//",
 			" ",
@@ -906,7 +871,7 @@
 	"groups":
 	[
 		{
-			"selected": 5,
+			"selected": 1,
 			"sheets":
 			[
 				{
@@ -915,26 +880,29 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1053,
+						"buffer_size": 979,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								729,
-								729
+								25,
+								25
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/Perl/Perl.sublime-syntax"
+							"git_gutter_is_enabled": true,
+							"syntax": "Packages/Perl/Perl.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 1,
 					"type": "text"
 				},
 				{
@@ -943,137 +911,22 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 2754,
+						"buffer_size": 1988,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2331,
-								2331
+								0,
+								0
 							]
 						],
 						"settings":
 						{
+							"git_gutter_is_enabled": true,
 							"syntax": "Packages/C++/C++.sublime-syntax",
 							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 468.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 1,
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "Makefile",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 3841,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1051,
-								1051
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Makefile/Makefile.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 315.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 2,
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "env.pl",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 473,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								453,
-								453
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Perl/Perl.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 5,
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"file": "lib/mbed/api/DigitalIn.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 2208,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1111,
-								1111
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 4,
-					"type": "text"
-				},
-				{
-					"buffer": 5,
-					"file": "lib/mbed/api/DigitalOut.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 2455,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1017,
-								1017
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 4,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
@@ -1081,36 +934,6 @@
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
-					"type": "text"
-				},
-				{
-					"buffer": 6,
-					"file": "lib/mbed/api/Serial.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1637,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1179,
-								1179
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 453.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 6,
 					"type": "text"
 				}
 			]
@@ -1122,7 +945,7 @@
 	},
 	"input":
 	{
-		"height": 33.0
+		"height": 35.0
 	},
 	"layout":
 	{
@@ -1149,7 +972,7 @@
 	"menu_visible": true,
 	"output.exec":
 	{
-		"height": 177.0
+		"height": 274.0
 	},
 	"output.find_results":
 	{
@@ -1168,6 +991,58 @@
 		"last_filter": "",
 		"selected_items":
 		[
+			[
+				"pinnames",
+				"lib/mbed/targets/hal/TARGET_STM/TARGET_STM32F407VG/TARGET_DISCO_F407VG/PinNames.h"
+			],
+			[
+				"stm32f4xx_hal_conf.h",
+				"lib/mbed/targets/cmsis/TARGET_STM/TARGET_STM32F407VG/stm32f4xx_hal_conf.h"
+			],
+			[
+				".s",
+				"lib/mbed/targets/cmsis/TARGET_STM/TARGET_STM32F407VG/TOOLCHAIN_GCC_ARM/startup_stm32f407xx.s"
+			],
+			[
+				"main",
+				"src/main.cpp"
+			],
+			[
+				"serial_api",
+				"lib/mbed/target/TARGET_STM/serial_api.c"
+			],
+			[
+				"serial_api.h",
+				"lib/mbed/hal/serial_api.h"
+			],
+			[
+				"de",
+				"lib/mbed/defaults.h"
+			],
+			[
+				"mbed",
+				"lib/mbed/mbed.h"
+			],
+			[
+				"gpio_irq",
+				"lib/mbed/hal/gpio_irq_api.h"
+			],
+			[
+				"gpio_irq_api.c",
+				"lib/mbed/target/TARGET_STM/gpio_irq_api.c"
+			],
+			[
+				"com",
+				"lib/mbed/target/TARGET_STM/TARGET_STM32F4/common_objects.h"
+			],
+			[
+				"mbed_applo",
+				"lib/mbed/features/platform/mbed_application.h"
+			],
+			[
+				"mbrblockdevice.cpp",
+				"lib/mbed/features/filesystem/bd/MBRBlockDevice.cpp"
+			],
 			[
 				"stm32f4xx_adc.h",
 				"reference/examples/stm32_discovery_arm_gcc/STM32F4-Discovery_FW_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/inc/stm32f4xx_adc.h"
@@ -1627,58 +1502,6 @@
 			[
 				"buttonentry",
 				"ntgbase/components/ui_library/entries/ButtonEntry.qml"
-			],
-			[
-				"headerentry",
-				"ntgbase/components/ui_library/entries/HeaderEntry.qml"
-			],
-			[
-				"dual",
-				"ntg6ui/common/widgets/DualMenu.qml"
-			],
-			[
-				"basestackitem",
-				"ntgbase/components/ui_library/controls/CommonLists/BaseStackItem.qml"
-			],
-			[
-				"basesheet",
-				"ntg6ui/sheets/ntg6/components/BaseSheet.qml"
-			],
-			[
-				"base",
-				"ntg6ui/sheets/ntg6/components/BaseSheet.qml"
-			],
-			[
-				"dualmenuinitialmodel",
-				"ntg6ui/sheets/ntg6/components/DualMenuInitialModel.qml"
-			],
-			[
-				"subsheetentry",
-				"ntg6ui/sheets/ntg6/components/SubSheetEntry.qml"
-			],
-			[
-				"appview02",
-				"ntg6ui/common/AppView02.qml"
-			],
-			[
-				"seatmodels",
-				"ntg6ui/apps/Comfort/ntg6/imports/SeatModels.qml"
-			],
-			[
-				"dualmenusheet.qml",
-				"ntg6ui/sheets/ntg6/components/DualMenuSheet.qml"
-			],
-			[
-				"appview",
-				"ntg6ui/common/AppView02.qml"
-			],
-			[
-				"unionentrymodel",
-				"ntgbase/src/plugins/ui/extensions/entrymodel/qmlunionentrymodel.h"
-			],
-			[
-				"menuitemstyle.",
-				"ntg6ui/styles/ntg6/MenuItemStyle.qml"
 			]
 		],
 		"width": 0.0
@@ -1709,7 +1532,7 @@
 	"show_open_files": false,
 	"show_tabs": true,
 	"side_bar_visible": true,
-	"side_bar_width": 328.0,
+	"side_bar_width": 337.0,
 	"status_bar_visible": true,
 	"template_settings":
 	{
