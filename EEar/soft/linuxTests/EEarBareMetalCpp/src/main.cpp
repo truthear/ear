@@ -6,7 +6,6 @@ DigitalOut myled1(LED1);
 DigitalOut myled2(LED2);
 DigitalOut myled3(LED3);
 DigitalOut myled4(LED4);
-DigitalOut loraReset(PE_2);
 DigitalOut rs485DE(PD_4,1);
 
 DigitalIn  btn1(PD_9);
@@ -19,8 +18,13 @@ Serial gps(PB_6, PB_7,9600); // tx, rx
 Serial gsm(PC_6, PC_7,57600); // tx, rx
 Serial rs485(PD_5, PD_6,115200); // tx, rx 
 
-SPI LoraSPI(PA_7, PA_6, PA_5);
+//         mosi, miso, sclk,
+SPI LoraSPI(PA_7, PA_6, PA_5);//         mosi, miso, sclk,
 DigitalOut LoraSpiCs(PA_4,1);
+DigitalIn  LoraDIO0(PA_3);
+DigitalOut loraReset(PE_2);
+DigitalOut loraRxSwitch(PE_3);
+DigitalOut loraTxSwitch(PE_4);
 
 int printf(const char *pFormat, ...)
 {
@@ -85,12 +89,19 @@ int main() {
       gsm.putc(ch);
     });
     
-    printf("\nSPI send .. \n");
+    printf("\nSPI send .. to SX1272 device \n");
     LoraSpiCs = 0;
-    LoraSPI.write(0x8F);
-    printf("some register value  = 0x%x\n", LoraSPI.write(0x00)); 
+    LoraSPI.write(0x02);
+    char ch = LoraSPI.write(0x00);
+    printf("SX1272 RegBitrateMsb value  = 0x%x\n", ch); 
     LoraSpiCs =1;
-    printf("SPI finished .. \n");
+    if (ch == 0x1a){
+      printf("SX1272 response Ok \n");
+    } else {
+      printf("SX1272 response fail \n");
+    }
+
+
     while(1) {
         myled1   = !btn1;
         myled2   = !btn2;
