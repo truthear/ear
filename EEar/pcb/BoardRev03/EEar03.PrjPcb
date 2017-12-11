@@ -30,7 +30,7 @@ DItemRevisionGUID=
 ReportSuppressedErrorsInMessages=0
 FSMCodingStyle=eFMSDropDownList_OneProcess
 FSMEncodingStyle=eFMSDropDownList_OneHot
-OutputPath=
+OutputPath=Project Outputs for EEar03
 LogFolderPath=
 ManagedProjectGUID=
 
@@ -365,18 +365,26 @@ DocumentUniqueId=WNPXJUUB
 Description=BASECONFIG
 AllowFabrication=0
 ParameterCount=0
-VariationCount=11
+VariationCount=19
 Variation1=Designator=X7|UniqueId=\SBEQEMRP\YLVQHJSL|Kind=1|AlternatePart= 
 Variation2=Designator=X5|UniqueId=\SBEQEMRP\DANMIGJD|Kind=1|AlternatePart= 
 Variation3=Designator=XS2|UniqueId=\SBYQOPVN\OJGNSGIA|Kind=1|AlternatePart= 
 Variation4=Designator=U8|UniqueId=\FXHLQWHP\UVJYMQOQ|Kind=1|AlternatePart= 
 Variation5=Designator=R22|UniqueId=\SBEQEMRP\GWSMOOYH|Kind=1|AlternatePart= 
 Variation6=Designator=U9|UniqueId=\FXHLQWHP\JQDPYRWH|Kind=1|AlternatePart= 
-Variation7=Designator=U18|UniqueId=\FXHLQWHP\NTTFQDQR|Kind=1|AlternatePart= 
+Variation7=Designator=U18|UniqueId=\FXHLQWHP\NTTFQDQR|Kind=0|AlternatePart= 
 Variation8=Designator=U13|UniqueId=\SBEQEMRP\NONQJADV|Kind=1|AlternatePart= 
 Variation9=Designator=U7|UniqueId=\SBEQEMRP\OGXJWNND|Kind=1|AlternatePart= 
-Variation10=Designator=X17|UniqueId=\YUAQCYWL\OLQBKJVJ|Kind=1|AlternatePart= 
+Variation10=Designator=X17|UniqueId=\YUAQCYWL\OLQBKJVJ|Kind=0|AlternatePart= 
 Variation11=Designator=R21|UniqueId=\CYNDMJOF\MJHEEJGS|Kind=1|AlternatePart= 
+Variation12=Designator=R27|UniqueId=\SBEQEMRP\QKTHOFUY|Kind=1|AlternatePart= 
+Variation13=Designator=R26|UniqueId=\SBEQEMRP\RDJVNYIW|Kind=1|AlternatePart= 
+Variation14=Designator=X12|UniqueId=\SBEQEMRP\GQCOWQRJ|Kind=1|AlternatePart= 
+Variation15=Designator=X8|UniqueId=\YUAQCYWL\VXRKCSHH|Kind=1|AlternatePart= 
+Variation16=Designator=U15|UniqueId=\KYHGIUFN\VQWBXTBW|Kind=1|AlternatePart= 
+Variation17=Designator=R1|UniqueId=\KYHGIUFN\RGVIJQGT|Kind=1|AlternatePart= 
+Variation18=Designator=R3|UniqueId=\KYHGIUFN\RAWWIJIA|Kind=1|AlternatePart= 
+Variation19=Designator=U14|UniqueId=\KYHGIUFN\YQMUGTII|Kind=1|AlternatePart= 
 ParamVariationCount=0
 
 [GeneratedDocument1]
@@ -504,7 +512,7 @@ SCH_NoERCSymbolsToShow="Thin Cross","Thick Cross","Small Cross",Checkbox,Triangl
 SCH_ShowNote=-1
 SCH_ShowNoteCollapsed=-1
 SCH_ExpandLogicalToPhysical=-1
-SCH_VariantName=[No Variations]
+SCH_VariantName=BASECONFIG
 SCH_ExpandComponentDesignators=-1
 SCH_ExpandNetlabels=0
 SCH_ExpandPorts=0
@@ -514,7 +522,7 @@ SCH_HasExpandLogicalToPhysicalSheets=-1
 SaveSettingsToOutJob=0
 
 [Generic_EDE]
-OutputDir=
+OutputDir=Project Outputs for EEar03
 
 [OutputGroup1]
 Name=Netlist Outputs
