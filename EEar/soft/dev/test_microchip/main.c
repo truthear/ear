@@ -130,18 +130,16 @@ void InitUART2()
   gpio.GPIO_PuPd = GPIO_PuPd_UP;
   GPIO_Init(GPIOD, &gpio);
 
-  gpio.GPIO_Mode = GPIO_Mode_AF;
+  gpio.GPIO_Mode = GPIO_Mode_OUT;
   gpio.GPIO_Pin = GPIO_Pin_4;
   gpio.GPIO_Speed = GPIO_Speed_50MHz;
   gpio.GPIO_OType = GPIO_OType_PP;
   gpio.GPIO_PuPd = GPIO_PuPd_UP;
   GPIO_Init(GPIOD, &gpio);
+  GPIOD->BSRRL = GPIO_Pin_4;  // set high
 
   GPIO_PinAFConfig(GPIOD, GPIO_PinSource5, GPIO_AF_USART2);
   GPIO_PinAFConfig(GPIOD, GPIO_PinSource6, GPIO_AF_USART2);
-  GPIO_PinAFConfig(GPIOD, GPIO_PinSource4, GPIO_AF_USART2);
-
-  //GPIOD->BSRRL = GPIO_Pin_4;  //!!!!!!!!!!!
 
   usart.USART_BaudRate = 9600;
   usart.USART_WordLength = USART_WordLength_8b;
