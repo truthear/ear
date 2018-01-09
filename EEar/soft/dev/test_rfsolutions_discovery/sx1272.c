@@ -111,8 +111,7 @@ void SX1272Init()
 
     uint8_t i;
 
-    SpiInit( &SX1272.Spi, RADIO_MOSI, RADIO_MISO, RADIO_SCLK, NC );
-    GpioInit( &SX1272.Spi.Nss, RADIO_NSS, PIN_OUTPUT, PIN_PUSH_PULL, PIN_PULL_UP, 1 );
+    SpiInit( &SX1272.Spi, RADIO_MOSI, RADIO_MISO, RADIO_SCLK, RADIO_NSS );
 
     GpioInit( &SX1272.AntTx, RADIO_ANT_SWITCH_TX, PIN_OUTPUT, PIN_PUSH_PULL, PIN_PULL_UP, 0 );
     GpioInit( &SX1272.AntRx, RADIO_ANT_SWITCH_RX, PIN_OUTPUT, PIN_PUSH_PULL, PIN_PULL_UP, 0 );
@@ -533,6 +532,8 @@ void SX1272WriteBuffer( uint8_t addr, uint8_t *buffer, uint8_t size )
 {
     uint8_t i;
 
+    __disable_irq( );
+
     //NSS = 0;
     GpioWrite( &SX1272.Spi.Nss, 0 );
 
@@ -544,11 +545,15 @@ void SX1272WriteBuffer( uint8_t addr, uint8_t *buffer, uint8_t size )
 
     //NSS = 1;
     GpioWrite( &SX1272.Spi.Nss, 1 );
+
+    __enable_irq( );
 }
 
 void SX1272ReadBuffer( uint8_t addr, uint8_t *buffer, uint8_t size )
 {
     uint8_t i;
+
+    __disable_irq( );
 
     //NSS = 0;
     GpioWrite( &SX1272.Spi.Nss, 0 );
@@ -562,6 +567,8 @@ void SX1272ReadBuffer( uint8_t addr, uint8_t *buffer, uint8_t size )
 
     //NSS = 1;
     GpioWrite( &SX1272.Spi.Nss, 1 );
+
+    __enable_irq( );
 }
 
 void SX1272WriteFifo( uint8_t *buffer, uint8_t size )
@@ -603,12 +610,15 @@ void SX1272SetOpMode( uint8_t opMode )
 
 int SX1272GetVersion()
 {
+  SX1272SetModem( MODEM_FSK );
+
   int version = 0;
-  while (version == 0 || version == 0xff)
+  int cnt = 0;
+  while ((version == 0 || version == 0xff) && cnt < 100)
   {
-    SX1272SetModem( MODEM_FSK );
     version = SX1272Read( REG_VERSION );
     DelayMs(1);
+    cnt++;
   }
 
   return version;

@@ -51,12 +51,13 @@ void SpiInit( Spi_t *obj, PinNames mosi, PinNames miso, PinNames sclk, PinNames 
 
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, ENABLE);
 
+  SPI_Cmd(obj->inst, DISABLE);
   SPI_I2S_DeInit(obj->inst);
   
   GpioInit( &obj->Mosi, mosi, PIN_ALTERNATE_FCT, PIN_PUSH_PULL, PIN_PULL_DOWN, GPIO_AF_SPI1 );
   GpioInit( &obj->Miso, miso, PIN_ALTERNATE_FCT, PIN_PUSH_PULL, PIN_PULL_DOWN, GPIO_AF_SPI1 );
   GpioInit( &obj->Sclk, sclk, PIN_ALTERNATE_FCT, PIN_PUSH_PULL, PIN_PULL_DOWN, GPIO_AF_SPI1 );
-  GpioInit( &obj->Nss, nss, PIN_ALTERNATE_FCT, PIN_PUSH_PULL, PIN_PULL_UP, GPIO_AF_SPI1 );
+  GpioInit( &obj->Nss, nss, PIN_OUTPUT, PIN_PUSH_PULL, PIN_PULL_UP, 1 );
 
   obj->Spi.SPI_Mode = SPI_Mode_Master;
   obj->Spi.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
@@ -67,6 +68,7 @@ void SpiInit( Spi_t *obj, PinNames mosi, PinNames miso, PinNames sclk, PinNames 
   obj->Spi.SPI_NSS = SPI_NSS_Soft;
   obj->Spi.SPI_CRCPolynomial = 7;
 
+  //obj->Spi.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_2;  //baudRate;
   SpiFrequency( obj, 10000000 );
 
   SPI_Init(obj->inst, &obj->Spi );
@@ -77,15 +79,11 @@ void SpiInit( Spi_t *obj, PinNames mosi, PinNames miso, PinNames sclk, PinNames 
 
 uint16_t SpiInOut( Spi_t *obj, uint16_t outData )
 {
-    __disable_irq( );
-
     while( SPI_I2S_GetFlagStatus( obj->inst, SPI_I2S_FLAG_TXE ) == RESET );
     SPI_I2S_SendData(obj->inst,outData & 0xFF);
 
     while( SPI_I2S_GetFlagStatus( obj->inst, SPI_I2S_FLAG_RXNE ) == RESET );
     uint16_t rc = SPI_I2S_ReceiveData(obj->inst);
-
-    __enable_irq( );
 
     return rc;
 }

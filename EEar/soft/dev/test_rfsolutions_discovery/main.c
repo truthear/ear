@@ -4,7 +4,7 @@
 #include "radio.h"
 
 
-//#define SENDER
+#define SENDER
 
 
 
@@ -29,7 +29,6 @@
 
 
 volatile bool sending = false;
-volatile bool send_err = false;
 volatile bool receiving = false;
 volatile bool recv_packet = false;
 volatile bool recv_err = false;
@@ -43,8 +42,6 @@ uint8_t recv_data[256];
 void OnTxDone()
 {
     sending = false;
-    send_err = false;
-    //SX1272Sleep();
 }
 
 
@@ -128,7 +125,8 @@ int main( void )
     LedOn(LedOrange);
     int version = SX1272GetVersion();
     printf("version: %d\n",version);
-    LedOff(LedOrange);
+    if ( version != 0 && version != 0xff )
+     LedOff(LedOrange);
 
       
     SX1272SetChannel( RF_FREQUENCY );
@@ -144,7 +142,6 @@ int main( void )
     while (1)
     {
       LedOn(LedGreen);
-      LedOff(LedRed);
       sending = true;
       SX1272Send( Buffer, sizeof(Buffer) );
       while (sending&&!reset_event);
@@ -153,11 +150,7 @@ int main( void )
            reset_event = false;
            break;
          }
-
       LedOff(LedGreen);
-      if ( send_err )
-       LedOn(LedRed);
-
       DelayMs(1000);
     }
   #else
@@ -181,6 +174,7 @@ int main( void )
            if ( recv_err )
               {
                 LedOn(LedRed);
+                printf("recv error!\n");
               }
            else
               {
@@ -192,8 +186,8 @@ int main( void )
                 }
                 printf("\n");
               }
-           DelayMs(300);
-           LedOff(LedRed);
+           DelayMs(100);
+           //LedOff(LedRed);
            LedOff(LedBlue);
          }
     }
