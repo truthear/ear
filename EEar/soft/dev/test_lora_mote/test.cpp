@@ -100,11 +100,13 @@ void main()
             while (!kbhit())
             {
               #ifndef SENDER
+              Cmd(h,"mac pause");
               Cmd(h,"radio rx 0");
               Cmd(h,NULL);
               Cmd(h,"radio get snr");
               #else
-              Cmd(h,"radio tx 484848484848484848484848484848484848484848484848484848484848484848484848");
+              Cmd(h,"mac pause");
+              Cmd(h,"radio tx 48484848484848484848484848484848484848484848484848484848484848484848484848484848");
               Sleep(1000);
               #endif
             }
