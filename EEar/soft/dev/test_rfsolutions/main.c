@@ -23,7 +23,6 @@
 #define LORA_CRC_ON                                 true
 #define LORA_IQ_INVERSION_ON                        false
 
-#define LORA_SYMBOL_TIMEOUT                         5         // Symbols, for RX only
 
 
 
@@ -67,7 +66,7 @@ void OnRxError( void )
 Gpio_t button;
 volatile bool reset_event = false;
 
-bool switch_rx_tx = false;  //!!!!!!!!!!!!
+bool high_power = true;  //!!!!!!!!!!!!
 
 
 void EXTI9_5_IRQHandler()
@@ -82,7 +81,7 @@ void EXTI9_5_IRQHandler()
        DelayMs(1000);
        LedOff(LedRed);
 
-       //switch_rx_tx = !switch_rx_tx;
+       high_power = !high_power;
        reset_event = true;
 
      }
@@ -151,6 +150,7 @@ int main( void )
             {
               LedOn(LedGreen);
               sending = true;
+              Buffer[17] = '0'+n;
               SX1272Send( (uint8_t*)Buffer, sizeof(Buffer)-1 );
               while (sending);
               LedOff(LedGreen);
@@ -168,6 +168,7 @@ int main( void )
         for ( int n = 0; n < 10; n++ )
             {
               LedOn(LedOrange);
+              Buffer[17] = '0'+n;
               Microchip_Send(Buffer);
               LedOff(LedOrange);
               DelayMs(1000);

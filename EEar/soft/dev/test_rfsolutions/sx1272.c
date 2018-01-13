@@ -89,23 +89,23 @@ void SX1272Init()
     }
      RadioRegsInit[] = 
     {                                                 
-        { MODEM_FSK , REG_LNA                , 0x23 },
-        { MODEM_FSK , REG_RXCONFIG           , 0x1E },
-        { MODEM_FSK , REG_RSSICONFIG         , 0xD2 },
-        { MODEM_FSK , REG_AFCFEI             , 0x01 },
-        { MODEM_FSK , REG_PREAMBLEDETECT     , 0xAA },
-        { MODEM_FSK , REG_OSC                , 0x07 },
-        { MODEM_FSK , REG_SYNCCONFIG         , 0x12 },
-        { MODEM_FSK , REG_SYNCVALUE1         , 0xC1 },
-        { MODEM_FSK , REG_SYNCVALUE2         , 0x94 },
-        { MODEM_FSK , REG_SYNCVALUE3         , 0xC1 },
-        { MODEM_FSK , REG_PACKETCONFIG1      , 0xD8 },
-        { MODEM_FSK , REG_FIFOTHRESH         , 0x8F },
-        { MODEM_FSK , REG_IMAGECAL           , 0x02 },
-        { MODEM_FSK , REG_DIOMAPPING1        , 0x00 },
-        { MODEM_FSK , REG_DIOMAPPING2        , 0x30 },
-        { MODEM_LORA, REG_LR_DETECTOPTIMIZE  , 0x43 },
-        { MODEM_LORA, REG_LR_PAYLOADMAXLENGTH, 0xFF },
+        { MODEM_LORA , REG_LNA                , 0x23 },
+        //{ MODEM_FSK , REG_RXCONFIG           , 0x1E },
+        //{ MODEM_FSK , REG_RSSICONFIG         , 0xD2 },
+        //{ MODEM_FSK , REG_AFCFEI             , 0x01 },
+        //{ MODEM_FSK , REG_PREAMBLEDETECT     , 0xAA },
+        //{ MODEM_FSK , REG_OSC                , 0x07 },
+        //{ MODEM_FSK , REG_SYNCCONFIG         , 0x12 },
+        //{ MODEM_FSK , REG_SYNCVALUE1         , 0xC1 },
+        //{ MODEM_FSK , REG_SYNCVALUE2         , 0x94 },
+        //{ MODEM_FSK , REG_SYNCVALUE3         , 0xC1 },
+        //{ MODEM_FSK , REG_PACKETCONFIG1      , 0xD8 },
+        //{ MODEM_FSK , REG_FIFOTHRESH         , 0x8F },
+        //{ MODEM_FSK , REG_IMAGECAL           , 0x02 },
+        //{ MODEM_FSK , REG_DIOMAPPING1        , 0x00 },
+        //{ MODEM_FSK , REG_DIOMAPPING2        , 0x30 },
+        //{ MODEM_LORA, REG_LR_DETECTOPTIMIZE  , 0x43 },
+        //{ MODEM_LORA, REG_LR_PAYLOADMAXLENGTH, 0xFF },
         { MODEM_LORA, REG_LR_SYNCWORD        , LORA_MAC_PRIVATE_SYNCWORD },
     };
 
@@ -165,6 +165,9 @@ void SX1272SetChannel( uint32_t freq )
     SX1272Write( REG_FRFLSB, ( uint8_t )( freq & 0xFF ) );
 }
 
+
+extern bool high_power;
+
 void SX1272SetTxConfig( 
                         uint32_t bandwidth, uint32_t datarate,
                         uint8_t coderate, uint16_t preambleLen,
@@ -172,7 +175,19 @@ void SX1272SetTxConfig(
 {
     SX1272SetModem( MODEM_LORA );
 
+    if ( !high_power )
     { // set max output TX power
+      uint8_t paConfig = SX1272Read( REG_PACONFIG );
+      paConfig = ( paConfig & RF_PACONFIG_PASELECT_MASK ) | RF_PACONFIG_PASELECT_RFO; 
+      paConfig = ( paConfig & RFLR_PACONFIG_OUTPUTPOWER_MASK ) | 0x0F;
+      SX1272Write( REG_PACONFIG, paConfig );
+
+      uint8_t paDac = SX1272Read( REG_PADAC );
+      paDac = ( paDac & RF_PADAC_20DBM_MASK ) | RF_PADAC_20DBM_OFF;
+      SX1272Write( REG_PADAC, paDac );
+    }
+    else
+    {
       uint8_t paConfig = SX1272Read( REG_PACONFIG );
       paConfig = ( paConfig & RF_PACONFIG_PASELECT_MASK ) | RF_PACONFIG_PASELECT_PABOOST; 
       paConfig = ( paConfig & RFLR_PACONFIG_OUTPUTPOWER_MASK ) | 0x0F;
@@ -429,7 +444,7 @@ void SX1272SetRx()
     SX1272Write( REG_LR_IRQFLAGSMASK, RFLR_IRQFLAGS_RXTIMEOUT |    // no RXtimeout in continuous mode
                                       //RFLR_IRQFLAGS_RXDONE |
                                       //RFLR_IRQFLAGS_PAYLOADCRCERROR |
-                                      //RFLR_IRQFLAGS_VALIDHEADER |
+                                      RFLR_IRQFLAGS_VALIDHEADER |
                                       RFLR_IRQFLAGS_TXDONE |
                                       RFLR_IRQFLAGS_CADDONE |
                                       RFLR_IRQFLAGS_FHSSCHANGEDCHANNEL |
@@ -582,8 +597,6 @@ void SX1272ReadFifo( uint8_t *buffer, uint8_t size )
 }
 
 
-extern bool switch_rx_tx;  //!!!!!!!!!!!!
-
 
 void SX1272SetOpMode( uint8_t opMode )
 {
@@ -596,13 +609,13 @@ void SX1272SetOpMode( uint8_t opMode )
     {
       if ( opMode == RFLR_OPMODE_TRANSMITTER )
          {
-           GpioWrite( &SX1272.AntRx, switch_rx_tx ? 1 : 0 );
-           GpioWrite( &SX1272.AntTx, switch_rx_tx ? 0 : 1 );
+           GpioWrite( &SX1272.AntRx,  0 );
+           GpioWrite( &SX1272.AntTx,  1 );
          }
       else
          {
-           GpioWrite( &SX1272.AntRx, switch_rx_tx ? 0 : 1 );
-           GpioWrite( &SX1272.AntTx, switch_rx_tx ? 1 : 0 );
+           GpioWrite( &SX1272.AntRx,  1 );
+           GpioWrite( &SX1272.AntTx,  0 );
          }
     }
 
@@ -643,7 +656,13 @@ void EXTI3_IRQHandler()
        else
        if ( SX1272.Settings.State == RF_RX_RUNNING )
        {
-         SX1272Write( REG_LR_IRQFLAGS, RFLR_IRQFLAGS_RXDONE );
+         bool rx_done = false;
+         
+         if( ( SX1272Read( REG_LR_IRQFLAGS ) & RFLR_IRQFLAGS_RXDONE_MASK ) == RFLR_IRQFLAGS_RXDONE )
+         {
+             SX1272Write( REG_LR_IRQFLAGS, RFLR_IRQFLAGS_RXDONE );
+             rx_done = true;
+         }
 
          if( ( SX1272Read( REG_LR_IRQFLAGS ) & RFLR_IRQFLAGS_PAYLOADCRCERROR_MASK ) == RFLR_IRQFLAGS_PAYLOADCRCERROR )
          {
@@ -651,6 +670,7 @@ void EXTI3_IRQHandler()
              OnRxError( );
          }
          else
+         if ( rx_done )
          {
            int PktSnr = (int)(int8_t)SX1272Read( REG_LR_PKTSNRVALUE );
            float snr = PktSnr*0.25;
@@ -665,6 +685,8 @@ void EXTI3_IRQHandler()
            unsigned Size = SX1272Read( REG_LR_RXNBBYTES );
            uint8_t RxBuffer[256];
            memset(RxBuffer,0,sizeof(RxBuffer));
+         
+           SX1272Write( REG_LR_FIFOADDRPTR, SX1272Read( REG_LR_FIFORXCURRENTADDR ) );
            SX1272ReadFifo( RxBuffer, Size );
 
            OnRxDone( RxBuffer, Size, rssi, snr );
