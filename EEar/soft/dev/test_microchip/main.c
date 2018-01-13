@@ -5,6 +5,10 @@
 #include <stdio.h>
 
 
+//#define SENDER
+
+
+
 void delay_ms_not_strict(uint32_t ms)
 {
   volatile uint32_t nCount;
@@ -263,14 +267,17 @@ int IsBufferEmpty(volatile TBUFF *i)
 
 void Cmd(const char *cmd)
 {
-  SendString(USART6,cmd);
-  SendString(USART6,"\r\n");
+  if ( cmd )
+     {
+       SendString(USART6,cmd);
+       SendString(USART6,"\r\n");
 
-  SendString(USART3,cmd);
-  SendString(USART3,"\r\n");
+       SendString(USART3,cmd);
+       SendString(USART3,"\r\n");
 
-  SendString(USART2,cmd);
-  SendString(USART2,"\r\n");
+       SendString(USART2,cmd);
+       SendString(USART2,"\r\n");
+     }
 
   while ( 1 )
   {
@@ -325,15 +332,22 @@ int main(void)
   Cmd("radio set cr 4/5");
   Cmd("radio set bw 500");
   Cmd("radio set sync 12");
+  Cmd("radio set wdt 5000");
   Cmd("radio set pwr 15");
   Cmd("radio get pwr");
 
   while (1)
   {
     Cmd("mac pause");
+
+    #ifdef SENDER
     Cmd("radio tx 48484848484848484848484848484848484848484848484848484848484848484848484848484848");
-    
     delay_ms_not_strict(800);
+    #else
+    Cmd("radio rx 0");
+    Cmd(NULL);
+    #endif
+
   }
   
 }
