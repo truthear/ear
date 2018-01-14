@@ -3,14 +3,14 @@
 
 
 // global object:
-CBuzzer g_buzzer(GPIOE,GPIO_Pin_9,RCC_AHB1Periph_GPIOE);
+CBuzzer g_buzzer(CPin::PE_9);
 
 
 
-CBuzzer::CBuzzer(GPIO_TypeDef *_port,uint16_t _pin,uint32_t _clk)
-   : m_pin(_port,_pin,_clk)
+CBuzzer::CBuzzer(CPin::EPins pin)
+   : m_pin(pin)
 {
-  m_pin.Off();
+  CPin::InitAsOutput(m_pin,0);
 
   CCPUTicks::Init();
 }
@@ -47,11 +47,11 @@ void CBuzzer::Activate(unsigned freq,unsigned duration)
               if ( cycle != old_cycle )
                  {
                    old_cycle = cycle;
-                   m_pin.Toggle();
+                   CPin::Toggle(m_pin);
                  }
             }
 
-            m_pin.Off();
+            CPin::Reset(m_pin);
           }
      }
 }

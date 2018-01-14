@@ -5,11 +5,11 @@
 
 class CBuzzer
 {
-          COutputPin m_pin;
+          CPin::EPins m_pin;
   
   public:
           // Warning!: CCPUTicks::Init() called inside!
-          CBuzzer(GPIO_TypeDef *_port,uint16_t _pin,uint32_t _clk);
+          CBuzzer(CPin::EPins pin);
 
           // IRQ safe:
           void Activate(unsigned freq,unsigned duration);  // not more than ~25000 msec!

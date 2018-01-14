@@ -15,6 +15,7 @@
 #include "stm32f4xx.h"
 #include "def.h"
 #include "tools.h"
+#include "pin.h"
 #include "led.h"
 #include "buzzer.h"
 #include "button.h"

@@ -73,16 +73,12 @@ void CModem::OnRXCallback(unsigned char data)
 
 
 CTelitModem::CTelitModem(EBoardUarts uart,int rate,unsigned recv_buff_size,int irq_priority,
-                         GPIO_TypeDef *reset_port,uint16_t reset_pin)
+                         CPin::EPins reset_pin)
 {
-  p_reset_port = reset_port;
   m_reset_pin = reset_pin;
 
   // reset pin set first
-  if ( p_reset_port )
-     {
-       GPIO_ResetBits(p_reset_port,m_reset_pin);
-     }
+  CPin::InitAsOutput(m_reset_pin,0,GPIO_PuPd_UP);
 
   // here we should wait, because modem send some bytes of shit after power on   
   CSysTicks::Delay(300);
@@ -96,22 +92,16 @@ CTelitModem::~CTelitModem()
 {
   delete p_modem;
 
-  if ( p_reset_port )
-     {
-       GPIO_SetBits(p_reset_port,m_reset_pin);
-     }
+  CPin::Set(m_reset_pin);
 }
 
 
 void CTelitModem::ResetModem()
 {
-  if ( p_reset_port )
-     {
-       GPIO_SetBits(p_reset_port,m_reset_pin);
-       CSysTicks::Delay(300);
-       GPIO_ResetBits(p_reset_port,m_reset_pin);
-       CSysTicks::Delay(2000);
-     }
+  CPin::Set(m_reset_pin);
+  CSysTicks::Delay(300);
+  CPin::Reset(m_reset_pin);
+  CSysTicks::Delay(2000);
 }
 
 
@@ -137,19 +127,7 @@ unsigned CTelitModem::GetLastRXTime() const
 
 CBoardModem::CBoardModem(int rate,unsigned recv_buff_size,int irq_priority)
 {
-  // init reset pin first
-  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
-
-  GPIO_InitTypeDef GPIO_InitStructure;
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;  // PB0
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
-  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_Init(GPIOB, &GPIO_InitStructure);
-
-  // create modem obj
-  p_modem = new CTelitModem(BOARD_UART_GSM,rate,recv_buff_size,irq_priority,GPIOB,GPIO_InitStructure.GPIO_Pin);
+  p_modem = new CTelitModem(BOARD_UART_GSM,rate,recv_buff_size,irq_priority,CPin::PB_0);
 }
 
 

@@ -41,22 +41,8 @@ void CMic::Init(TCALLBACK cb,void *cbparm,int irq_priority)
 
 
   // GPIO init
-  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB,ENABLE);
-
-  GPIO_InitTypeDef GPIO_InitStructure;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
-  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-  GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_NOPULL;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13;
-  GPIO_Init(GPIOB, &GPIO_InitStructure);
-
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_15;
-  GPIO_Init(GPIOB, &GPIO_InitStructure);
-  
-  GPIO_PinAFConfig(GPIOB, GPIO_PinSource13, GPIO_AF_SPI2);
-  GPIO_PinAFConfig(GPIOB, GPIO_PinSource15, GPIO_AF_SPI2);
+  CPin::InitAsAF(CPin::PB_13,GPIO_AF_SPI2);
+  CPin::InitAsAF(CPin::PB_15,GPIO_AF_SPI2);
 
 
   // SPI init

@@ -313,15 +313,15 @@ class CEar
           static const short INVALID_GNSS = 0x3f3f;  // '??'
           
           
-          CBoardLED* m_leds[4];   // base objects
-          CBoardLED* p_led1;      // pointer alias
-          CBoardLED* p_led2;      // pointer alias
-          CBoardLED* p_led3;      // pointer alias
-          CBoardLED* p_led4;      // pointer alias
-          CBoardLED* p_led_mic;   // pointer alias
-          CBoardLED* p_led_gsm;   // pointer alias
-          CBoardLED* p_led_sync;  // pointer alias
-          CBoardLED* p_led_nosim; // pointer alias
+          CLED* m_leds[4];   // base objects
+          CLED* p_led1;      // pointer alias
+          CLED* p_led2;      // pointer alias
+          CLED* p_led3;      // pointer alias
+          CLED* p_led4;      // pointer alias
+          CLED* p_led_mic;   // pointer alias
+          CLED* p_led_gsm;   // pointer alias
+          CLED* p_led_sync;  // pointer alias
+          CLED* p_led_nosim; // pointer alias
 
           FATFS m_ffs;
 
@@ -430,10 +430,10 @@ CEar::CEar()
   CDebugger::Init();
   // start from this point we can use printf()!
 
-  m_leds[0] = new CBoardLED(BOARD_LED1);
-  m_leds[1] = new CBoardLED(BOARD_LED2);
-  m_leds[2] = new CBoardLED(BOARD_LED3);
-  m_leds[3] = new CBoardLED(BOARD_LED4);
+  m_leds[0] = new CLED(BOARD_LED1);
+  m_leds[1] = new CLED(BOARD_LED2);
+  m_leds[2] = new CLED(BOARD_LED3);
+  m_leds[3] = new CLED(BOARD_LED4);
   p_led1 = m_leds[0];
   p_led2 = m_leds[1];
   p_led3 = m_leds[2];
@@ -494,9 +494,9 @@ CEar::CEar()
   p_sender = new CPacketSender(m_cfg,p_mob,p_log);
   p_balance = new CBalanceReq(m_cfg,p_mob,p_log);
 
-  p_btn1 = new CBoardButton(BOARD_BUTTON1,IRQ_OnButton1Wrapper,this);
-  p_btn2 = new CBoardButton(BOARD_BUTTON2,IRQ_OnButton2Wrapper,this);
-  p_btn3 = new CBoardButton(BOARD_BUTTON3,IRQ_OnButton3Wrapper,this);
+  p_btn1 = new CButton(BOARD_BUTTON1,IRQ_OnButton1Wrapper,this);
+  p_btn2 = new CButton(BOARD_BUTTON2,IRQ_OnButton2Wrapper,this);
+  p_btn3 = new CButton(BOARD_BUTTON3,IRQ_OnButton3Wrapper,this);
 }
 
 

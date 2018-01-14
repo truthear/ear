@@ -36,12 +36,8 @@ typedef void (*TPeriphClkCmdFunc)(uint32_t,FunctionalState);
 static USART_TypeDef*    UART_NUM[]         = { USART1                  , USART2                 , USART3                 };
 static TPeriphClkCmdFunc UART_PERIPH_FUNC[] = { RCC_APB2PeriphClockCmd  , RCC_APB1PeriphClockCmd , RCC_APB1PeriphClockCmd };
 static uint32_t          UART_PERIPH[]      = { RCC_APB2Periph_USART1   , RCC_APB1Periph_USART2  , RCC_APB1Periph_USART3  };
-static uint32_t          UART_PIN_CLK[]     = { RCC_AHB1Periph_GPIOB    , RCC_AHB1Periph_GPIOD   , RCC_AHB1Periph_GPIOB   };
-static GPIO_TypeDef*     UART_PIN_PORT[]    = { GPIOB                   , GPIOD                  , GPIOB                  };
-static uint16_t          UART_PIN_PIN1[]    = { GPIO_Pin_7              , GPIO_Pin_6             , GPIO_Pin_11            };
-static uint16_t          UART_PIN_PIN2[]    = { GPIO_Pin_6              , GPIO_Pin_5             , GPIO_Pin_10            };
-static uint8_t           UART_PIN_SRC1[]    = { GPIO_PinSource7         , GPIO_PinSource6        , GPIO_PinSource11       };
-static uint8_t           UART_PIN_SRC2[]    = { GPIO_PinSource6         , GPIO_PinSource5        , GPIO_PinSource10       };
+static CPin::EPins       UART_PIN1[]        = { CPin::PB_7              , CPin::PD_6             , CPin::PB_11            };
+static CPin::EPins       UART_PIN2[]        = { CPin::PB_6              , CPin::PD_5             , CPin::PB_10            };
 static uint8_t           UART_AF[]          = { GPIO_AF_USART1          , GPIO_AF_USART2         , GPIO_AF_USART3         };
 static IRQn              UART_IRQn[]        = { USART1_IRQn             , USART2_IRQn            , USART3_IRQn            };
 
@@ -57,27 +53,10 @@ CBoardUART::CBoardUART(EBoardUarts uart,int rate,bool allow_rx,bool allow_tx,
   USART_TypeDef *USARTx = UART_NUM[uart];
   
   UART_PERIPH_FUNC[uart](UART_PERIPH[uart],ENABLE);
-  RCC_AHB1PeriphClockCmd(UART_PIN_CLK[uart], ENABLE);
 
-  GPIO_InitTypeDef gpio;
-
-  gpio.GPIO_Mode = GPIO_Mode_AF;
-  gpio.GPIO_Pin = UART_PIN_PIN1[uart];
-  gpio.GPIO_Speed = GPIO_Speed_50MHz;
-  gpio.GPIO_OType = GPIO_OType_PP;
-  gpio.GPIO_PuPd = GPIO_PuPd_UP;
-  GPIO_Init(UART_PIN_PORT[uart], &gpio);
-
-  gpio.GPIO_Mode = GPIO_Mode_AF;
-  gpio.GPIO_Pin = UART_PIN_PIN2[uart];
-  gpio.GPIO_Speed = GPIO_Speed_50MHz;
-  gpio.GPIO_OType = GPIO_OType_PP;
-  gpio.GPIO_PuPd = GPIO_PuPd_UP;
-  GPIO_Init(UART_PIN_PORT[uart], &gpio);
-
-  GPIO_PinAFConfig(UART_PIN_PORT[uart], UART_PIN_SRC1[uart], UART_AF[uart]);
-  GPIO_PinAFConfig(UART_PIN_PORT[uart], UART_PIN_SRC2[uart], UART_AF[uart]);
-
+  CPin::InitAsAF(UART_PIN1[uart],UART_AF[uart],GPIO_PuPd_UP);
+  CPin::InitAsAF(UART_PIN2[uart],UART_AF[uart],GPIO_PuPd_UP);
+  
   USART_InitTypeDef ui;
   ui.USART_BaudRate = rate;
   ui.USART_WordLength = USART_WordLength_8b;
