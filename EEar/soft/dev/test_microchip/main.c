@@ -200,13 +200,6 @@ void InitUART6()
   GPIO_PinAFConfig(GPIOC, GPIO_PinSource6, GPIO_AF_USART6);
   GPIO_PinAFConfig(GPIOC, GPIO_PinSource7, GPIO_AF_USART6);
 
-  gpio.GPIO_Mode = GPIO_Mode_OUT;
-  gpio.GPIO_Pin = GPIO_Pin_2;
-  gpio.GPIO_Speed = GPIO_Speed_50MHz;
-  gpio.GPIO_OType = GPIO_OType_PP;
-  gpio.GPIO_PuPd = GPIO_PuPd_UP;
-  GPIO_Init(GPIOE, &gpio);
-  
   usart.USART_BaudRate = 57600;
   usart.USART_WordLength = USART_WordLength_8b;
   usart.USART_StopBits = USART_StopBits_1;
@@ -224,6 +217,15 @@ void InitUART6()
   NVIC_Init(&nvic);
 
   USART_ITConfig(USART6, USART_IT_RXNE, ENABLE);
+
+  // reset pin
+  gpio.GPIO_Mode = GPIO_Mode_OUT;
+  gpio.GPIO_Pin = GPIO_Pin_2;
+  gpio.GPIO_Speed = GPIO_Speed_50MHz;
+  gpio.GPIO_OType = GPIO_OType_PP;
+  gpio.GPIO_PuPd = GPIO_PuPd_UP;
+  GPIO_Init(GPIOE, &gpio);
+  GPIOE->BSRRL = GPIO_Pin_2;  // set high
 }
 
 
@@ -315,9 +317,6 @@ int main(void)
   InitUART3(); // USB-debug
   InitUART2(); // RS-485
   InitUART6(); // lora
-
-  GPIOE->BSRRL = GPIO_Pin_2;
-  //delay_ms_not_strict(500);
 
   Cmd("sys get ver");
   Cmd("sys get vdd");
