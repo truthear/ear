@@ -7,5 +7,6 @@
 #include "pin.h"
 #include "dbg_uart.h"
 #include "ticks.h"
+#include "led.h"
 #include "lora.h"
 #include "tools.h"

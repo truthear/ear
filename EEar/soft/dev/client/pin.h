@@ -20,6 +20,7 @@ class CPin
          static void InitAsInput(EPins pin,GPIOPuPd_TypeDef pupd=GPIO_PuPd_NOPULL);
          static void InitAsOutput(EPins pin,int init_value,GPIOPuPd_TypeDef pupd=GPIO_PuPd_NOPULL,GPIOOType_TypeDef otype=GPIO_OType_PP,GPIOSpeed_TypeDef speed=GPIO_Fast_Speed);
          static void InitAsAF(EPins pin,uint8_t af,GPIOPuPd_TypeDef pupd=GPIO_PuPd_NOPULL,GPIOOType_TypeDef otype=GPIO_OType_PP,GPIOSpeed_TypeDef speed=GPIO_Fast_Speed);
+         static void InitAsAnalog(EPins pin);
 
          static void Set(EPins pin);
          static void Reset(EPins pin);
@@ -29,6 +30,7 @@ class CPin
 
          typedef void (*TCALLBACK)(void *parm);
          static void SetInterrupt(EPins pin,TCALLBACK cb,void *cb_parm=NULL,EXTITrigger_TypeDef trigger=EXTI_Trigger_Rising,uint8_t priority=15);
+         static void RemoveInterrupt(EPins pin);
 
   private:
          typedef struct {

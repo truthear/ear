@@ -145,6 +145,20 @@ void CPin::InitAsAF(EPins pin,uint8_t af,GPIOPuPd_TypeDef pupd,GPIOOType_TypeDef
 }
 
 
+void CPin::InitAsAnalog(EPins pin)
+{
+  if ( pin != NC_PIN )
+     {
+       EnablePower(pin);
+
+       GPIO_InitTypeDef i;
+       i.GPIO_Pin = GetPinIndex(pin);
+       i.GPIO_Mode = GPIO_Mode_AN;
+       GPIO_Init(GetPort(pin),&i);
+     }
+}
+
+
 void CPin::Set(EPins pin)
 {
   if ( pin != NC_PIN )
@@ -256,6 +270,13 @@ void CPin::SetInterrupt(EPins pin,TCALLBACK cb,void *cb_parm,EXTITrigger_TypeDef
        NVIC_Init(&NVIC_InitStructure); 
      }
 }
+
+
+void CPin::RemoveInterrupt(EPins pin)
+{
+  InitAsAnalog(pin);
+}
+
 
 
 class CEXTIHandler

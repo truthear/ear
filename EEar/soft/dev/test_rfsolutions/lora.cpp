@@ -16,7 +16,7 @@ enum {
  RegFifoAddrPtr = 0x0D,
  RegFifoTxBaseAddr = 0x0E,
  RegFifoRxBaseAddr = 0x0F,
- FifoRxCurrentAddr = 0x10,
+ RegFifoRxCurrentAddr = 0x10,
  RegIrqFlagsMask = 0x11,
  RegIrqFlags = 0x12,
  RegRxNbBytes = 0x13,
@@ -81,6 +81,7 @@ void CSemtechSX::Init(const TRadio& i)
   
   // at this point we in STANDBY mode with LORA modem selection
   // initialize LORA registers
+  WriteBit(RegDetectOptimize,7,0); // false rx packets eliminate, todo: check!
   WriteReg(RegLna,0x23); // LNA Gain
   WriteReg(RegSyncWord,i.sync_word);
   WriteReg(RegPaConfig,0x8F);  // PA_BOOST
@@ -218,9 +219,9 @@ void CSemtechSX::OnDIO0()
 {
   uint8_t irqs = ReadReg(RegIrqFlags);
 
-  const MASK_RXDONE = 0x40;
-  const MASK_CRCERR = 0x20;
-  const MASK_TXDONE = 0x08;
+  const uint8_t MASK_RXDONE = 0x40;
+  const uint8_t MASK_CRCERR = 0x20;
+  const uint8_t MASK_TXDONE = 0x08;
 
   uint8_t clear = 0;
 
@@ -373,39 +374,39 @@ uint8_t CSemtechSX::SpiInOut8(uint8_t out_data)
 
 void CSemtechSX::WriteBuffer(uint8_t addr,const uint8_t *buffer,uint8_t size)
 {
-  __disable_irq( );
+  __disable_irq();
 
   CPin::Reset(m_pins.nss);
 
-  SpiInOut(addr|0x80);
+  SpiInOut8(addr|0x80);
 
   for ( unsigned i = 0; i < size; i++ )
       {
-        SpiInOut(buffer[i]);
+        SpiInOut8(buffer[i]);
       }
 
   CPin::Set(m_pins.nss);
 
-  __enable_irq( );
+  __enable_irq();
 }
 
 
 void CSemtechSX::ReadBuffer(uint8_t addr,uint8_t *buffer,uint8_t size)
 {
-  __disable_irq( );
+  __disable_irq();
 
   CPin::Reset(m_pins.nss);
 
-  SpiInOut(addr&0x7F);
+  SpiInOut8(addr&0x7F);
 
   for ( unsigned i = 0; i < size; i++ )
       {
-        buffer[i] = SpiInOut(0);
+        buffer[i] = SpiInOut8(0);
       }
 
   CPin::Set(m_pins.nss);
 
-  __enable_irq( );
+  __enable_irq();
 }
 
 
@@ -502,16 +503,132 @@ void CSemtechSX::SetOpMode(uint8_t mode)
 
 
 
+CLoraMote::CLoraMote(EChip chip,CPin::EPins reset,CPin::EPins sclk,CPin::EPins miso,CPin::EPins mosi,CPin::EPins nss,SPI_TypeDef* SPIx,
+                     CPin::EPins dio0,CPin::EPins ant_rx,CPin::EPins ant_tx,const TRadio& radio)
+  : CSemtechSX(chip,reset,sclk,miso,mosi,nss,SPIx)
+{
+  m_dio0 = dio0;
+  m_ant_rx = ant_rx;
+  m_ant_tx = ant_tx;
+  m_radio = radio;
+  p_cb = NULL;
+  p_cbparm = NULL;
+
+  CPin::InitAsInput(dio0,GPIO_PuPd_UP);
+  CPin::SetInterrupt(dio0,OnDIO0Wrapper,this);
+
+  CPin::InitAsOutput(ant_rx,0,GPIO_PuPd_UP);
+  CPin::InitAsOutput(ant_tx,0,GPIO_PuPd_UP);
+
+  Init(radio);
+}
 
 
+CLoraMote::~CLoraMote()
+{
+  p_cb = NULL;
+  
+  CPin::Reset(m_ant_rx);
+  CPin::Reset(m_ant_tx);
+  CPin::RemoveInterrupt(m_dio0);
+}
 
 
+bool CLoraMote::Send(const void *buff,unsigned size,unsigned maxwait_ms)
+{
+  bool rc = false;
+
+  if ( !buff || !size )
+     {
+       rc = true;
+     }
+  else
+     {
+       size = MIN(size,255);
+
+       if ( IsSendingInProgress() )
+          {
+            if ( maxwait_ms )
+               {
+                 unsigned starttime = GetTickCount();
+                 while ( GetTickCount() - starttime < maxwait_ms && IsSendingInProgress() ) {}
+               }
+          }
+
+       CPin::Reset(m_ant_rx);
+       CPin::Set(m_ant_tx);
+
+       rc = CSemtechSX::Send((const uint8_t*)buff,(uint8_t)size);
+
+       if ( !rc )
+          {
+            p_cb = NULL;
+            CPin::Reset(m_ant_rx);
+            CPin::Reset(m_ant_tx);
+            Init(m_radio);  //reinitialize chip
+          }
+     }
+
+  return rc;
+}
 
 
+bool CLoraMote::IsSendingInProgress() const
+{
+  return CSemtechSX::IsSendingInProgress();
+}
 
 
+int CLoraMote::GetTimeOnAirMs(unsigned packet_size) const
+{
+  return CSemtechSX::GetTimeOnAirMs(m_radio,packet_size);
+}
 
 
+void CLoraMote::StartReceiverMode(TRECVCALLBACK cb,void *cbparm)
+{
+  p_cb = NULL;
+  p_cbparm = cbparm;
+  p_cb = cb;
 
+  CPin::Reset(m_ant_tx);
+  CPin::Set(m_ant_rx);
+
+  CSemtechSX::StartReceiverMode();
+}
+
+
+// Warning! called from IRQ!
+void CLoraMote::OnRecvPacket(const uint8_t *buff,uint8_t size,float rssi,float snr)
+{
+  if ( p_cb )
+     {
+       p_cb(p_cbparm,false,buff,size,rssi,snr);
+     }
+}
+
+
+// Warning! called from IRQ!
+void CLoraMote::OnRecvCrcError()
+{
+  if ( p_cb )
+     {
+       p_cb(p_cbparm,true,NULL,0,0,0);
+     }
+}
+
+
+// Warning! called from IRQ!
+void CLoraMote::OnDIO0Wrapper(void *parm)
+{
+  reinterpret_cast<CLoraMote*>(parm)->OnDIO0();
+}
+
+
+// Warning! called from IRQ!
+void CLoraMote::OnDIO0()
+{
+  CSemtechSX::OnDIO0();
+}
 
 

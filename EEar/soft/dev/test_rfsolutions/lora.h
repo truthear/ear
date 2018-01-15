@@ -3,7 +3,9 @@
 #define __LORA_H__
 
 
-// this class uses CSysTicks, which should be initialized before!
+// these classes use CSysTicks, which should be initialized before!
+// members calls are not IRQ safe!
+
 class CSemtechSX
 {
   public:
@@ -109,18 +111,18 @@ class CLoraMote : public CSemtechSX
 {
   public:
           // if crc_error==TRUE, other args are NULLs
-          typedef void (*TRECVCALLBACK)(bool crc_error,const void *data,unsigned size,float rssi,float snr); 
+          typedef void (*TRECVCALLBACK)(void *parm,bool crc_error,const void *data,unsigned size,float rssi,float snr); 
 
   private:        
           CPin::EPins m_dio0;
           CPin::EPins m_ant_rx;
           CPin::EPins m_ant_tx;
           TRadio m_radio;
-          TRECVCALLBACK p_cb;
+          volatile TRECVCALLBACK p_cb;
           void *p_cbparm;
 
   public:
-          CLoraMote(EChip chip,CPin::EPins reset,CPin::EPins sclk,CPin::EPins miso,CPin::EPins mosi,CPin::EPins nss,SPI_TypeDef* SPIx
+          CLoraMote(EChip chip,CPin::EPins reset,CPin::EPins sclk,CPin::EPins miso,CPin::EPins mosi,CPin::EPins nss,SPI_TypeDef* SPIx,
                     CPin::EPins dio0,CPin::EPins ant_rx,CPin::EPins ant_tx,const TRadio& radio);
           ~CLoraMote();
 
@@ -128,12 +130,12 @@ class CLoraMote : public CSemtechSX
           // if maxwait time specified correctly (according to GetTimeOnAirMs()) then only SPI problem can cause a problem,
           // in this case chip will be reinitialized and repeat of Send() can be performed
           // generally this return code can be used mainly for debug purposes only and should normally never happens
-          // max size is 256
+          // max size is 255
           bool Send(const void *buff,unsigned size,unsigned maxwait_ms);
           bool IsSendingInProgress() const;  // for debug only
           int GetTimeOnAirMs(unsigned packet_size) const;
           
-          void StartReceiverMode(TRECVCALLBACK cb,void *cbparm);
+          void StartReceiverMode(TRECVCALLBACK cb,void *cbparm=NULL);
 
   protected:
           void OnRecvPacket(const uint8_t *buff,uint8_t size,float rssi,float snr);
