@@ -1,6 +1,6 @@
 
-#include "stm32f4xx.h"
-#include "dbg_uart.h"
+#include "include.h"
+
 
 
 void InitUART3()
@@ -26,7 +26,7 @@ void InitUART3()
   gpio.GPIO_OType = GPIO_OType_PP;
   gpio.GPIO_PuPd = GPIO_PuPd_UP;
   GPIO_Init(GPIOB, &gpio);
-
+  
   GPIO_PinAFConfig(GPIOB, GPIO_PinSource11, GPIO_AF_USART3);
   GPIO_PinAFConfig(GPIOB, GPIO_PinSource10, GPIO_AF_USART3);
 
@@ -55,3 +55,35 @@ void DbgChar(char c)
 }
 
 
+extern "C"
+int _EXFUN(printf, (const char* __restrict pFormat, ...))
+{
+    int result = 0;
+
+    va_list ap;
+    va_start(ap, pFormat);
+
+    char pStr[1024];
+    vsprintf(pStr, pFormat, ap);
+
+    const char *p = pStr;
+    while ( 1 )
+    {
+      char c = *p++;
+      if ( c == 0 )
+       break;
+
+      result++;
+
+      if ( c == '\n' )
+         {
+           DbgChar('\r');
+         }
+
+      DbgChar(c);
+    }
+
+    va_end(ap);
+
+    return result;
+}

@@ -19,7 +19,6 @@
                                                               //  3: 4/7,
                                                               //  4: 4/8]
 #define LORA_PREAMBLE_LENGTH                        8         // Same for Tx and Rx
-#define LORA_SYMBOL_TIMEOUT                         5         // Symbols
 #define LORA_CRC_ON                                 true
 #define LORA_IQ_INVERSION_ON                        false
 
