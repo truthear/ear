@@ -113,24 +113,24 @@ bool CSemtechSX::Send(const uint8_t *buff,uint8_t size)
        m_state = STATE_IDLE;  // for IRQ
        SetOpMode(OP_MODE_STANDBY); // switch to standby mode
 
-      if ( !buff || !size ) 
-         {
-           rc = true;
-         }
-      else
-         {
-           WriteReg(RegPayloadLength,size);
-           WriteReg(RegFifoTxBaseAddr,0);
-           WriteReg(RegFifoAddrPtr,0);
-           WriteFifo(buff,size);
-           WriteReg(RegIrqFlagsMask,0xF7);  // unmask TxDone
-           WriteReg(RegDioMapping1,0x40);   // DIO0=TxDone
+       if ( !buff || !size ) 
+          {
+            rc = true;
+          }
+       else
+          {
+            WriteReg(RegPayloadLength,size);
+            WriteReg(RegFifoTxBaseAddr,0);
+            WriteReg(RegFifoAddrPtr,0);
+            WriteFifo(buff,size);
+            WriteReg(RegIrqFlagsMask,0xF7);  // unmask TxDone
+            WriteReg(RegDioMapping1,0x40);   // DIO0=TxDone
 
-           m_state = STATE_SENDING;
-           SetOpMode(OP_MODE_TRANSMIT);
+            m_state = STATE_SENDING;
+            SetOpMode(OP_MODE_TRANSMIT);
 
-           rc = true;
-         }
+            rc = true;
+          }
      }
 
   return rc;
@@ -438,6 +438,8 @@ uint8_t CSemtechSX::ReadReg(uint8_t addr)
 
 void CSemtechSX::WriteBits(uint8_t addr,uint8_t from_bit,uint8_t to_bit,uint8_t value)
 {
+  CIRQDisable g;
+
   uint8_t lo = MIN(from_bit,to_bit);
   uint8_t hi = MAX(from_bit,to_bit);
   uint8_t cnt = hi-lo+1;
@@ -521,7 +523,7 @@ CLoraMote::CLoraMote(EChip chip,CPin::EPins reset,CPin::EPins sclk,CPin::EPins m
   p_cbparm = NULL;
 
   CPin::InitAsInput(dio0,GPIO_PuPd_UP);
-  CPin::SetInterrupt(dio0,OnDIO0Wrapper,this,EXTI_Trigger_Rising,0/*high priority*/);
+  CPin::SetInterrupt(dio0,OnDIO0Wrapper,this,EXTI_Trigger_Rising,8/*med priority*/);
 
   CPin::InitAsOutput(ant_rx,0,GPIO_PuPd_UP);
   CPin::InitAsOutput(ant_tx,0,GPIO_PuPd_UP);
