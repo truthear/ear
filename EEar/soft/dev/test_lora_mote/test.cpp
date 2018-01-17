@@ -68,7 +68,7 @@ void Cmd(HANDLE h,const char *cmd)
 
 void main()
 {
-  HANDLE h = CreateFile("\\\\.\\COM20",GENERIC_READ|GENERIC_WRITE,0/*FILE_SHARE_READ|FILE_SHARE_WRITE*/,NULL,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,NULL);
+  HANDLE h = CreateFile("\\\\.\\COM12",GENERIC_READ|GENERIC_WRITE,0/*FILE_SHARE_READ|FILE_SHARE_WRITE*/,NULL,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,NULL);
   if ( h != INVALID_HANDLE_VALUE )
      {
        DCB dcb;
@@ -107,6 +107,7 @@ void main()
               #else
               Cmd(h,"mac pause");
               Cmd(h,"radio tx 48484848484848484848484848484848484848484848484848484848484848484848484848484848");
+              Cmd(h,NULL);
               Sleep(1000);
               #endif
             }
