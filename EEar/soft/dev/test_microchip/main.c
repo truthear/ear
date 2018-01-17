@@ -289,7 +289,7 @@ void Cmd(const char *cmd)
          SendOneByte(USART3,c);
          SendOneByte(USART2,c);
     
-         if ( c == '\n' && IsBufferEmpty(&device2debug) )
+         if ( c == '\n' /*&& IsBufferEmpty(&device2debug)*/ )
           break;
        }
   }
@@ -341,6 +341,7 @@ int main(void)
 
     #ifdef SENDER
     Cmd("radio tx 48484848484848484848484848484848484848484848484848484848484848484848484848484848");
+    Cmd(NULL);
     delay_ms_not_strict(800);
     #else
     Cmd("radio rx 0");
