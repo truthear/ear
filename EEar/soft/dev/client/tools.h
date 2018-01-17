@@ -73,6 +73,15 @@ class CCSGuard
 };
 
 
+class CIRQDisable
+{
+          static volatile int m_cnt;
+  public:
+          CIRQDisable();
+          ~CIRQDisable();
+};
+
+
 template<int _size>
 class CFormatStr
 {

@@ -272,12 +272,6 @@ void CPin::SetInterrupt(EPins pin,TCALLBACK cb,void *cb_parm,EXTITrigger_TypeDef
 }
 
 
-void CPin::RemoveInterrupt(EPins pin)
-{
-  InitAsAnalog(pin);
-}
-
-
 
 class CEXTIHandler
 {

@@ -30,7 +30,6 @@ class CPin
 
          typedef void (*TCALLBACK)(void *parm);
          static void SetInterrupt(EPins pin,TCALLBACK cb,void *cb_parm=NULL,EXTITrigger_TypeDef trigger=EXTI_Trigger_Rising,uint8_t priority=15);
-         static void RemoveInterrupt(EPins pin);
 
   private:
          typedef struct {
