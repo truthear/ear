@@ -151,6 +151,7 @@ int main()
   btn1 = new CButton(BOARD_BUTTON1,OnButton);
 
   InitUART3();
+  InitUART2();
 
   Sleep(1000);  // allow USB connect
 
