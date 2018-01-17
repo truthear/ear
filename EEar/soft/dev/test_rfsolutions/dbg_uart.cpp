@@ -2,7 +2,6 @@
 #include "include.h"
 
 
-
 void InitUART3()
 {
   GPIO_InitTypeDef gpio;

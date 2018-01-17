@@ -72,16 +72,16 @@ void CSemtechSX::Init(const TRadio& i)
   Reset();
 
   // now we in STANDBY mode, switch to SLEEP
-  SetOpMode(0);
-  // enable LORA
+  SetOpMode(OP_MODE_SLEEP);
+  Sleep(2);
+  // enable LORA (only in SLEEP mode!)
   WriteBit(RegOpMode,7,1);
   // return back to STANDBY mode
-  SetOpMode(1);
+  SetOpMode(OP_MODE_STANDBY);
   Sleep(2);
   
   // at this point we in STANDBY mode with LORA modem selection
   // initialize LORA registers
-  WriteBit(RegDetectOptimize,7,0); // false rx packets eliminate, todo: check!
   WriteReg(RegLna,0x23); // LNA Gain
   WriteReg(RegSyncWord,i.sync_word);
   WriteReg(RegPaConfig,0x8F);  // PA_BOOST
@@ -89,13 +89,13 @@ void CSemtechSX::Init(const TRadio& i)
   WriteBits(RegOcp,4,0,15);    // over current protection set to 120 mA
 
   uint32_t freq = (uint32_t)((double)i.freq/61.03515625);
-  WriteReg(RegFrfMsb, (uint8_t)((freq >> 16) & 0xFF));
-  WriteReg(RegFrfMid, (uint8_t)((freq >> 8) & 0xFF));
-  WriteReg(RegFrfLsb, (uint8_t)((freq >> 0) & 0xFF));
+  WriteReg(RegFrfMsb,(uint8_t)((freq >> 16) & 0xFF));
+  WriteReg(RegFrfMid,(uint8_t)((freq >> 8) & 0xFF));
+  WriteReg(RegFrfLsb,(uint8_t)((freq >> 0) & 0xFF));
 
   bool lowdropt = ((i.sf == SF_11 || i.sf == SF_12) && i.bw == BW_125KHz);
   WriteReg(RegModemConfig1,((uint8_t)i.bw<<6) | ((uint8_t)i.cr<<3) | (0 << 2) | (i.crc?2:0) | (lowdropt?1:0));
-  WriteBits(RegModemConfig2,7,4,i.sf); // todo: see AgcAutoOn bit!
+  WriteBits(RegModemConfig2,7,4,i.sf);
   WriteReg(RegPreambleMsb,(i.preamble_len>>8)&0xFF);
   WriteReg(RegPreambleLsb,i.preamble_len&0xFF);
   WriteBit(RegInvertIQ,6,i.iq_invert?1:0);
@@ -111,7 +111,7 @@ bool CSemtechSX::Send(const uint8_t *buff,uint8_t size)
   if ( m_state != STATE_UNINITIALIZED && m_state != STATE_SENDING )
      {
        m_state = STATE_IDLE;  // for IRQ
-       SetOpMode(1); // switch to standby mode
+       SetOpMode(OP_MODE_STANDBY); // switch to standby mode
 
       if ( !buff || !size ) 
          {
@@ -127,7 +127,7 @@ bool CSemtechSX::Send(const uint8_t *buff,uint8_t size)
            WriteReg(RegDioMapping1,0x40);   // DIO0=TxDone
 
            m_state = STATE_SENDING;
-           SetOpMode(3);
+           SetOpMode(OP_MODE_TRANSMIT);
 
            rc = true;
          }
@@ -197,14 +197,15 @@ bool CSemtechSX::StartReceiverMode()
        else
           {
             m_state = STATE_IDLE;  // for IRQ
-            SetOpMode(1); // switch to standby mode
+            SetOpMode(OP_MODE_STANDBY); // switch to standby mode
 
             WriteReg(RegIrqFlagsMask,0x9F);  // unmask RxDone and PayloadCrcError
+            WriteReg(RegDioMapping1,0x00);   // DIO0=RxDone
             WriteReg(RegFifoRxBaseAddr,0);
             WriteReg(RegFifoAddrPtr,0);
 
             m_state = STATE_RECEIVER;
-            SetOpMode(5);
+            SetOpMode(OP_MODE_RECEIVER);
 
             rc = true;
           }
@@ -281,8 +282,11 @@ void CSemtechSX::OnDIO0()
             uint8_t RxBuffer[256];
             memset(RxBuffer,0,sizeof(RxBuffer));
           
-            WriteReg(RegFifoAddrPtr,ReadReg(RegFifoRxCurrentAddr));
-            ReadFifo(RxBuffer,size);
+            if ( size )
+               {
+                 WriteReg(RegFifoAddrPtr,ReadReg(RegFifoRxCurrentAddr));
+                 ReadFifo(RxBuffer,size);
+               }
 
             OnRecvPacket(RxBuffer,size,rssi,snr);
           }
@@ -374,7 +378,7 @@ uint8_t CSemtechSX::SpiInOut8(uint8_t out_data)
 
 void CSemtechSX::WriteBuffer(uint8_t addr,const uint8_t *buffer,uint8_t size)
 {
-  __disable_irq();
+  CIRQDisable g;
 
   CPin::Reset(m_pins.nss);
 
@@ -386,14 +390,12 @@ void CSemtechSX::WriteBuffer(uint8_t addr,const uint8_t *buffer,uint8_t size)
       }
 
   CPin::Set(m_pins.nss);
-
-  __enable_irq();
 }
 
 
 void CSemtechSX::ReadBuffer(uint8_t addr,uint8_t *buffer,uint8_t size)
 {
-  __disable_irq();
+  CIRQDisable g;
 
   CPin::Reset(m_pins.nss);
 
@@ -405,8 +407,6 @@ void CSemtechSX::ReadBuffer(uint8_t addr,uint8_t *buffer,uint8_t size)
       }
 
   CPin::Set(m_pins.nss);
-
-  __enable_irq();
 }
 
 
@@ -499,6 +499,12 @@ void CSemtechSX::SetOpMode(uint8_t mode)
 }
 
 
+int CSemtechSX::GetOpMode()
+{
+  return ReadBits(RegOpMode,2,0);
+}
+
+
 ///////////////////////
 
 
@@ -515,7 +521,7 @@ CLoraMote::CLoraMote(EChip chip,CPin::EPins reset,CPin::EPins sclk,CPin::EPins m
   p_cbparm = NULL;
 
   CPin::InitAsInput(dio0,GPIO_PuPd_UP);
-  CPin::SetInterrupt(dio0,OnDIO0Wrapper,this);
+  CPin::SetInterrupt(dio0,OnDIO0Wrapper,this,EXTI_Trigger_Rising,0/*high priority*/);
 
   CPin::InitAsOutput(ant_rx,0,GPIO_PuPd_UP);
   CPin::InitAsOutput(ant_tx,0,GPIO_PuPd_UP);
@@ -530,7 +536,7 @@ CLoraMote::~CLoraMote()
   
   CPin::Reset(m_ant_rx);
   CPin::Reset(m_ant_tx);
-  CPin::RemoveInterrupt(m_dio0);
+  //CPin::RemoveInterrupt(m_dio0);
 }
 
 

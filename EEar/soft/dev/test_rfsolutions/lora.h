@@ -89,6 +89,13 @@ class CSemtechSX
           void OnDIO0();
 
   private:
+          enum {
+           OP_MODE_SLEEP    = 0x00,
+           OP_MODE_STANDBY  = 0x01,
+           OP_MODE_TRANSMIT = 0x03,
+           OP_MODE_RECEIVER = 0x05,
+          };
+          
           void Reset();
 
           void SpiInit();
@@ -104,6 +111,7 @@ class CSemtechSX
           void WriteBit(uint8_t addr,uint8_t bit,uint8_t value);
           uint8_t ReadBit(uint8_t addr,uint8_t bit);
           void SetOpMode(uint8_t mode);
+          int GetOpMode();
 };
 
 
@@ -133,7 +141,7 @@ class CLoraMote : public CSemtechSX
           // max size is 255
           bool Send(const void *buff,unsigned size,unsigned maxwait_ms);
           bool IsSendingInProgress() const;  // for debug only
-          int GetTimeOnAirMs(unsigned packet_size) const;
+          int GetTimeOnAirMs(unsigned packet_size) const;  // for debug only
           
           void StartReceiverMode(TRECVCALLBACK cb,void *cbparm=NULL);
 
