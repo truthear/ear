@@ -3,31 +3,60 @@
 
 
 
-volatile bool recv_packet = false;
-volatile bool recv_err = false;
 
-unsigned recv_size = 0;
-float recv_rssi = 0;
-float recv_snr = 0;
-uint8_t recv_data[256] = {0,};
+struct SQueue 
+{
+  static const unsigned MAX_QUEUE = 16;
+
+  typedef struct {
+  bool crc_err;
+  uint8_t data[256];
+  unsigned size;
+  float rssi;
+  float snr;
+  } TPACKET;
+  
+  TPACKET ar[MAX_QUEUE];
+  volatile unsigned to_write; // modified only by IRQ!
+  volatile unsigned to_read;  // modified only by main thread!
+ 
+  SQueue() : to_write(0), to_read(0) {}
+  
+  bool IsEmpty() const { return to_write == to_read; }
+  void NextWrite() { SafeIncrement(to_write); }
+
+ private:
+  void SafeIncrement(volatile unsigned& v) 
+  {
+    unsigned t = v;
+    t++;
+    t = (t == MAX_QUEUE ? 0 : t);
+    v = t;
+  }
+};
+
+static SQueue g_q;
+
 
 // IRQ call!
 void OnReceive(void *parm,bool crc_error,const void *data,unsigned size,float rssi,float snr)
 {
+  SQueue::TPACKET& p = g_q.ar[g_q.to_write];
+
   if ( crc_error )
      {
-       recv_packet = false;
-       recv_err = true;
+       p.crc_err = true;
      }
   else
      {
-       recv_size = size;
-       recv_rssi = rssi;
-       recv_snr = snr;
-       memcpy(recv_data,data,size);
-       recv_err = false;
-       recv_packet = true;
+       p.crc_err = false;
+       memcpy(p.data,data,size);
+       p.size = size;
+       p.rssi = rssi;
+       p.snr = snr;
      }
+
+  g_q.NextWrite();
 }
 
 
@@ -53,7 +82,7 @@ void ProcessAsSender(CLoraMote &lora)
   static int g_packet_num = 0;
   static int g_errors = 0;
 
-  char Buffer[41];
+  char Buffer[256];
 
   printf("------------\n");
   printf("Switching to sender mode\n");
@@ -65,7 +94,7 @@ void ProcessAsSender(CLoraMote &lora)
 
     LedGreen->On();
 
-    if ( !lora.Send(Buffer,sizeof(Buffer)-1,3000) )
+    if ( !lora.Send(Buffer,strlen(Buffer),3000) )
        {
          printf("Timeout sending!\n");
          LedRed->On();
@@ -86,11 +115,35 @@ void ProcessAsSender(CLoraMote &lora)
 }
 
 
-void ProcessAsReceiver(CLoraMote &lora)
+void ProcessReceivedPacket(const SQueue::TPACKET& p)
 {
   static int g_packets = 0;
   static int g_errors = 0;
   
+  if ( p.crc_err )
+     {
+       LedRed->On();
+       printf("recv error!\n");
+       g_errors++;
+     }
+  else
+     {
+       LedBlue->On();
+       printf("%d: %d errors, RSSI: %.1f, SNR: %.1f, [%d bytes]: ",g_packets,g_errors,p.rssi,p.snr,p.size);
+       for ( unsigned n = 0; n < p.size; n++ )
+       {
+         printf("%c",(int)p.data[n]);
+       }
+       printf("\n");
+       Sleep(50);
+       LedBlue->Off();
+       g_packets++;
+     }
+}
+
+
+void ProcessAsReceiver(CLoraMote &lora)
+{
   printf("------------\n");
   printf("Switching to receiver mode\n");
   printf("------------\n");
@@ -99,32 +152,26 @@ void ProcessAsReceiver(CLoraMote &lora)
 
   printf("Awaiting packets...\n");
 
-  while( !on_button )
+  while( 1 )
   {
-    recv_err = false;
-    recv_packet = false;
-    while ( !recv_err && !recv_packet && !on_button ) {}
+    while ( g_q.IsEmpty() && !on_button ) {}
 
-    if ( recv_err )
-       {
-         LedRed->On();
-         printf("recv error!\n");
-         g_errors++;
-       }
-    else
-    if ( recv_packet )
-       {
-         LedBlue->On();
-         printf("%d: %d errors, RSSI: %.1f, SNR: %.1f, [%d bytes]: ",g_packets,g_errors,recv_rssi,recv_snr,recv_size);
-         for ( unsigned n = 0; n < recv_size; n++ )
-         {
-           printf("%c",recv_data[n]);
-         }
-         printf("\n");
-         Sleep(50);
-         LedBlue->Off();
-         g_packets++;
-       }
+    if ( on_button )
+      break;
+
+    unsigned last = g_q.to_write;
+    unsigned first = g_q.to_read;
+
+    for ( unsigned n = first; n != last; )
+        {
+          ProcessReceivedPacket(g_q.ar[n]);
+
+          n++;
+          if ( n == SQueue::MAX_QUEUE )
+           n = 0;
+        }
+
+    g_q.to_read = last;
   }
 }
 
