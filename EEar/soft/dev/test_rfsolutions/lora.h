@@ -73,6 +73,7 @@ class CSemtechSX
           volatile EState m_state;
 
   protected:
+          // after object created it state will STATE_UNINITIALIZED
           CSemtechSX(EChip chip,CPin::EPins reset,CPin::EPins sclk,CPin::EPins miso,CPin::EPins mosi,CPin::EPins nss,SPI_TypeDef* SPIx);
           ~CSemtechSX();
           
@@ -111,7 +112,6 @@ class CSemtechSX
           void WriteBit(uint8_t addr,uint8_t bit,uint8_t value);
           uint8_t ReadBit(uint8_t addr,uint8_t bit);
           void SetOpMode(uint8_t mode);
-          int GetOpMode();
 };
 
 
@@ -130,6 +130,7 @@ class CLoraMote : public CSemtechSX
           void *p_cbparm;
 
   public:
+          // after this object created radio will reset, initialized and working in standby mode
           CLoraMote(EChip chip,CPin::EPins reset,CPin::EPins sclk,CPin::EPins miso,CPin::EPins mosi,CPin::EPins nss,SPI_TypeDef* SPIx,
                     CPin::EPins dio0,CPin::EPins ant_rx,CPin::EPins ant_tx,const TRadio& radio);
           ~CLoraMote();
@@ -138,7 +139,7 @@ class CLoraMote : public CSemtechSX
           // if maxwait time specified correctly (according to GetTimeOnAirMs()) then only SPI problem can cause a problem,
           // in this case chip will be reinitialized and repeat of Send() can be performed
           // generally this return code can be used mainly for debug purposes only and should normally never happens
-          // max size is 255
+          // max size is 255 bytes(!), truncated if more than this value
           bool Send(const void *buff,unsigned size,unsigned maxwait_ms);
           bool IsSendingInProgress() const;  // for debug only
           int GetTimeOnAirMs(unsigned packet_size) const;  // for debug only

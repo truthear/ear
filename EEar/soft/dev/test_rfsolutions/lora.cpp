@@ -218,77 +218,80 @@ bool CSemtechSX::StartReceiverMode()
 // Warning!!! called from IRQ!
 void CSemtechSX::OnDIO0()
 {
-  uint8_t irqs = ReadReg(RegIrqFlags);
-
-  const uint8_t MASK_RXDONE = 0x40;
-  const uint8_t MASK_CRCERR = 0x20;
-  const uint8_t MASK_TXDONE = 0x08;
-
-  uint8_t clear = 0;
-
-  bool rx_done = false;
-  bool crc_err = false;
-  bool tx_done = false;
-
-  if ( irqs & MASK_RXDONE )
+  if ( m_state != STATE_UNINITIALIZED )
      {
-       rx_done = true;
-       clear |= MASK_RXDONE;
-     }
+       uint8_t irqs = ReadReg(RegIrqFlags);
 
-  if ( irqs & MASK_CRCERR )
-     {
-       crc_err = true;
-       clear |= MASK_CRCERR;
-     }
+       const uint8_t MASK_RXDONE = 0x40;
+       const uint8_t MASK_CRCERR = 0x20;
+       const uint8_t MASK_TXDONE = 0x08;
 
-  if ( irqs & MASK_TXDONE )
-     {
-       tx_done = true;
-       clear |= MASK_TXDONE;
-     }
+       uint8_t clear = 0;
 
-  WriteReg(RegIrqFlags,clear);
+       bool rx_done = false;
+       bool crc_err = false;
+       bool tx_done = false;
 
-  if ( m_state == STATE_SENDING )
-     {
-       if ( tx_done )
+       if ( irqs & MASK_RXDONE )
           {
-            m_state = STATE_IDLE;
+            rx_done = true;
+            clear |= MASK_RXDONE;
           }
-     }
-  else
-  if ( m_state == STATE_RECEIVER )
-     {
-       if ( crc_err )
+
+       if ( irqs & MASK_CRCERR )
           {
-            OnRecvCrcError();
+            crc_err = true;
+            clear |= MASK_CRCERR;
+          }
+
+       if ( irqs & MASK_TXDONE )
+          {
+            tx_done = true;
+            clear |= MASK_TXDONE;
+          }
+
+       WriteReg(RegIrqFlags,clear);
+
+       if ( m_state == STATE_SENDING )
+          {
+            if ( tx_done )
+               {
+                 m_state = STATE_IDLE;
+               }
           }
        else
-       if ( rx_done )
+       if ( m_state == STATE_RECEIVER )
           {
-            int PktSnr = (int)ReadReg(RegPktSnrValue);
-            float snr = PktSnr*0.25;
-
-            int PktRssi = (int)ReadReg(RegPktRssiValue);
-            float rssi = -139.0 + PktRssi*1.0667;
-            if ( snr < 0 )
+            if ( crc_err )
                {
-                 rssi += snr;
+                 OnRecvCrcError();
                }
-
-            uint8_t size = ReadReg(RegRxNbBytes);
-
-            uint8_t RxBuffer[256];
-            memset(RxBuffer,0,sizeof(RxBuffer));
-          
-            if ( size )
+            else
+            if ( rx_done )
                {
-                 WriteReg(RegFifoAddrPtr,ReadReg(RegFifoRxCurrentAddr));
-                 ReadFifo(RxBuffer,size);
-               }
+                 int PktSnr = (int)ReadReg(RegPktSnrValue);
+                 float snr = PktSnr*0.25;
 
-            OnRecvPacket(RxBuffer,size,rssi,snr);
+                 int PktRssi = (int)ReadReg(RegPktRssiValue);
+                 float rssi = -139.0 + PktRssi*1.0667;
+                 if ( snr < 0 )
+                    {
+                      rssi += snr;
+                    }
+
+                 uint8_t size = ReadReg(RegRxNbBytes);
+
+                 uint8_t RxBuffer[256];
+                 memset(RxBuffer,0,sizeof(RxBuffer));
+               
+                 if ( size )
+                    {
+                      WriteReg(RegFifoAddrPtr,ReadReg(RegFifoRxCurrentAddr));
+                      ReadFifo(RxBuffer,size);
+                    }
+
+                 OnRecvPacket(RxBuffer,size,rssi,snr);
+               }
           }
      }
 }
@@ -501,12 +504,6 @@ void CSemtechSX::SetOpMode(uint8_t mode)
 }
 
 
-int CSemtechSX::GetOpMode()
-{
-  return ReadBits(RegOpMode,2,0);
-}
-
-
 ///////////////////////
 
 
@@ -523,22 +520,23 @@ CLoraMote::CLoraMote(EChip chip,CPin::EPins reset,CPin::EPins sclk,CPin::EPins m
   p_cbparm = NULL;
 
   CPin::InitAsInput(dio0,GPIO_PuPd_UP);
-  CPin::SetInterrupt(dio0,OnDIO0Wrapper,this,EXTI_Trigger_Rising,8/*med priority*/);
 
   CPin::InitAsOutput(ant_rx,0,GPIO_PuPd_UP);
   CPin::InitAsOutput(ant_tx,0,GPIO_PuPd_UP);
 
   Init(radio);
+
+  CPin::SetInterrupt(dio0,OnDIO0Wrapper,this,EXTI_Trigger_Rising,8/*med priority*/);
 }
 
 
 CLoraMote::~CLoraMote()
 {
   p_cb = NULL;
+  CPin::SetInterrupt(m_dio0,NULL,NULL);
   
   CPin::Reset(m_ant_rx);
   CPin::Reset(m_ant_tx);
-  //CPin::RemoveInterrupt(m_dio0);
 }
 
 
@@ -553,6 +551,8 @@ bool CLoraMote::Send(const void *buff,unsigned size,unsigned maxwait_ms)
   else
      {
        size = MIN(size,255);
+
+       p_cb = NULL;
 
        if ( IsSendingInProgress() )
           {
@@ -570,7 +570,6 @@ bool CLoraMote::Send(const void *buff,unsigned size,unsigned maxwait_ms)
 
        if ( !rc )
           {
-            p_cb = NULL;
             CPin::Reset(m_ant_rx);
             CPin::Reset(m_ant_tx);
             Init(m_radio);  //reinitialize chip
