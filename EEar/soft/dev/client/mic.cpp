@@ -46,11 +46,12 @@ void CMic::Init(TCALLBACK cb,void *cbparm,int irq_priority)
 
 
   // SPI init
+  //RCC_I2SCLKConfig(RCC_I2SBus_APB1,RCC_I2S2CLKSource_PLLI2S);
   RCC_PLLI2SCmd(ENABLE);
   while ( RCC_GetFlagStatus(RCC_FLAG_PLLI2SRDY) == RESET ) {}
-  
-  RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2,ENABLE);
 
+  RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2,ENABLE);
+  
   SPI_I2S_DeInit(SPI2);
 
   I2S_InitTypeDef I2S_InitStructure;

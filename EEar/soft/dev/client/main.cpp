@@ -430,6 +430,8 @@ CEar::CEar()
   CDebugger::Init();
   // start from this point we can use printf()!
 
+  Sleep(1000);
+
   m_leds[0] = new CLED(BOARD_LED1);
   m_leds[1] = new CLED(BOARD_LED2);
   m_leds[2] = new CLED(BOARD_LED3);
@@ -712,6 +714,16 @@ void CEar::UpdateSync(unsigned& last_update_time)
             b_synced = sync;
 
             ADD2LOG(("Sync: %s",sync?"YES":"no"));
+
+            if ( sync )
+               {
+                 double lat,lon;
+                 short gnss;
+                 if ( p_sat->GetNavData(lat,lon,gnss) )
+                    {
+                      ADD2LOG(("Coords: %.7f, %.7f",lat,lon));
+                    }
+               }
           }
 
        last_update_time = GetTickCount();
@@ -871,7 +883,7 @@ void CEar::CheckFDetect()
           {
             OURTIME ftime = CRTC::GetTime() - (OURTIME)(GetTickCount()-ts);
 
-            ADD2LOG(("FDetect: %s, %d msec, %.1f dB",COurTime(ftime).AsString().c_str(),length_ms,db_amp));
+            ADD2LOG(("FDetect: %s, %d msec, %.1f dB, [%.7f, %.7f]",COurTime(ftime).AsString().c_str(),length_ms,db_amp,m_lat,m_lon));
 
             p_sender->PushImportant(PrepareFDetectPacket(ftime,length_ms,db_amp));  // not always 100% async!
           }
