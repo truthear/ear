@@ -88,7 +88,7 @@ Generating : Bottom Layer
 
 Used DCodes :
     D39
-    D42
+    D40
     D43
     D47
     D48
@@ -176,7 +176,7 @@ Generating : Top Overlay
 
 Used DCodes :
     D39
-    D41
+    D42
     D47
     D48
     D49
@@ -411,7 +411,7 @@ Generating : Mechanical 29
 
 
 Used DCodes :
-    D43
+    D40
     D45
     D47
     D48

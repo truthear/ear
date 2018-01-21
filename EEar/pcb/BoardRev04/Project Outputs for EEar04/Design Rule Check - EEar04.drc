@@ -1,7 +1,7 @@
 Protel Design System Design Rule Check
 PCB File : Z:\Documents\zwork\ear\EEar\pcb\BoardRev04\EEar04.PcbDoc
 Date     : 21.01.2018
-Time     : 0:29:24
+Time     : 22:57:07
 
 Processing Rule : Clearance Constraint (Gap=0.125mm) (All),(All)
 Rule Violations :0
@@ -47,4 +47,4 @@ Rule Violations :0
 
 
 Violations Detected : 0
-Time Elapsed        : 00:00:02
+Time Elapsed        : 00:00:03
