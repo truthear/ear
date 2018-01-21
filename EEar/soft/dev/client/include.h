@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <alloca.h>
 #include <assert.h>
+#include <math.h>
 #include <string>
 #include <vector>
 #include <map>
@@ -28,6 +29,7 @@
 #include "mic.h"
 #include "log.h"
 #include "gps.h"
+#include "lora.h"
 #include "modem.h"
 #include "terminal.h"
 #include "mobile.h"

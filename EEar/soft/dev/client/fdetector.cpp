@@ -1,7 +1,6 @@
 
 #include "include.h"
 
-#include <math.h>
 #include <complex>
 #include "fft.h"
 
