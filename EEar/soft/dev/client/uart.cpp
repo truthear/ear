@@ -29,6 +29,7 @@ void CUART::SendByte(unsigned char data)
 }
 
 
+/////////////////////////////////
 
 
 typedef void (*TPeriphClkCmdFunc)(uint32_t,FunctionalState);
@@ -40,6 +41,7 @@ static CPin::EPins       UART_PIN1[]        = { CPin::PB_7              , CPin::
 static CPin::EPins       UART_PIN2[]        = { CPin::PB_6              , CPin::PD_5             , CPin::PB_10            };
 static uint8_t           UART_AF[]          = { GPIO_AF_USART1          , GPIO_AF_USART2         , GPIO_AF_USART3         };
 static IRQn              UART_IRQn[]        = { USART1_IRQn             , USART2_IRQn            , USART3_IRQn            };
+
 
 
 CBoardUART::TUARTRXCALLBACKWITHPARM CBoardUART::callbacks[3] = {{NULL,NULL},{NULL,NULL},{NULL,NULL}};
@@ -127,6 +129,15 @@ void USART3_IRQHandler()
   CBoardUART::OnIRQ_Internal(BOARD_UART3);
 }  
 
+
+///////////////////
+
+
+CBoardRS485::CBoardRS485(int rate,bool allow_rx,bool allow_tx,TUARTRXCALLBACK cbrx,void *cbparm,int irq_priority)
+  : CBoardUART(BOARD_UART_RS485,rate,allow_rx,allow_tx,cbrx,cbparm,irq_priority)
+{
+  CPin::InitAsOutput(CPin::PD_4,1);  //RTS/DE
+}
 
 
 
