@@ -48,6 +48,8 @@ class CTerminal
           int GetAvailQueueItemsCount() const { return (int)m_max_queue_cmds-(int)m_cmds.size(); }
           // returns -1 if queue is full, or unique id if operation success
           int Push(const char *atcmd,TCALLBACK cb=NULL,void *cbparm=NULL,unsigned max_wait=1000,unsigned min_wait=0,bool add_cr_at_end=true);
+
+          // Warning!!! These two functions can block more than command_max_wait, because they waits for queue will empty before processing!
           void SyncProcessCmd(const char *atcmd,std::string& _answer,bool& _is_timeout,bool& _is_answered_ok,
                               unsigned command_max_wait=1000,unsigned command_min_wait=0,bool add_cr_at_end=true);
           bool SyncProcessCmdSimple(const char *atcmd,unsigned command_max_wait=1000,bool add_cr_at_end=true);
