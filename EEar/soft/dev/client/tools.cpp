@@ -209,3 +209,28 @@ CIRQDisable::~CIRQDisable()
      }
 }
 
+
+///////////////////////
+
+
+void CRandom::Init()
+{
+  RCC_AHB2PeriphClockCmd(RCC_AHB2Periph_RNG,ENABLE);
+  RNG_Cmd(ENABLE);
+}
+
+
+void CRandom::Done()
+{
+  RNG_Cmd(DISABLE);
+  RCC_AHB2PeriphClockCmd(RCC_AHB2Periph_RNG,DISABLE);
+}
+
+
+uint32_t CRandom::Get()
+{
+  while ( RNG_GetFlagStatus(RNG_FLAG_DRDY) == RESET ) {}
+  return RNG_GetRandomNumber();
+}
+
+
