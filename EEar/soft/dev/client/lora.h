@@ -75,7 +75,7 @@ class CSemtechSX
   protected:
           // after object created it state will STATE_UNINITIALIZED
           CSemtechSX(EChip chip,CPin::EPins reset,CPin::EPins sclk,CPin::EPins miso,CPin::EPins mosi,CPin::EPins nss,SPI_TypeDef* SPIx);
-          ~CSemtechSX();
+          virtual ~CSemtechSX();
           
           void Init(const TRadio& i); // reset and initialize chip and SPI, can be called many times as needed with different parms
 
@@ -133,7 +133,7 @@ class CLoraMote : public CSemtechSX
           // after this object created radio will reset, initialized and working in standby mode
           CLoraMote(EChip chip,CPin::EPins reset,CPin::EPins sclk,CPin::EPins miso,CPin::EPins mosi,CPin::EPins nss,SPI_TypeDef* SPIx,
                     CPin::EPins dio0,CPin::EPins ant_rx,CPin::EPins ant_tx,const TRadio& radio);
-          ~CLoraMote();
+          virtual ~CLoraMote();
 
           // returns false if prev sending is in progress after timeout expired, 
           // if maxwait time specified correctly (according to GetTimeOnAirMs()) then only SPI problem can cause a problem,

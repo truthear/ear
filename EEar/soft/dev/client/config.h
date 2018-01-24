@@ -22,6 +22,9 @@ class CConfig
           bool use_galileo;
           bool use_beidou;
           bool debug_mode;
+          bool use_gsm;
+          bool use_lora;
+          bool use_rs485;
 
   public:
           bool ReadConfig();
