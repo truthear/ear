@@ -1,5 +1,5 @@
 ------------------------------------------------------------------------------------------
-Gerber File Extension Report For: EEar04.GBR   21.01.2018  22:54:12
+Gerber File Extension Report For: EEar04.GBR   01.04.2018  23:23:44
 ------------------------------------------------------------------------------------------
 
 
@@ -15,8 +15,8 @@ Layer Extension     Layer Description
 .GBO                Bottom Overlay                          
 .GBP                Bottom Paste                            
 .GKO                Keep-Out Layer                          
-.GM1                Mechanical 1                            
 .GM13               Mechanical 13                           
+.GM1                Mechanical 1                            
 .GM15               Mechanical 15                           
 .GM29               Mechanical 29                           
 .GM30               Mechanical 30                           

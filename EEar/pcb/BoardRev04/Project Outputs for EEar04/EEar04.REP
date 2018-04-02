@@ -7,8 +7,6 @@ Generating : Top Layer
 
     Adding Layer      : Top Layer
 
-    Adding Layer      : Mechanical 13
-
     Adding Layer      : Multi-Layer
 
 
@@ -68,11 +66,6 @@ Used DCodes :
     D62
     D63
     D64
-    D65
-    D66
-    D67
-    D68
-    D69
 *************************************************************
 
 *************************************************************
@@ -81,15 +74,13 @@ Generating : Bottom Layer
 
     Adding Layer      : Bottom Layer
 
-    Adding Layer      : Mechanical 13
-
     Adding Layer      : Multi-Layer
 
 
 Used DCodes :
     D39
     D40
-    D43
+    D42
     D47
     D48
     D49
@@ -108,11 +99,6 @@ Used DCodes :
     D62
     D63
     D64
-    D65
-    D66
-    D67
-    D68
-    D69
 *************************************************************
 
 *************************************************************
@@ -120,8 +106,6 @@ Generating : Top Paste
       File : EEar04.GTP
 
     Adding Layer      : Top Paste
-
-    Adding Layer      : Mechanical 13
 
     Adding Layer      : Top Layer
 
@@ -158,11 +142,6 @@ Used DCodes :
     D36
     D37
     D38
-    D47
-    D48
-    D49
-    D50
-    D51
 *************************************************************
 
 *************************************************************
@@ -171,19 +150,14 @@ Generating : Top Overlay
 
     Adding Layer      : Top Overlay
 
-    Adding Layer      : Mechanical 13
-
 
 Used DCodes :
     D39
-    D42
-    D47
-    D48
-    D49
-    D50
-    D51
-    D70
-    D71
+    D46
+    D65
+    D66
+    D67
+    D68
 *************************************************************
 
 *************************************************************
@@ -192,19 +166,15 @@ Generating : Top Solder
 
     Adding Layer      : Top Solder
 
-    Adding Layer      : Mechanical 13
-
     Adding Layer      : Top Layer
 
     Adding Layer      : Multi-Layer
 
 
 Used DCodes :
-    D47
-    D48
-    D49
-    D50
-    D51
+    D69
+    D70
+    D71
     D72
     D73
     D74
@@ -249,9 +219,6 @@ Used DCodes :
     D113
     D114
     D115
-    D116
-    D117
-    D118
 *************************************************************
 
 *************************************************************
@@ -260,19 +227,15 @@ Generating : Bottom Solder
 
     Adding Layer      : Bottom Solder
 
-    Adding Layer      : Mechanical 13
-
     Adding Layer      : Bottom Layer
 
     Adding Layer      : Multi-Layer
 
 
 Used DCodes :
-    D47
-    D48
-    D49
-    D50
-    D51
+    D98
+    D99
+    D100
     D101
     D102
     D103
@@ -288,9 +251,6 @@ Used DCodes :
     D113
     D114
     D115
-    D116
-    D117
-    D118
 *************************************************************
 
 *************************************************************
@@ -299,16 +259,10 @@ Generating : Bottom Overlay
 
     Adding Layer      : Bottom Overlay
 
-    Adding Layer      : Mechanical 13
-
 
 Used DCodes :
-    D47
-    D48
-    D49
-    D50
-    D51
-    D70
+    D66
+    D67
 *************************************************************
 
 *************************************************************
@@ -317,19 +271,12 @@ Generating : Bottom Paste
 
     Adding Layer      : Bottom Paste
 
-    Adding Layer      : Mechanical 13
-
     Adding Layer      : Bottom Layer
 
     Adding Layer      : Multi-Layer
 
 
 Used DCodes :
-    D47
-    D48
-    D49
-    D50
-    D51
 *************************************************************
 
 *************************************************************
@@ -338,32 +285,8 @@ Generating : Keep-Out Layer
 
     Adding Layer      : Keep-Out Layer
 
-    Adding Layer      : Mechanical 13
-
 
 Used DCodes :
-    D47
-    D48
-    D49
-    D50
-    D51
-*************************************************************
-
-*************************************************************
-Generating : Mechanical 1
-      File : EEar04.GM1
-
-    Adding Layer      : Mechanical 1
-
-    Adding Layer      : Mechanical 13
-
-
-Used DCodes :
-    D47
-    D48
-    D49
-    D50
-    D51
 *************************************************************
 
 *************************************************************
@@ -372,15 +295,23 @@ Generating : Mechanical 13
 
     Adding Layer      : Mechanical 13
 
-    Adding Layer      : Mechanical 13
+
+Used DCodes :
+    D66
+    D68
+    D116
+    D117
+    D118
+*************************************************************
+
+*************************************************************
+Generating : Mechanical 1
+      File : EEar04.GM1
+
+    Adding Layer      : Mechanical 1
 
 
 Used DCodes :
-    D47
-    D48
-    D49
-    D50
-    D51
 *************************************************************
 
 *************************************************************
@@ -389,15 +320,9 @@ Generating : Mechanical 15
 
     Adding Layer      : Mechanical 15
 
-    Adding Layer      : Mechanical 13
-
 
 Used DCodes :
-    D47
-    D48
-    D49
-    D50
-    D51
+    D66
     D119
 *************************************************************
 
@@ -407,18 +332,13 @@ Generating : Mechanical 29
 
     Adding Layer      : Mechanical 29
 
-    Adding Layer      : Mechanical 13
-
 
 Used DCodes :
-    D40
-    D45
-    D47
-    D48
-    D49
-    D50
-    D51
-    D70
+    D42
+    D44
+    D66
+    D67
+    D68
     D120
 *************************************************************
 
@@ -428,16 +348,10 @@ Generating : Mechanical 30
 
     Adding Layer      : Mechanical 30
 
-    Adding Layer      : Mechanical 13
-
 
 Used DCodes :
-    D47
-    D48
-    D49
-    D50
-    D51
-    D70
+    D66
+    D67
 *************************************************************
 
 *************************************************************
@@ -445,8 +359,6 @@ Generating : Multi-Layer
       File : EEar04.GML
 
     Adding Layer      : Multi-Layer
-
-    Adding Layer      : Mechanical 13
 
 
 Used DCodes :
@@ -468,11 +380,6 @@ Used DCodes :
     D62
     D63
     D64
-    D65
-    D66
-    D67
-    D68
-    D69
 *************************************************************
 
 *************************************************************
@@ -481,14 +388,7 @@ Generating : Dielectric 1
 
     Adding Layer      : Dielectric 1
 
-    Adding Layer      : Mechanical 13
-
 
 Used DCodes :
-    D47
-    D48
-    D49
-    D50
-    D51
 *************************************************************
 
