@@ -127,6 +127,9 @@ bool CConfig::ReadConfig()
   map["use_galileo"]        = "0";
   map["use_beidou"]         = "0";
   map["debug_mode"]         = "0";
+  map["use_gsm"]            = "0";
+  map["use_lora"]           = "0";
+  map["use_rs485"]          = "0";
 
   if ( BuildMap(CONFIG_FILENAME,map) )
      {
@@ -146,6 +149,9 @@ bool CConfig::ReadConfig()
        Get(use_galileo        , map["use_galileo"]         );
        Get(use_beidou         , map["use_beidou"]          );
        Get(debug_mode         , map["debug_mode"]          );
+       Get(use_gsm            , map["use_gsm"]             );
+       Get(use_lora           , map["use_lora"]            );
+       Get(use_rs485          , map["use_rs485"]           );
 
        // check for critical values
        if ( device_id != 0xFFFF && sector != 0xFF && gps_baud != 0 )

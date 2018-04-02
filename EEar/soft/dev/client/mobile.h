@@ -82,12 +82,13 @@ class CTelitMobile
                             unsigned total_timeout=25000);
 
           // use it for old firmware only!
-          // function can take a little time, not 100% async!
+          // function can take much more time, not async!!!
           // WARNING!!! symbols \r,\n is not permitted inside str!
           int SendStringUDP_OldFW(const char *server,int port,const char *str,CTerminal::TCALLBACK cb,void *cbparm=NULL,
                                   unsigned total_timeout=25000);
 
           // high level function with default timeouts:
+          // for old firmware can block for many seconds!!!
           int InitiateInternetConnectionAndSendStringUDP(bool use_old_fw,const char *apn,const char *user,const char *pwd,
                                                          const char *server,int port,const char *str,
                                                          CTerminal::TCALLBACK cb,void *cbparm);

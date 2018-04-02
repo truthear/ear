@@ -34,6 +34,7 @@ CSOURCES+=$(DRV_COMMON)/src/stm32f4xx_sdio.c
 CSOURCES+=$(DRV_COMMON)/src/stm32f4xx_spi.c
 CSOURCES+=$(DRV_COMMON)/src/stm32f4xx_syscfg.c
 CSOURCES+=$(DRV_COMMON)/src/stm32f4xx_usart.c
+CSOURCES+=$(DRV_COMMON)/src/stm32f4xx_rng.c
 CSOURCES+=$(wildcard *.c)
 
 CXXSOURCES=$(wildcard *.cpp)

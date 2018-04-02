@@ -82,6 +82,17 @@ class CIRQDisable
 };
 
 
+class CRandom
+{
+  public:
+          static void Init();
+          static void Done();
+          static uint32_t Get();  // thread safe
+
+};
+
+
+
 template<int _size>
 class CFormatStr
 {

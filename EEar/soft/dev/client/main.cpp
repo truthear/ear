@@ -6,14 +6,65 @@
 //////////////////////////////
 
 
-// class for sending packets via internet, sms, or file (offline)
+class CEarDefs
+{
+  protected:
+          static const unsigned FDETECT_AUDIO_BUFFER_MSEC = 500;
+          static const int GSM_MODEM_BAUDRATE = 57600; // on 115200 we can got some issues!
+          static const unsigned MOBILE_TERMINAL_MAX_QUEUE_COMMANDS = 25;
+          static const bool MOBILE_TERMINAL_AUTO_ANSWER_MODE = true;
+          static const bool LOG_STDOUT_ECHO = true;
+          static const unsigned DBG_AUDIO_FILE_LEN_IN_SEC = 1*60*60;  // 1 hour
+          static const bool CLEAR_DBG_AUDIO_FILE = false;  // slowdown at startup if true!
+          static const unsigned GSM_STATUS_UPDATE_INTERVAL = 5000;
+          static const unsigned PING_INTERVAL = 3*60*60*1000;  // 3 hours
+
+};
+
+
+//////////////////////////////
+
+
+// interface class for sending packets
 class CPacketSender
 {
+  protected:
           static const unsigned MAX_QUEUED_PACKETS = 10;   // only for important packets
-          
+
+          CLog *p_log;
+  public:
+          CPacketSender(CLog *_log) : p_log(_log) {}
+          virtual ~CPacketSender() {}
+
+          virtual void PushImportant(const std::string& pkt) = 0;
+          virtual void PushUnimportant(const std::string& pkt) = 0;
+          virtual bool IsBusy() const = 0;
+          virtual void Poll() = 0;
+
+  protected:
+          void SaveOffline(const std::string& pkt);
+
+};
+
+
+// class for sending packets offline only (used for debug)
+class CPacketSenderOffline : public CPacketSender
+{
+  public:
+          CPacketSenderOffline(CLog *_log) : CPacketSender(_log) {}
+
+          void PushImportant(const std::string& pkt) { SaveOffline(pkt); }
+          void PushUnimportant(const std::string& pkt) { /*SaveOffline(pkt);*/ }
+          bool IsBusy() const { return false; }
+          void Poll() {}
+};
+
+
+// class for sending packets via internet, sms, or file (offline)
+class CPacketSenderMobile : public CPacketSender
+{
           const CConfig& m_cfg;
           CTelitMobile *p_mob;
-          CLog *p_log;
 
           enum {
            STAGE_INET,
@@ -32,17 +83,16 @@ class CPacketSender
           TQueue m_queue;
 
   public:
-          CPacketSender(const CConfig& cfg,CTelitMobile *mob,CLog *_log);
-          ~CPacketSender();
+          CPacketSenderMobile(const CConfig& cfg,CTelitMobile *mob,CLog *_log);
+          ~CPacketSenderMobile();
 
-          void PushImportant(const std::string& pkt);
-          void PushUnimportant(const std::string& pkt);
+          void PushImportant(const std::string& pkt) { Push(pkt,true); }
+          void PushUnimportant(const std::string& pkt) { Push(pkt,false); }
           bool IsBusy() const { return p_curr || !m_queue.empty(); }
           void Poll();
 
   private:
           void Push(const std::string& pkt,bool is_important);
-          void SaveOffline(const std::string& pkt);
           bool SendByInternet(const std::string& pkt);
           bool SendBySMS(const std::string& pkt);
           static void CallbackWrapper(void *parm,int id,const char *cmd,const char *answer,bool is_timeout,bool is_answered_ok);
@@ -50,9 +100,66 @@ class CPacketSender
 };
 
 
+// class for sending packets via LoRa, RS485, or file (offline)
+class CPacketSenderNew : public CPacketSender
+{
+          // these all options must be the same on the receiver's side!
+          // (other LoRa options are set by default in TRadio constructor)
+          static const CLoraMote::ERadioFreq    LORA_FREQ  = CLoraMote::RF_868MHz;
+          static const CLoraMote::EBandWidth    LORA_BW    = CLoraMote::BW_500KHz;
+          static const CLoraMote::ESpreadFactor LORA_SF    = CLoraMote::SF_7;
+          static const CLoraMote::ECodingRate   LORA_CR    = CLoraMote::CR_4_5;
+          static const int                      RS485_RATE = 9600;
 
-CPacketSender::CPacketSender(const CConfig& cfg,CTelitMobile *mob,CLog *_log)
-  : m_cfg(cfg), p_mob(mob), p_log(_log)
+          static const unsigned MAX_RANDOM_DELAY = 2000;
+          static const unsigned MAX_ATTEMPTS = 3;   // for important packets only
+          
+          const CConfig& m_cfg;
+          CUART *p_uart;
+          CLoraMote *p_lora;
+
+          typedef struct {
+           std::string data;
+           unsigned counter;  // from N attempts down to 0
+           unsigned last_sent_time;
+           unsigned random_delay;
+          } PACKET;
+
+          typedef std::vector<PACKET*> TQueue;
+          TQueue m_queue;
+
+  public:
+          CPacketSenderNew(const CConfig& cfg,CLog *_log);
+          ~CPacketSenderNew();
+
+          void PushImportant(const std::string& pkt) { Push(pkt,true); }
+          void PushUnimportant(const std::string& pkt) { Push(pkt,false); }
+          bool IsBusy() const { return !m_queue.empty(); }
+          void Poll();
+
+  private:
+          void Push(const std::string& pkt,bool is_important);
+          unsigned GenRandomDelay();
+          void SendPacket_Internal(const std::string& data);
+};
+
+
+
+void CPacketSender::SaveOffline(const std::string& pkt)
+{
+  FIL f;
+  if ( f_open(&f,OFFLINE_FILENAME,FA_WRITE|FA_OPEN_APPEND) == FR_OK )
+     {
+       UINT wb = 0;
+       f_write(&f,pkt.data(),pkt.size(),&wb);
+       f_write(&f,"\r\n",2,&wb);
+       f_close(&f);
+     }
+}
+
+
+CPacketSenderMobile::CPacketSenderMobile(const CConfig& cfg,CTelitMobile *mob,CLog *_log)
+  : CPacketSender(_log), m_cfg(cfg), p_mob(mob)
 {
   p_curr = NULL;
 
@@ -60,7 +167,7 @@ CPacketSender::CPacketSender(const CConfig& cfg,CTelitMobile *mob,CLog *_log)
 }
 
 
-CPacketSender::~CPacketSender()
+CPacketSenderMobile::~CPacketSenderMobile()
 {
   SAFEDELETE(p_curr);
 
@@ -72,7 +179,7 @@ CPacketSender::~CPacketSender()
 }
 
 
-void CPacketSender::Push(const std::string& pkt,bool is_important)
+void CPacketSenderMobile::Push(const std::string& pkt,bool is_important)
 {
   if ( !pkt.empty() )
      {
@@ -98,33 +205,8 @@ void CPacketSender::Push(const std::string& pkt,bool is_important)
 }
 
 
-void CPacketSender::PushImportant(const std::string& pkt)
-{
-  Push(pkt,true);
-}
-
-
-void CPacketSender::PushUnimportant(const std::string& pkt)
-{
-  Push(pkt,false);
-}
-
-
-void CPacketSender::SaveOffline(const std::string& pkt)
-{
-  FIL f;
-  if ( f_open(&f,OFFLINE_FILENAME,FA_WRITE|FA_OPEN_APPEND) == FR_OK )
-     {
-       UINT wb = 0;
-       f_write(&f,pkt.data(),pkt.size(),&wb);
-       f_write(&f,"\r\n",2,&wb);
-       f_close(&f);
-     }
-}
-
-
 // returns false in case terminal queue is full
-bool CPacketSender::SendByInternet(const std::string& pkt)
+bool CPacketSenderMobile::SendByInternet(const std::string& pkt)
 {
   int id = p_mob->InitiateInternetConnectionAndSendStringUDP(m_cfg.modem_old_firmware,m_cfg.apn.c_str(),NULL,NULL,
                                           m_cfg.server.c_str(),m_cfg.port_udp,pkt.c_str(),CallbackWrapper,this);
@@ -133,20 +215,20 @@ bool CPacketSender::SendByInternet(const std::string& pkt)
 
 
 // returns false in case terminal queue is full
-bool CPacketSender::SendBySMS(const std::string& pkt)
+bool CPacketSenderMobile::SendBySMS(const std::string& pkt)
 {
   int id = p_mob->SendSMS(m_cfg.sms_number.c_str(),(m_cfg.sms_prefix+pkt).c_str(),CallbackWrapper,this);
   return id >= 0;
 }
 
 
-void CPacketSender::CallbackWrapper(void *parm,int id,const char *cmd,const char *answer,bool is_timeout,bool is_answered_ok)
+void CPacketSenderMobile::CallbackWrapper(void *parm,int id,const char *cmd,const char *answer,bool is_timeout,bool is_answered_ok)
 {
-  reinterpret_cast<CPacketSender*>(parm)->Callback(id,cmd,answer,is_timeout,is_answered_ok);
+  reinterpret_cast<CPacketSenderMobile*>(parm)->Callback(id,cmd,answer,is_timeout,is_answered_ok);
 }
 
 
-void CPacketSender::Callback(int id,const char *cmd,const char *answer,bool is_timeout,bool is_answered_ok)
+void CPacketSenderMobile::Callback(int id,const char *cmd,const char *answer,bool is_timeout,bool is_answered_ok)
 {
   if ( p_curr )  // paranoja
      {
@@ -181,7 +263,7 @@ void CPacketSender::Callback(int id,const char *cmd,const char *answer,bool is_t
 }
 
 
-void CPacketSender::Poll()
+void CPacketSenderMobile::Poll()
 {
   if ( !p_curr && !m_queue.empty() )
      {
@@ -197,6 +279,134 @@ void CPacketSender::Poll()
             assert(p_curr);
             m_queue.insert(m_queue.begin(),p_curr);
             p_curr = NULL;
+          }
+     }
+}
+
+
+CPacketSenderNew::CPacketSenderNew(const CConfig& cfg,CLog *_log)
+  : CPacketSender(_log), m_cfg(cfg)
+{
+  p_uart = NULL;
+  p_lora = NULL;
+
+  if ( cfg.use_lora )
+     {
+       CLoraMote::TRadio i;  // here is default constructor
+       i.freq = LORA_FREQ;
+       i.bw = LORA_BW;
+       i.sf = LORA_SF;
+       i.cr = LORA_CR;
+
+       p_lora = new CBoardLoraMote(i);
+     }
+
+  if ( cfg.use_rs485 )
+     {
+       p_uart = new CBoardRS485(RS485_RATE,false/*rx*/,true/*tx*/);
+     }
+
+  m_queue.reserve(MAX_QUEUED_PACKETS);
+}
+
+
+CPacketSenderNew::~CPacketSenderNew()
+{
+  for ( unsigned n = 0; n < m_queue.size(); n++ )
+      {
+        SAFEDELETE(m_queue[n]);
+      }
+  m_queue.clear();
+
+  SAFEDELETE(p_uart);
+  SAFEDELETE(p_lora);
+}
+
+
+void CPacketSenderNew::Poll()
+{
+  TQueue::iterator it = m_queue.begin();
+  while ( it != m_queue.end() )
+  {
+    PACKET *p = *it;
+
+    if ( GetTickCount() - p->last_sent_time > p->random_delay )
+       {
+         SendPacket_Internal(p->data);
+
+         p->counter--;
+         if ( p->counter == 0 )
+            {
+              delete p;
+              it = m_queue.erase(it);
+              continue;
+            }
+         else
+            {
+              p->last_sent_time = GetTickCount();
+              p->random_delay = GenRandomDelay();
+            }
+       }
+
+    ++it;
+  }
+}
+
+
+void CPacketSenderNew::Push(const std::string& pkt,bool is_important)
+{
+  if ( !pkt.empty() )
+     {
+       if ( !IsBusy() || is_important )
+          {
+            if ( m_queue.size() < MAX_QUEUED_PACKETS )
+               {
+                 PACKET *p = new PACKET;
+
+                 p->data = pkt;
+                 p->counter = (is_important ? MAX_ATTEMPTS : 1);
+                 p->last_sent_time = GetTickCount();
+                 p->random_delay = GenRandomDelay();
+                 
+                 m_queue.push_back(p);
+               }
+            else
+               {
+                 // todo: insert packet instead of one in queue which was sent
+
+                 ADD2LOG(("PacketSender queue is full, save packet offline"));
+                 SaveOffline(pkt);
+               }
+          }
+     }
+}
+
+
+unsigned CPacketSenderNew::GenRandomDelay()
+{
+  return rand() % MAX_RANDOM_DELAY;
+}
+
+
+void CPacketSenderNew::SendPacket_Internal(const std::string& data)
+{
+  if ( p_uart )
+     {
+       for ( unsigned n = 0; n < data.size(); n++ )
+           {
+             p_uart->SendByte((unsigned char)data[n]);
+           }
+
+       p_uart->SendByte('\r');
+       p_uart->SendByte('\n');
+     }
+
+  if ( p_lora )
+     {
+       if ( !p_lora->Send(data.data(),data.size(),3000) )
+          {
+            // should be never happens!
+            ADD2LOG(("Error: LoRa sending failed due to timeout"));
           }
      }
 }
@@ -298,18 +508,8 @@ void CBalanceReq::Callback(int id,const char *cmd,const char *answer,bool is_tim
 ///////////////////////////
 
 
-class CEar
+class CEar : public CEarDefs
 {
-          static const unsigned FDETECT_AUDIO_BUFFER_MSEC = 500;
-          static const int GSM_MODEM_BAUDRATE = 57600; // on 115200 we can got some issues!
-          static const unsigned MOBILE_TERMINAL_MAX_QUEUE_COMMANDS = 25;
-          static const bool MOBILE_TERMINAL_AUTO_ANSWER_MODE = true;
-          static const bool LOG_STDOUT_ECHO = true;
-          static const unsigned DBG_AUDIO_FILE_LEN_IN_SEC = 3*60*60;  // 3 hours
-          static const bool CLEAR_DBG_AUDIO_FILE = false;  // slowdown at startup if true!
-          static const unsigned GSM_STATUS_UPDATE_INTERVAL = 5000;
-          static const unsigned PING_INTERVAL = 6*60*60*1000;  // 6 hours
-          
           static const short INVALID_GNSS = 0x3f3f;  // '??'
           
           
@@ -424,6 +624,10 @@ CEar::CEar()
 
   // system init
   NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);  // 4 bits for preemption priority, 0 for subpriority
+
+  CRandom::Init();
+  srand(CRandom::Get());  // use system rng only for pseudo-random seed
+  CRandom::Done();
   
   CCPUTicks::Init();
   CSysTicks::Init();
@@ -466,6 +670,12 @@ CEar::CEar()
      }
   // start from this point we can use m_cfg.XXX
 
+  if ( m_cfg.use_gsm && (m_cfg.use_lora || m_cfg.use_rs485) )
+     {
+       printf("Config mismatch: use_gsm && (use_lora || use_rs485)\n");
+       FatalError();
+     }
+
   p_led3->On();
   p_debug_audio = m_cfg.debug_mode ? new CDebugAudio(CMic::SAMPLE_RATE,DBG_AUDIO_FILENAME,DBG_AUDIO_FILE_LEN_IN_SEC,CLEAR_DBG_AUDIO_FILE) : NULL;
   p_led3->Off();
@@ -482,19 +692,34 @@ CEar::CEar()
   p_log = new CLog(LOG_FILENAME,LOG_STDOUT_ECHO);
   // start from this point we can use ADD2LOG()
 
-  p_mob = new CTelitMobile(GSM_MODEM_BAUDRATE,MOBILE_TERMINAL_MAX_QUEUE_COMMANDS);
-  if ( !p_mob->Startup(MOBILE_TERMINAL_AUTO_ANSWER_MODE) )
+  if ( m_cfg.use_gsm )
      {
-       ADD2LOG(("Mobile init failed"));
-       //FatalError();  - not critical
+       p_mob = new CTelitMobile(GSM_MODEM_BAUDRATE,MOBILE_TERMINAL_MAX_QUEUE_COMMANDS);
+       if ( !p_mob->Startup(MOBILE_TERMINAL_AUTO_ANSWER_MODE) )
+          {
+            ADD2LOG(("Mobile init failed"));
+            //FatalError();  - not critical
+          }
      }
 
   p_fdetect = new CFDetector(CMic::SAMPLE_RATE,FDETECT_AUDIO_BUFFER_MSEC);
 
   CMic::Init(IRQ_OnMicWrapper,this);  // after creating p_fdetect!
 
-  p_sender = new CPacketSender(m_cfg,p_mob,p_log);
-  p_balance = new CBalanceReq(m_cfg,p_mob,p_log);
+  if ( m_cfg.use_gsm )
+     {
+       p_sender = new CPacketSenderMobile(m_cfg,p_mob,p_log);
+       p_balance = new CBalanceReq(m_cfg,p_mob,p_log);
+     }
+  else
+  if ( m_cfg.use_lora || m_cfg.use_rs485 )
+     {
+       p_sender = new CPacketSenderNew(m_cfg,p_log);
+     }
+  else
+     {
+       p_sender = new CPacketSenderOffline(p_log);
+     }
 
   p_btn1 = new CButton(BOARD_BUTTON1,IRQ_OnButton1Wrapper,this);
   p_btn2 = new CButton(BOARD_BUTTON2,IRQ_OnButton2Wrapper,this);
@@ -751,22 +976,25 @@ void CEar::UpdateLatLon(unsigned& last_update_time)
 
 void CEar::UpdateGSMStatuses(unsigned& last_update_time)
 {
-  if ( GetTickCount() - last_update_time > GSM_STATUS_UPDATE_INTERVAL )
+  if ( p_mob && p_balance )
      {
-       if ( !p_sender->IsBusy() && !p_balance->IsBusy() )  // to not fill terminal's queue if busy
+       if ( GetTickCount() - last_update_time > GSM_STATUS_UPDATE_INTERVAL )
           {
-            p_mob->UpdateSIMStatus();
-            p_mob->UpdateNetStatus();
-            //p_mob->UpdateGPRSStatus();     // used for debug log
-            //p_mob->UpdateSignalQuality();  // used for debug log
-            //p_mob->UpdateInternetConnectionStatus();  // used for debug log
+            if ( !p_sender->IsBusy() && !p_balance->IsBusy() )  // to not fill terminal's queue if busy
+               {
+                 p_mob->UpdateSIMStatus();
+                 p_mob->UpdateNetStatus();
+                 //p_mob->UpdateGPRSStatus();     // used for debug log
+                 //p_mob->UpdateSignalQuality();  // used for debug log
+                 //p_mob->UpdateInternetConnectionStatus();  // used for debug log
+               }
+
+            last_update_time = GetTickCount();
           }
 
-       last_update_time = GetTickCount();
+       p_led_nosim->SetState(p_mob->GetSIMStatus()!=SIM_READY);
+       p_led_gsm->SetState(p_mob->GetNetStatus()==NET_REGISTERED_HOME||p_mob->GetNetStatus()==NET_REGISTERED_ROAMING);
      }
-
-  p_led_nosim->SetState(p_mob->GetSIMStatus()!=SIM_READY);
-  p_led_gsm->SetState(p_mob->GetNetStatus()==NET_REGISTERED_HOME||p_mob->GetNetStatus()==NET_REGISTERED_ROAMING);
 }
 
 
@@ -785,14 +1013,17 @@ void CEar::UpdatePing(unsigned& last_update_time)
 
 void CEar::UpdateBalance(unsigned& last_update_time)
 {
-  if ( GetTickCount() - last_update_time > PING_INTERVAL )
+  if ( p_balance )
      {
-       ADD2LOG(("Balance..."));
+       if ( GetTickCount() - last_update_time > PING_INTERVAL )
+          {
+            ADD2LOG(("Balance..."));
 
-       std::string text = p_balance->GetResult();  // can return empty string
-       p_sender->PushUnimportant(PrepareUSSDPacket(text.c_str()));
+            std::string text = p_balance->GetResult();  // can return empty string
+            p_sender->PushUnimportant(PrepareUSSDPacket(text.c_str()));
 
-       last_update_time = GetTickCount();
+            last_update_time = GetTickCount();
+          }
      }
 }
 
@@ -850,11 +1081,14 @@ void CEar::OnButton2()
 // "balance" button
 void CEar::OnButton3()
 {
-  std::string text = p_balance->GetResult();  // can return empty string
-  
-  ADD2LOG(("Balance: %s",text.c_str()));
+  if ( p_balance )
+     {
+       std::string text = p_balance->GetResult();  // can return empty string
+       
+       ADD2LOG(("Balance: %s",text.c_str()));
 
-  p_sender->PushUnimportant(PrepareUSSDPacket(text.c_str()));
+       p_sender->PushUnimportant(PrepareUSSDPacket(text.c_str()));
+     }
 }
 
 
@@ -893,10 +1127,20 @@ void CEar::CheckFDetect()
 
 void CEar::PollObjects()
 {
-  p_sender->Poll();
-  p_balance->Poll();
+  p_sender->Poll();  // for old firmware GSM modem can hung for many seconds!!!
+
+  if ( p_balance )
+     {
+       p_balance->Poll();
+     }
+
   p_sat->Poll();
-  p_mob->Poll();
+
+  if ( p_mob )
+     {
+       p_mob->Poll();
+     }
+
   if ( p_debug_audio )
      {
        p_debug_audio->Poll();
@@ -910,6 +1154,7 @@ void CEar::MainLoop()
   ADD2LOG(("device_id: %d, sector: %d",m_cfg.device_id,m_cfg.sector));
   ADD2LOG(("GPS:%d, Glonass:%d, Galileo:%d, Beidou:%d",m_cfg.use_gps,m_cfg.use_glonass,m_cfg.use_galileo,m_cfg.use_beidou));
   ADD2LOG(("Debug mode: %s",m_cfg.debug_mode?"YES":"no"));
+  ADD2LOG(("GSM:%d, LoRa:%d, RS485:%d",m_cfg.use_gsm,m_cfg.use_lora,m_cfg.use_rs485));
 
   unsigned last_update_sync = GetTickCount();
   unsigned last_update_latlon = GetTickCount();

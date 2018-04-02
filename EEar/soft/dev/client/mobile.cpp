@@ -298,6 +298,7 @@ int CTelitMobile::SendStringUDP(const char *server,int port,const char *str,CTer
 }
 
 
+// Warning!!! This function can block more than 1 sec, because it uses Sync function which wait for queue will empty before processing!
 int CTelitMobile::SendStringUDP_OldFW(const char *server,int port,const char *str,CTerminal::TCALLBACK cb,void *cbparm,
                                       unsigned total_timeout)
 {
@@ -310,7 +311,7 @@ int CTelitMobile::SendStringUDP_OldFW(const char *server,int port,const char *st
 
   str = str ? str : "";
 
-  if ( !p_trm->SyncProcessCmdSimple(CFormat("AT#SSENDEXT=1,%d",strlen(str))) )
+  if ( !p_trm->SyncProcessCmdSimple(CFormat("AT#SSENDEXT=1,%d",strlen(str))) )  // can block for more than 1 sec!!!!
      {
        return p_trm->Push("AT#MYERRORCOMMAND",cb,cbparm);  // issue async error
      }
@@ -321,6 +322,7 @@ int CTelitMobile::SendStringUDP_OldFW(const char *server,int port,const char *st
 }
 
 
+// for old firmware can block for many seconds!!!
 int CTelitMobile::InitiateInternetConnectionAndSendStringUDP(bool use_old_fw,const char *apn,const char *user,const char *pwd,
                                                              const char *server,int port,const char *str,
                                                              CTerminal::TCALLBACK cb,void *cbparm)
